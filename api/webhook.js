@@ -7,74 +7,49 @@ export default async function handler(req, res) {
 
   try {
     const { event, object } = req.body;
+
     console.log('Webhook received:', event, object.id);
 
     if (event === 'payment.succeeded') {
       const crmId = object.metadata.crmId;
 
       if (crmId && process.env.RETAILCRM_URL && process.env.RETAILCRM_API_KEY) {
-        const apiKey = process.env.RETAILCRM_API_KEY;
-        const site = 'wowbox';
-        const apiUrl = process.env.RETAILCRM_URL;
+        console.log(`Payment success for CRM Order #${crmId}. Creating payment transaction...`);
 
-        console.log(`Processing success for Order #${crmId}. Fetching existing payments...`);
+        const paymentParams = new URLSearchParams();
+        
+        const paymentData = {
+          order: { id: crmId },
+          amount: object.amount.value,
+          type: 'bank-card',
+          status: 'paid',
+          paidAt: new Date().toISOString(),
+          comment: `Оплата через ЮKassa. Транзакция: ${object.id}`
+        };
+
+        paymentParams.append('payment', JSON.stringify(paymentData));
+        paymentParams.append('apiKey', process.env.RETAILCRM_API_KEY);
+        paymentParams.append('site', 'wowbox-site');
 
         try {
-          const orderResponse = await axios.get(`${apiUrl}/api/v5/orders/${crmId}`, {
-            params: { apiKey, site, by: 'id' }
-          });
-
-          const order = orderResponse.data.order;
-          let targetPayment = null;
-          if (order.payments && order.payments.length > 0) {
-            // Берем первый платеж из списка
-            targetPayment = order.payments[0];
-          }
-
-          if (targetPayment) {
-            console.log(`Found Payment #${targetPayment.id}. Updating status to 'paid'...`);
-            
-            const updateParams = new URLSearchParams();
-            const paymentData = {
-              status: 'paid', // Ставим статус "Оплачен"
-              amount: object.amount.value,
-              paidAt: new Date().toISOString(),
-              comment: `Оплата ЮKassa: ${object.id}`
-            };
-
-            updateParams.append('payment', JSON.stringify(paymentData));
-            updateParams.append('apiKey', apiKey);
-            updateParams.append('site', site);
-
-            await axios.post(
-              `${apiUrl}/api/v5/orders/payments/${targetPayment.id}/edit`,
-              updateParams
-            );
-            console.log(`Payment #${targetPayment.id} updated successfully.`);
-
+          const response = await axios.post(
+            `${process.env.RETAILCRM_URL}/api/v5/orders/payments/create`,
+            paymentParams
+          );
+          
+          if (response.data.success) {
+             console.log(`Payment created successfully for Order #${crmId}. Payment ID: ${response.data.id}`);
           } else {
-            console.log(`No payments found in Order #${crmId}. Creating new payment...`);
-            
-            const createParams = new URLSearchParams();
-            createParams.append('payment', JSON.stringify({
-              order: { id: crmId },
-              amount: object.amount.value,
-              status: 'paid',
-              type: 'bank-card',
-              paidAt: new Date().toISOString()
-            }));
-            createParams.append('apiKey', apiKey);
-            createParams.append('site', site);
-
-            await axios.post(`${apiUrl}/api/v5/orders/payments/create`, createParams);
+             console.error('RetailCRM Error:', response.data);
           }
-
+          
         } catch (crmError) {
-          console.error('RetailCRM Error:', crmError.response?.data || crmError.message);
+          console.error('RetailCRM Request Failed:', crmError.response?.data || crmError.message);
         }
+      } else {
+        console.warn('Missing crmId in metadata or CRM credentials are not set');
       }
     }
-
     return res.status(200).send('OK');
 
   } catch (error) {
