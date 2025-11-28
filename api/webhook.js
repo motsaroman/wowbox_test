@@ -18,13 +18,13 @@ export default async function handler(req, res) {
 
         const updateParams = new URLSearchParams();
         
-        // ОБНОВЛЯЕМ ТОЛЬКО СТАТУС ОПЛАТЫ
         updateParams.append('order', JSON.stringify({
           paymentStatus: 'paid'
         }));
         
         updateParams.append('apiKey', process.env.RETAILCRM_API_KEY);
         updateParams.append('site', 'wowbox-market');
+        updateParams.append('by', 'id');
 
         try {
           await axios.post(
