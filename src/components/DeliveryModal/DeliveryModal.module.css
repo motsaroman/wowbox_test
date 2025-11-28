@@ -1,0 +1,125 @@
+/* DeliveryModal.module.css */
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  padding: 20px;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 2.4rem;
+  max-width: 60rem;
+  width: 100%;
+  position: relative;
+}
+
+.closeButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.closeButton:hover {
+  color: #000;
+}
+
+.modalBody {
+  padding: 2.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.santaImage {
+  width: 19.2rem;
+  height: auto;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-family: "SF Pro";
+  font-weight: 760;
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: rgba(230, 0, 0, 1);
+  margin-bottom: 0.8rem;
+}
+
+.description {
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: rgba(51, 51, 51, 1);
+  margin: 0 0 2.4rem 0;
+  max-width: 40.2rem;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.declineButton,
+.acceptButton {
+  width: 100%;
+  padding: 1.7rem 3.2rem;
+  border-radius: 1.2rem;
+  font-family: "SF Pro";
+  font-weight: 650;
+  font-size: 1.6rem;
+  line-height: 110.00000000000001%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+
+.declineButton {
+  background: srgba(51, 51, 51, 0.1);
+  color: rgba(51, 51, 51, 1);
+}
+
+.declineButton:hover {
+  background: rgba(51, 51, 51, 0.2);
+}
+
+.acceptButton {
+  background: rgba(29, 29, 29, 1);
+  color: white;
+}
+
+.acceptButton:hover {
+  background: rgba(29, 29, 29, 0.8);
+  transform: translateY(-2px);
+}

@@ -1,0 +1,610 @@
+/* Modal Overlay - Full Screen */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Modal Container */
+.modalContainer {
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  font-family: "SF Pro", sans-serif;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Header */
+.headerContainer {
+  padding: 3.1rem 10rem 1rem 10rem;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.3rem;
+}
+
+.backBtn,
+.searchBtn {
+  width: 2.4rem;
+  height: 2.4rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s;
+}
+
+.backBtn img,
+.searchBtn img {
+  width: 100%;
+  object-fit: contain;
+}
+
+.backBtn:hover,
+.searchBtn:hover {
+  opacity: 0.7;
+}
+
+.searchBtnDisabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.searchBtnDisabled:hover {
+  opacity: 0.3;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: rgba(51, 51, 51, 1);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.tabBtn {
+  padding: 1.2rem;
+  background: transparent;
+  color: rgba(51, 51, 51, 1);
+  border: none;
+  border-radius: 1.2rem;
+  font-size: 1.4rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.tabBtnActive {
+  background-color: rgba(51, 51, 51, 1);
+  color: #fff;
+}
+
+/* Main Content */
+.mainContent {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 23.75rem;
+  background: #f8f9fa;
+  border-right: 0.0625rem solid #dee2e6;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.sidebarTitle {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+/* Point Card */
+.pointCard {
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background: white;
+  color: #333;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 0.125rem solid transparent;
+}
+
+.pointCard:hover {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+.pointCardActive {
+  background: #667eea;
+  color: white;
+  border: 0.125rem solid #764ba2;
+}
+
+.pointName {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pointIcon {
+  font-size: 1.2rem;
+}
+
+.pointAddress {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Confirm Button */
+.confirmBtn {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0.25rem 0.375rem rgba(40, 167, 69, 0.3);
+  transition: all 0.3s ease;
+}
+
+.confirmBtn:hover {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.375rem 0.75rem rgba(40, 167, 69, 0.4);
+}
+
+/* Map */
+.mapWrapper {
+  flex-grow: 1;
+  position: relative;
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Info Card (Pickup) */
+.infoCard,
+.courierForm {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 2rem;
+  border-radius: 1.6rem;
+  box-shadow: 0px 2px 6px 0px rgba(51, 51, 51, 0.1);
+  width: 100%;
+  max-width: 45.2rem;
+  z-index: 1000;
+}
+
+.infoTitle {
+  font-weight: 760;
+  margin: 0 0 0.8rem 0;
+  color: rgba(51, 51, 51, 1);
+  font-size: 2rem;
+}
+
+.infoAddress {
+  font-weight: 510;
+  margin: 0 0 0.8rem 0;
+  font-size: 1.8rem;
+  color: rgba(51, 51, 51, 1);
+  line-height: 1.1s;
+}
+
+.infoBadges {
+  display: flex;
+  gap: 1.6rem;
+  margin-bottom: 4rem;
+}
+
+.badge {
+  flex: 1;
+  font-weight: 590;
+  font-size: 1.4rem;
+  color: rgba(51, 51, 51, 1);
+  padding: 0.6rem 1.2rem;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.priceLabel,
+.priceValue {
+  font-weight: 510;
+  font-size: 1.3rem;
+  color: rgba(51, 51, 51, 1);
+}
+
+.deliverBtn {
+  width: 100%;
+  padding: 1.6rem;
+  background: rgba(29, 29, 29, 1);
+  color: white;
+  border: none;
+  border-radius: 1.2rem;
+  font-size: 2rem;
+  font-weight: 760;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.deliverBtn:hover {
+  background: rgba(29, 29, 29, 0.7);
+}
+
+/* Courier Form */
+
+.courierForm {
+  max-width: 46rem;
+  padding: 2rem;
+}
+
+.courierAddress {
+  font-weight: 510;
+  margin: 0 0 1.2rem 0;
+  color: rgba(51, 51, 51, 1);
+  font-size: 1.3rem;
+}
+
+.formGrid {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.input {
+  width: 31%;
+  height: 3.8rem;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.8rem;
+  font-size: 1.3rem;
+  font-weight: 510;
+  background: rgba(51, 51, 51, 0.03);
+  color: rgba(51, 51, 51, 1);
+  font-family: "SF Pro", sans-serif;
+  transition: all 0.2s;
+  margin-bottom: 0.3rem;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: rgba(51, 51, 51, 0.5);
+}
+
+.textarea {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.8rem;
+  font-size: 1.3rem;
+  font-weight: 510;
+  background: rgba(51, 51, 51, 0.03);
+  color: rgba(51, 51, 51, 1);
+  font-family: "SF Pro", sans-serif;
+  margin-bottom: 1rem;
+  resize: vertical;
+  transition: all 0.2s;
+  outline: none;
+  min-height: 3.5rem;
+}
+
+.courierForm .priceRow {
+  padding-top: 0.6rem;
+}
+
+.courierForm .priceLabel {
+  font-size: 1.3rem;
+  font-weight: 510;
+}
+
+.saveBtn {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(29, 29, 29, 1);
+  color: white;
+  border: none;
+  border-radius: 0.6rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.saveBtn:hover {
+  background: rgba(29, 29, 29, 0.7);
+}
+
+.agreement {
+  margin: 0;
+  font-size: 1rem;
+  color: #999;
+  text-align: center;
+}
+
+.agreementLink {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.agreementLink:hover {
+  color: #666;
+}
+
+/* City Search Modal */
+.searchModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 10001;
+  padding-top: 2rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalContent {
+  background: white;
+  border-radius: 1.2rem;
+  width: 100%;
+  max-width: 40rem;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(2rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 0.0625rem solid #e0e0e0;
+  background: white;
+}
+
+.modalBackBtn,
+.modalCloseBtn {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  color: rgba(51, 51, 51, 1);
+  transition: opacity 0.2s;
+  border-radius: 0.5rem;
+}
+
+.modalBackBtn:hover,
+.modalCloseBtn:hover {
+  opacity: 0.7;
+  background: rgba(245, 245, 245, 1);
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 690;
+  color: rgba(51, 51, 51, 1);
+}
+
+.searchInputContainer {
+  padding: 1rem 1.5rem;
+  border-bottom: 0.0625rem solid #e0e0e0;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 0.0625rem solid #e0e0e0;
+  border-radius: 0.5rem;
+  font-size: 1.6rem;
+  background: rgba(248, 249, 250, 1);
+  color: rgba(51, 51, 51, 1);
+  font-family: "SF Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: rgba(51, 51, 51, 1);
+  background: white;
+  box-shadow: 0 0 0 0.125rem rgba(51, 51, 51, 0.1);
+}
+
+.searchInput::placeholder {
+  color: rgba(153, 153, 153, 1);
+}
+
+.searchLoader {
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 1.5rem;
+  color: rgba(102, 102, 102, 1);
+}
+
+.searchResults {
+  max-height: 35rem;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.searchResultItem {
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 0.0625rem solid #f0f0f0;
+}
+
+.searchResultItem:hover {
+  background: #f8f9fa;
+}
+
+.searchResultItem:last-child {
+  border-bottom: none;
+}
+
+.resultMainText {
+  font-size: 1.5rem;
+  font-weight: 510;
+  color: rgba(51, 51, 51, 1);
+  margin-bottom: 0.25rem;
+}
+
+.resultSubText {
+  font-size: 1.2rem;
+  color: #666;
+  line-height: 1.3;
+}
+
+.noResults {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 18.75rem;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .infoCard,
+  .courierForm {
+    max-width: 90%;
+    width: 90%;
+  }
+
+  .modalContent {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .modalHeader {
+    padding: 0.75rem 1rem;
+  }
+
+  .searchInputContainer {
+    padding: 0.75rem 1rem;
+  }
+
+  .searchResultItem {
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    display: none;
+  }
+
+  .infoCard,
+  .courierForm {
+    width: 100%;
+    max-width: 100%;
+    bottom: 0;
+    border-radius: 0;
+  }
+
+  .modalOverlay {
+    padding-top: 1rem;
+  }
+
+  .modalContent {
+    width: 98%;
+    margin: 0.5rem;
+    border-radius: 0.75rem;
+  }
+
+  .searchResults {
+    max-height: 20rem;
+  }
+
+  .courierAddress {
+    font-size: 1.6rem;
+  }
+}

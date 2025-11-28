@@ -1,0 +1,608 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  z-index: 1000;
+}
+
+.modal {
+  width: 61.2rem;
+  height: 49.1rem;
+  border-radius: 2.4rem;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 2.4rem;
+}
+
+.closeButton {
+  position: absolute;
+  top: 2.7rem;
+  right: 3rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: none;
+  background: transparent;
+  font-size: 2.4rem;
+  cursor: pointer;
+  color: rgba(51, 51, 51, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #000;
+}
+
+.title {
+  font-family: "SF Pro";
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 110%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: rgba(51, 51, 51, 1);
+  margin-bottom: 0.8rem;
+}
+
+.themesRow {
+  display: flex;
+  gap: 2.4rem;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.themeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s;
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.themeCard .themeIcon {
+  width: 5rem;
+}
+
+.themeCardActive {
+  opacity: 1;
+}
+
+.themeCardActive .themeIcon {
+  width: 7rem;
+}
+
+.themeLabel {
+  font-family: "SF Pro";
+  font-weight: 590;
+  font-size: 1.4rem;
+  line-height: 110%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: rgba(51, 51, 51, 1);
+}
+
+.content {
+  flex: 1;
+  padding-top: 2.4rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.stepIndicator {
+  font-family: "SF Pro";
+  font-weight: 858;
+  font-size: 1.4rem;
+  font-style: italic;
+  line-height: 110%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: rgba(51, 51, 51, 0.5);
+}
+
+.question {
+  font-family: "SF Pro";
+  font-size: 2.4rem;
+  font-weight: 760;
+  line-height: 110%;
+  text-align: center;
+  margin-bottom: 1.6rem;
+  color: rgba(51, 51, 51, 1);
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.optionButton {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  border-radius: 1.2rem;
+  padding: 1rem 0.6rem;
+  border: none;
+  background: rgba(51, 51, 51, 0.03);
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.optionButton:hover {
+  background: rgba(51, 51, 51, 0.09);
+  transform: translateY(-2px);
+}
+
+.optionButtonActive,
+.optionButton:focus {
+  background: rgba(51, 51, 51, 0.1);
+}
+
+.optionButton:focus.optionButtonChecked {
+  background: linear-gradient(
+    96.09deg,
+    #e8f2ff 1.01%,
+    #f6fff2 23.7%,
+    #f9f1ff 43.8%,
+    #edf3ff 58.56%,
+    #fefeff 70.48%,
+    #ecfcff 80.41%,
+    #eee9ff 100%
+  );
+}
+
+.optionButtonChecked {
+  background: linear-gradient(
+    96.09deg,
+    #e8f2ff 1.01%,
+    #f6fff2 23.7%,
+    #f9f1ff 43.8%,
+    #edf3ff 58.56%,
+    #fefeff 70.48%,
+    #ecfcff 80.41%,
+    #eee9ff 100%
+  );
+}
+
+.optionButtonChecked:hover {
+  background: linear-gradient(
+    96.09deg,
+    #e8f2ff 1.01%,
+    #f6fff2 23.7%,
+    #f9f1ff 43.8%,
+    #edf3ff 58.56%,
+    #fefeff 70.48%,
+    #ecfcff 80.41%,
+    #eee9ff 100%
+  );
+  opacity: 0.9;
+}
+
+.optionIcon {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+}
+
+.optionIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.restrictionIcon {
+  font-size: 2.4rem;
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 0, 0, 0.1);
+}
+
+.optionText {
+  font-family: "Sf Pro";
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.checkmark {
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 2px solid rgba(51, 51, 51, 0.2);
+  border-radius: 0.6rem;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: transparent;
+  background: transparent;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.checkmark.checked {
+  background: rgba(51, 51, 51, 1);
+  border-color: rgba(51, 51, 51, 1);
+  color: #ffffff;
+}
+
+.textarea {
+  width: 100%;
+  height: 18rem;
+  padding: 1.6rem;
+  border-radius: 1.2rem;
+  resize: vertical;
+  outline: none;
+  background: rgba(51, 51, 51, 0.03);
+  font-family: "SF Pro";
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 110%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+}
+
+.textarea::placeholder {
+  color: rgba(51, 51, 51, 0.5);
+}
+
+.footer {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 2.2rem;
+}
+
+.skipButton {
+  flex: 1;
+  padding: 1.8rem 3.2rem;
+  border: none;
+  border-radius: 1.2rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(51, 51, 51, 0.5);
+  color: #fff;
+}
+
+.backButton,
+.nextButton {
+  flex: 1;
+  padding: 1.7rem 1.5rem;
+  border: none;
+  border-radius: 1.2rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  gap: 0.8rem;
+}
+
+.backButton {
+  background: rgba(51, 51, 51, 0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6.6rem;
+}
+
+.backButton img {
+  width: 1.2rem;
+}
+
+.backButton:hover {
+  background: rgba(51, 51, 51, 0.9);
+}
+
+.backArrow {
+  font-size: 2rem;
+}
+
+.nextButton {
+  background: #000;
+  color: #fff;
+}
+
+.nextButton:hover {
+  background: #333;
+}
+
+.skipButton:hover {
+  background: rgba(51, 51, 51, 0.7);
+}
+
+/* ============================================
+   RESPONSIVE MEDIA QUERIES
+   ============================================ */
+
+/* Tablet - 1024px and below */
+@media only screen and (max-width: 1024px) {
+  .overlay {
+    padding: 1.6rem;
+  }
+
+  .modal {
+    width: 90%;
+    max-width: 70rem;
+    height: auto;
+    max-height: 90vh;
+    padding: 2rem;
+  }
+
+  .closeButton {
+    top: 2rem;
+    right: 2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    font-size: 2rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .themesRow {
+    gap: 1.6rem;
+  }
+
+  .themeCard .themeIcon {
+    width: 4.5rem;
+  }
+
+  .themeCardActive .themeIcon {
+    width: 6rem;
+  }
+
+  .themeLabel {
+    font-size: 1.3rem;
+  }
+
+  .content {
+    padding-top: 2rem;
+  }
+
+  .stepIndicator {
+    font-size: 1.3rem;
+  }
+
+  .question {
+    font-size: 2.2rem;
+    margin-bottom: 1.4rem;
+  }
+
+  .optionButton {
+    padding: 1.2rem 0.8rem;
+    border-radius: 1rem;
+  }
+
+  .optionIcon {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  .optionText {
+    font-size: 1.6rem;
+  }
+
+  .checkmark {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.4rem;
+  }
+
+  .textarea {
+    height: 16rem;
+    padding: 1.4rem;
+    font-size: 1.5rem;
+  }
+
+  .footer {
+    gap: 1rem;
+  }
+
+  .skipButton,
+  .backButton,
+  .nextButton {
+    padding: 1.6rem 2.4rem;
+    font-size: 1.6rem;
+  }
+
+  .backButton {
+    gap: 10rem;
+  }
+}
+
+/* Mobile - 414px and below */
+@media only screen and (max-width: 414px) {
+  .overlay {
+    padding: 1rem;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 95vh;
+    padding: 1.6rem;
+    border-radius: 2rem;
+  }
+
+  .closeButton {
+    top: 1.6rem;
+    right: 1.6rem;
+    width: 1rem;
+    height: 1rem;
+    font-size: 1.8rem;
+  }
+
+  .title {
+    font-size: 1.3rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .themesRow {
+    gap: 1.2rem;
+  }
+
+  .themeCard .themeIcon {
+    width: 4rem;
+  }
+
+  .themeCardActive .themeIcon {
+    width: 5.5rem;
+  }
+
+  .themeLabel {
+    font-size: 1.1rem;
+  }
+
+  .content {
+    padding-top: 1.6rem;
+  }
+
+  .stepIndicator {
+    font-size: 1.1rem;
+  }
+
+  .question {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .optionsList {
+    gap: 0.6rem;
+  }
+
+  .optionButton {
+    gap: 1rem;
+    padding: 1rem 0.6rem;
+    border-radius: 1rem;
+  }
+
+  .optionIcon {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .optionText {
+    font-size: 1.4rem;
+  }
+
+  .checkmark {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.2rem;
+    border-radius: 0.4rem;
+  }
+
+  .textarea {
+    height: 14rem;
+    padding: 1.2rem;
+    font-size: 1.4rem;
+    border-radius: 1rem;
+  }
+
+  .footer {
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .skipButton {
+    width: 100%;
+    padding: 1.4rem 2rem;
+    font-size: 1.4rem;
+    border-radius: 1rem;
+  }
+
+  .backButton,
+  .nextButton {
+    flex: 1;
+    padding: 1.4rem 1rem;
+    font-size: 1.4rem;
+    border-radius: 1rem;
+  }
+
+  .backButton {
+    gap: 4.5rem;
+  }
+
+  .backButton img {
+    width: 1rem;
+  }
+
+  .backArrow {
+    font-size: 1.6rem;
+  }
+}
+
+/* Extra Small Mobile - 375px and below */
+@media only screen and (max-width: 375px) {
+  .modal {
+    padding: 1.4rem;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .themesRow {
+    gap: 1rem;
+  }
+
+  .themeCard .themeIcon {
+    width: 3.5rem;
+  }
+
+  .themeCardActive .themeIcon {
+    width: 5rem;
+  }
+
+  .themeLabel {
+    font-size: 1rem;
+  }
+
+  .question {
+    font-size: 1.6rem;
+  }
+
+  .optionText {
+    font-size: 1.3rem;
+  }
+
+  .textarea {
+    height: 12rem;
+    font-size: 1.3rem;
+  }
+
+  .backButton,
+  .nextButton {
+    padding: 1.2rem 0.8rem;
+    font-size: 1.3rem;
+  }
+}

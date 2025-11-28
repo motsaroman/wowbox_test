@@ -1,0 +1,64 @@
+.telegramChat {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  animation: pulse 1.3s ease-in-out infinite;
+}
+
+.telegramChat:hover {
+  transform: translateY(-5px);
+}
+
+.telegramChat img:nth-child(2) {
+  width: 4.6rem;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.telegramChat img:nth-child(1) {
+  width: 23.1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .telegramChat img:nth-child(1) {
+    width: 18rem;
+    height: 4rem;
+  }
+
+  .telegramChat img:nth-child(2) {
+    width: 4rem;
+    height: 4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .telegramChat {
+    right: 2rem;
+    bottom: 2rem;
+  }
+
+  .telegramChat img:nth-child(1) {
+    width: 15rem;
+    height: 3.5rem;
+  }
+
+  .telegramChat img:nth-child(2) {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}

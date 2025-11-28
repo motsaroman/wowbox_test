@@ -1,0 +1,1083 @@
+/* src/components/OrderModal/OrderModal.module.css */
+
+/* Page Container - Full Screen Page */
+.pageContainer {
+  position: fixed;
+  inset: 0;
+  background: #f9f9f9;
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 10rem 6rem 4rem 6rem;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #f9f9f9;
+  padding: 3.2rem 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  border-bottom: 0.1rem solid rgba(51, 51, 51, 0.1);
+}
+
+.closeButton {
+  position: absolute;
+  right: 6rem;
+  width: 3.2rem;
+  height: 3.2rem;
+  background: none;
+  border: none;
+  font-size: 2.4rem;
+  color: rgba(51, 51, 51, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  color: rgba(51, 51, 51, 1);
+  transform: scale(1.1);
+}
+
+.title {
+  font-family: "SF Pro";
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+  margin: 0;
+  text-align: center;
+}
+
+.form {
+  max-width: 144rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 82.2rem 40.3rem;
+  gap: 2rem;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 3.2rem;
+  background: #ffffff;
+  padding: 3.2rem;
+  border-radius: 1.6rem;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 1.6rem;
+  position: sticky;
+  top: 2rem;
+  align-self: flex-start;
+}
+
+.rightColumnTopContent,
+.rightColumnBottomContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.sectionTitle {
+  font-family: "SF Pro";
+  font-weight: 700;
+  font-size: 1.8rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+  margin-bottom: 0.8rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  position: relative;
+}
+
+.label {
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.4rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+}
+
+.required {
+  color: rgba(255, 59, 48, 1);
+  margin-left: 0.2rem;
+}
+
+.input {
+  width: 100%;
+  padding: 1.6rem;
+  background: rgba(51, 51, 51, 0.03);
+  border: 0.1rem solid rgba(51, 51, 51, 0.1);
+  border-radius: 1.2rem;
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.5rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inputItem {
+  width: 95%;
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.5rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.input:focus {
+  outline: none;
+  border-color: rgba(51, 51, 51, 0.3);
+  background: #ffffff;
+}
+
+.input::placeholder {
+  color: rgba(51, 51, 51, 0.5);
+}
+
+.telegramInput {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.telegramPrefix {
+  position: absolute;
+  left: 1.6rem;
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.5rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.telegramInput .input {
+  padding-left: 3.2rem;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  padding: 0.4rem 0;
+}
+
+.checkboxText {
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.5rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 5.2rem;
+  height: 3rem;
+  flex-shrink: 0;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(51, 51, 51, 0.1);
+  transition: 0.3s;
+  border-radius: 3rem;
+}
+
+.toggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 2.2rem;
+  width: 2.2rem;
+  left: 0.4rem;
+  bottom: 0.4rem;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.toggle input:checked + .toggleSlider {
+  background: rgba(215, 255, 107, 1);
+}
+
+.toggle input:checked + .toggleSlider:before {
+  transform: translateX(2.2rem);
+}
+
+.deliveryOptions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.deliveryOption {
+  padding: 1.6rem;
+  background: rgba(248, 248, 248, 1);
+  border: 0.2rem solid rgba(51, 51, 51, 0.1);
+  border-radius: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  position: relative;
+}
+
+.deliveryOption input[type="radio"] {
+  display: none;
+}
+
+.deliveryOption:hover {
+  border-color: rgba(51, 51, 51, 0.2);
+}
+
+.deliveryOption.active {
+  background: rgba(238, 242, 248, 1);
+  border-color: rgba(108, 160, 227, 1);
+}
+
+.deliveryContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.deliveryLogo {
+  width: auto;
+  height: 2.4rem;
+  object-fit: contain;
+}
+
+.deliveryIcon {
+  width: 2.4rem;
+  height: 2.4rem;
+  object-fit: contain;
+}
+
+.deliveryContent span {
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.4rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+}
+
+.addressGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+}
+
+.toMapButton {
+  margin-top: 0.8rem;
+  padding: 1rem 1.6rem;
+  background: rgba(108, 160, 227, 1);
+  border: none;
+  border-radius: 0.8rem;
+  font-family: "SF Pro";
+  font-weight: 590;
+  font-size: 1.4rem;
+  line-height: 110%;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.toMapButton:hover {
+  background: rgba(88, 140, 207, 1);
+  transform: translateY(-1px);
+}
+
+.toMapButton:active {
+  transform: translateY(0);
+}
+
+.select {
+  width: 100%;
+  padding: 1.6rem;
+  background: rgba(51, 51, 51, 0.03);
+  border: 0.1rem solid rgba(51, 51, 51, 0.1);
+  border-radius: 1.2rem;
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.5rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.select:focus {
+  outline: none;
+  border-color: rgba(51, 51, 51, 0.3);
+  background-color: #ffffff;
+}
+
+.deliveryNote {
+  font-family: "SF Pro";
+  font-style: italic;
+  font-weight: 510;
+  font-size: 1.4rem;
+  line-height: 140%;
+  background: linear-gradient(
+    110.05deg,
+    #6ca0e3 -5.55%,
+    #aca3de 2.67%,
+    #b3a9d7 10.36%,
+    #85e4b2 14.94%,
+    #70d6dd 19.8%,
+    #97acf1 23.97%,
+    #d9b9e1 28.73%,
+    #e7ddd5 33.09%,
+    #e5cbd9 40.68%,
+    #e4b7df 48.72%,
+    #b8b6e9 56.17%,
+    #8db6f2 65.45%,
+    #b2a9f0 73.83%,
+    #e3b2e8 79.67%,
+    #e9ddda 85.96%,
+    #81f5f7 93.28%,
+    #7ba3f4 98.61%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-top: 0.4rem;
+  text-transform: uppercase;
+}
+
+.paymentOptions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.2rem;
+}
+
+.paymentOption {
+  padding: 1.6rem 1.2rem;
+  background: rgba(248, 248, 248, 1);
+  border: 0.2rem solid rgba(51, 51, 51, 0.1);
+  border-radius: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 9rem;
+}
+
+.paymentOption input[type="radio"] {
+  display: none;
+}
+
+.paymentOption:hover {
+  border-color: rgba(51, 51, 51, 0.2);
+}
+
+.paymentOption.active {
+  background: rgba(238, 242, 248, 1);
+  border-color: rgba(108, 160, 227, 1);
+}
+
+.paymentContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.paymentLogo {
+  width: auto;
+  height: 3.2rem;
+  object-fit: contain;
+}
+
+.paymentIcon {
+  width: 3.2rem;
+  height: 3.2rem;
+  object-fit: contain;
+}
+
+.paymentContent span {
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.3rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+  text-align: center;
+}
+
+.cardForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-top: 1.6rem;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.paymentNote {
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.3rem;
+  line-height: 140%;
+  color: rgba(51, 51, 51, 0.5);
+  margin-top: 1.2rem;
+}
+
+.selectedBox {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  position: relative;
+}
+
+.editButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3.2rem;
+  height: 3.2rem;
+  background: white;
+  border: 0.1rem solid rgba(51, 51, 51, 0.1);
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem;
+  z-index: 2;
+}
+
+.editButton img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.editButton:hover {
+  border-color: rgba(51, 51, 51, 0.3);
+  transform: scale(1.05);
+}
+
+.boxImageWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.boxImage {
+  width: 100%;
+  height: 20rem;
+  background: transparent;
+  border-radius: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  padding: 1rem;
+}
+
+.boxLogo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.boxInfo {
+  width: 100%;
+}
+
+.boxTitle {
+  font-family: "SF Pro";
+  font-weight: 760;
+  font-size: 1.8rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+.boxDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.boxDetails p {
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.3rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 0.5);
+}
+
+.boxDetails p span {
+  color: rgba(51, 51, 51, 1);
+  font-weight: 590;
+}
+
+.promoSection {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+}
+
+.promoInput {
+  display: flex;
+  gap: 0.6rem;
+  align-items: stretch;
+}
+
+.promoInput .input {
+  flex: 1;
+  margin: 0;
+  background: rgba(51, 51, 51, 0.03);
+  padding: 1.6rem;
+  height: auto;
+}
+
+.promoButton {
+  width: 4.8rem;
+  height: auto;
+  background: rgba(248, 248, 248, 1);
+  border: 0.1rem solid rgba(51, 51, 51, 0.1);
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 1rem;
+}
+
+.promoButton img {
+  width: 1.6rem;
+  height: 1.6rem;
+  object-fit: contain;
+}
+
+.promoButton:hover:not(:disabled) {
+  background: rgba(238, 238, 238, 1);
+  border-color: rgba(51, 51, 51, 0.2);
+}
+
+.promoButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.priceDetails {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+}
+
+.priceTitle {
+  font-family: "SF Pro";
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+  margin-bottom: 1.2rem;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.5rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 0.8);
+}
+
+.priceRow span:last-child {
+  font-family: "SF Pro";
+  font-weight: 590;
+  color: rgba(51, 51, 51, 1);
+}
+
+.priceRow.discount {
+  color: rgba(215, 107, 107, 1);
+}
+
+.priceRow.discount span:last-child {
+  font-family: "SF Pro";
+  color: rgba(215, 107, 107, 1);
+}
+
+.priceLine {
+  width: 100%;
+  height: 0.1rem;
+  background: rgba(51, 51, 51, 0.1);
+  margin: 0 0 1.2rem 0;
+}
+
+.priceRow.total {
+  font-family: "SF Pro";
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: rgba(51, 51, 51, 1);
+  margin-bottom: 0;
+}
+
+.priceRow.total span:last-child {
+  font-family: "SF Pro";
+  font-weight: 760;
+  font-size: 2rem;
+}
+
+.agreements {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.checkboxLabel2 {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  cursor: pointer;
+  position: relative;
+}
+
+.checkboxLabel2 input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 2rem;
+  height: 2rem;
+  border: 0.2rem solid rgba(51, 51, 51, 0.3);
+  border-radius: 0.4rem;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.2s ease;
+  margin-top: 0.2rem;
+}
+
+.checkboxLabel2 input[type="checkbox"]:checked + .checkmark {
+  background: rgba(108, 160, 227, 1);
+  border-color: rgba(108, 160, 227, 1);
+}
+
+.checkboxLabel2 input[type="checkbox"]:checked + .checkmark:after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.agreementText {
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.3rem;
+  line-height: 140%;
+  color: rgba(51, 51, 51, 0.6);
+}
+
+.link {
+  color: rgba(108, 160, 227, 1);
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: rgba(88, 140, 207, 1);
+}
+
+.finalPrice {
+  text-align: center;
+  font-family: "SF Pro";
+  font-weight: 760;
+  font-size: 2.4rem;
+  line-height: 110%;
+  color: rgba(51, 51, 51, 1);
+  padding: 0;
+  background: none;
+  margin-bottom: 0.8rem;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 2rem;
+  background: rgba(29, 29, 29, 1);
+  border: none;
+  border-radius: 2.4rem;
+  font-family: "SF Pro";
+  font-weight: 760;
+  font-size: 1.8rem;
+  line-height: 110%;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submitButton:hover {
+  background: rgba(45, 45, 45, 1);
+  transform: translateY(-2px);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+/* АДАПТАЦИЯ: 1280px - плавное уменьшение для больших планшетов */
+@media (max-width: 1280px) {
+  .pageContainer {
+    padding: 10rem 4rem 4rem 4rem;
+  }
+
+  .closeButton {
+    right: 4rem;
+  }
+
+  .title {
+    padding: 3.2rem 4rem;
+  }
+
+  .form {
+    grid-template-columns: 1fr 38rem;
+    gap: 2rem;
+    max-width: 100%;
+  }
+}
+
+/* АДАПТАЦИЯ: 1024px - стандартный планшет */
+@media (max-width: 1024px) {
+  .pageContainer {
+    padding: 10rem 3rem 3rem 3rem;
+  }
+
+  .closeButton {
+    right: 3rem;
+  }
+
+  .title {
+    padding: 3.2rem 3rem;
+  }
+
+  .form {
+    grid-template-columns: 1fr 36rem;
+    gap: 1.6rem;
+  }
+
+  .leftColumn {
+    padding: 2.4rem;
+  }
+
+  .rightColumn {
+    padding: 1.6rem;
+  }
+
+  .paymentOptions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .addressGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* АДАПТАЦИЯ: 900px - средние планшеты */
+@media (max-width: 900px) {
+  .pageContainer {
+    padding: 10rem 2.4rem 3rem 2.4rem;
+  }
+
+  .closeButton {
+    right: 2.4rem;
+  }
+
+  .title {
+    padding: 3.2rem 2.4rem;
+  }
+
+  .form {
+    grid-template-columns: 1fr 32rem;
+    gap: 1.6rem;
+  }
+
+  .leftColumn {
+    padding: 2rem;
+  }
+
+  .rightColumn {
+    padding: 1.6rem;
+  }
+
+  .boxImage {
+    height: 16rem;
+  }
+}
+
+/* АДАПТАЦИЯ: 768px - малые планшеты (ВСЕ ЕЩЕ 2 КОЛОНКИ) */
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 10rem 2rem 3rem 2rem;
+  }
+
+  .closeButton {
+    right: 2rem;
+  }
+
+  .title {
+    padding: 3.2rem 2rem;
+  }
+
+  .form {
+    grid-template-columns: 1fr 30rem;
+    gap: 1.6rem;
+  }
+
+  .leftColumn {
+    padding: 2rem;
+  }
+
+  .rightColumn {
+    padding: 1.6rem;
+  }
+
+  .boxImage {
+    height: 14rem;
+  }
+
+  .boxTitle {
+    font-size: 1.6rem;
+  }
+
+  .boxDetails p {
+    font-size: 1.2rem;
+  }
+}
+
+/* АДАПТАЦИЯ: 600px - большие мобильные устройства (ВСЕ ЕЩЕ 2 КОЛОНКИ) */
+@media (max-width: 600px) {
+  .pageContainer {
+    padding: 10rem 1.6rem 2.4rem 1.6rem;
+  }
+
+  .closeButton {
+    right: 1.6rem;
+    top: 2.4rem;
+  }
+
+  .title {
+    padding: 2.8rem 1.6rem;
+    font-size: 1.4rem;
+  }
+
+  .form {
+    grid-template-columns: 1fr 28rem;
+    gap: 1.2rem;
+  }
+
+  .leftColumn {
+    padding: 1.6rem;
+  }
+
+  .rightColumn {
+    padding: 1.4rem;
+  }
+
+  .boxImage {
+    height: 12rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.6rem;
+  }
+
+  .deliveryOptions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ПЕРЕХОД НА 1 КОЛОНКУ: 480px и ниже */
+@media (max-width: 480px) {
+  .pageContainer {
+    padding: 8rem 1.6rem 2rem 1.6rem;
+  }
+
+  .closeButton {
+    top: 2rem;
+    right: 1.6rem;
+    width: 2.8rem;
+    height: 2.8rem;
+    font-size: 2rem;
+  }
+
+  .title {
+    padding: 2.4rem 1.6rem;
+    font-size: 1.4rem;
+  }
+
+  /* ПЕРЕКЛЮЧЕНИЕ НА 1 КОЛОНКУ */
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .leftColumn {
+    order: 2;
+    padding: 2rem 1.6rem;
+  }
+
+  .rightColumn {
+    display: contents;
+    padding: 0;
+  }
+
+  .rightColumnTopContent {
+    order: 1;
+    background: #ffffff;
+    padding: 1.6rem;
+    border-radius: 1.6rem;
+    width: 100%;
+  }
+
+  .rightColumnBottomContent {
+    order: 3;
+    background: #ffffff;
+    padding: 1.6rem;
+    border-radius: 1.6rem;
+  }
+
+  .section {
+    gap: 1.2rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.6rem;
+  }
+
+  .deliveryOptions {
+    grid-template-columns: 1fr;
+  }
+
+  .paymentOptions {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+  }
+
+  .paymentOption {
+    padding: 1.2rem 0.8rem;
+    min-height: 8rem;
+  }
+
+  .addressGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  /* МОБИЛЬНЫЙ LAYOUT: фото слева, детали справа */
+  .boxImageWrapper {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1.2rem;
+    width: 100%;
+  }
+
+  .boxImage {
+    width: 14.5rem;
+    height: 12.2rem;
+    margin-bottom: 0;
+    padding: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .boxInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .boxTitle {
+    text-align: left;
+    font-size: 1.6rem;
+    margin-bottom: 0;
+  }
+
+  .boxDetails {
+    gap: 0.6rem;
+  }
+
+  .boxDetails p {
+    font-size: 1.2rem;
+  }
+}

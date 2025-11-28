@@ -1,0 +1,235 @@
+/* SmsModal.module.css */
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  padding: 20px;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 2.4rem;
+  max-width: 60rem;
+  width: 100%;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.closeButton {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.closeButton:hover {
+  color: #000;
+}
+
+.modalBody {
+  padding: 2.2rem 2.4rem 2.4rem 2.4rem;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.title {
+  font-family: "SF Pro";
+  font-weight: 760;
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: rgba(51, 51, 51, 1);
+  margin-bottom: 2.4rem;
+}
+
+.description {
+  max-width: 40.2rem;
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-style: Medium;
+  font-size: 1.5rem;
+  line-height: 1.1;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  color: rgba(51, 51, 51, 1);
+  margin-bottom: 3.2rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.codeInputs {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-bottom: 2.4rem;
+}
+
+.codeInput {
+  width: 13.5rem;
+  height: 8.2rem;
+  border: 1px solid rgba(51, 51, 51, 1);
+  border-radius: 1.2rem;
+  font-size: 4.8rem;
+  font-weight: 600;
+  text-align: center;
+  color: #1a1a1a;
+  background: #f8f8f8;
+  transition: all 0.3s;
+  outline: none;
+  vertical-align: middle;
+}
+
+.codeInput:not(:placeholder-shown) {
+  background: white;
+  border-color: #1a1a1a;
+}
+
+.resendButton {
+  background: none;
+  border: none;
+  transition: color 0.2s;
+  font-family: "SF Pro";
+  font-weight: 590;
+  font-size: 1.4rem;
+  line-height: 110.00000000000001%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-decoration: underline;
+  text-decoration-style: solid;
+  text-decoration-thickness: 0%;
+  margin-bottom: 4rem;
+}
+
+.resendButton:not(:disabled):hover {
+  color: #1a1a1a;
+}
+
+.resendButton:disabled {
+  cursor: not-allowed;
+}
+
+.resendText {
+  text-decoration: underline;
+  color: rgba(51, 51, 51, 0.8);
+}
+
+.timer {
+  color: rgba(29, 29, 29, 1);
+  text-decoration: none;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 1.6rem 2rem;
+  border-radius: 1.2rem;
+  font-family: "SF Pro";
+  font-size: 2rem;
+  font-weight: 760;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+  background: rgba(29, 29, 29, 1);
+  color: white;
+}
+
+.submitButton:not(.disabled):hover {
+  background: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.submitButton.disabled {
+  background: #e8e8e8;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.submitButtonTextMobile {
+  display: none;
+}
+
+@media only screen and (max-width: 480px) {
+  .modalContent {
+    padding: 1.6rem;
+  }
+
+  .modalBody {
+    padding: 0;
+  }
+
+  .codeInput {
+    width: 10rem;
+    height: 6rem;
+    font-size: 36px;
+  }
+
+  .title {
+    font-size: 1.4rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .description {
+    max-width: 31rem;
+    font-size: 1.2rem;
+    margin-bottom: 2.4rem;
+  }
+
+  .codeInputs {
+    justify-content: space-between;
+  }
+
+  .codeInput {
+    width: 7.2rem;
+    height: 8.2rem;
+  }
+
+  .resendButton {
+    text-align: start;
+  }
+
+  .closeButton {
+    top: 0rem;
+    right: 0.8rem;
+  }
+
+  .closeButton svg {
+    width: 1.5rem;
+  }
+
+  .submitButton {
+    font-size: 1.6rem;
+  }
+
+  .submitButtonText {
+    display: none;
+  }
+
+  .submitButtonTextMobile {
+    display: inline;
+  }
+}
