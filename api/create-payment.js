@@ -2,22 +2,10 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 const BOX_DATA = {
-  techno: {
-    title: "ТЕХНО БОКС",
-    price: 4900,
-  },
-  cozy: {
-    title: "УЮТНЫЙ БОКС",
-    price: 4900,
-  },
-  party: {
-    title: "ПАТИ БОКС",
-    price: 4900,
-  },
-  sweet: {
-    title: "СЛАДКИЙ БОКС",
-    price: 4900,
-  },
+  techno: { title: "ТЕХНО БОКС", price: 4900 },
+  cozy: { title: "УЮТНЫЙ БОКС", price: 4900 },
+  party: { title: "ПАТИ БОКС", price: 4900 },
+  sweet: { title: "СЛАДКИЙ БОКС", price: 4900 },
 };
 
 const DELIVERY_PRICE = 99;
@@ -30,93 +18,97 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { 
-      boxTheme,
-      promoCode, 
-      contactData, 
-      deliveryData
-    } = req.body;
+    const { boxTheme, promoCode, contactData, deliveryData, paymentMethod } = req.body;
+
+    console.log('Incoming Request:', JSON.stringify(req.body, null, 2));
+
     const selectedBox = BOX_DATA[boxTheme];
     if (!selectedBox) {
-      return res.status(400).json({ message: 'Неверно выбран бокс (товар не найден)' });
+      return res.status(400).json({ message: 'Неверно выбран бокс' });
     }
+
+    const paymentMap = {
+      'sbp': 'sbp',
+      'card': 'bank_card',
+      'sberpay': 'sberbank',
+      'tpay': 'tinkoff_bank'
+    };
+
+    const yookassaMethodType = paymentMap[paymentMethod] || 'bank_card';
+
     let deliveryDescription = "";
     if (deliveryData.type === '5post') {
-      if (!deliveryData.pointId || !deliveryData.pointName) {
-        return res.status(400).json({ message: 'Не выбран пункт выдачи 5Post' });
-      }
-      deliveryDescription = `ПВЗ: ${deliveryData.pointName} (${deliveryData.pointId})`;
+      deliveryDescription = `ПВЗ: ${deliveryData.pointName || 'Не указан'}`;
     } else if (deliveryData.type === 'courier') {
-      if (!deliveryData.address) {
-        return res.status(400).json({ message: 'Не указан адрес доставки' });
-      }
-      deliveryDescription = `Курьер: ${deliveryData.address}`;
-    } else {
-
-       return res.status(400).json({ message: 'Неверный тип доставки' });
+      deliveryDescription = `Курьер: ${deliveryData.address || 'Не указан'}`;
     }
 
-    let amount = selectedBox.price + DELIVERY_PRICE;
-
-    let appliedDiscount = 0;
+    let boxPrice = selectedBox.price;
     if (promoCode && promoCode.toUpperCase() === VALID_PROMO) {
-      appliedDiscount = PROMO_DISCOUNT;
-      amount -= appliedDiscount;
+      boxPrice -= PROMO_DISCOUNT;
     }
 
-    const auth = Buffer.from(`${process.env.YOOKASSA_SHOP_ID}:${process.env.YOOKASSA_SECRET_KEY}`).toString('base64');
-    const idempotenceKey = uuidv4();
-    const paymentDescription = `Заказ: ${selectedBox.title}. Доставка: ${deliveryData.type === '5post' ? '5Post' : 'Курьер'}`;
+    const items = [
+      {
+        description: selectedBox.title,
+        quantity: "1",
+        amount: {
+          value: boxPrice.toFixed(2),
+          currency: "RUB"
+        },
+        vat_code: "1",
+        payment_mode: "full_prepayment",
+        payment_subject: "commodity"
+      },
+      {
+        description: "Доставка",
+        quantity: "1",
+        amount: {
+          value: DELIVERY_PRICE.toFixed(2),
+          currency: "RUB"
+        },
+        vat_code: "1",
+        payment_mode: "full_prepayment",
+        payment_subject: "service"
+      }
+    ];
+
+    const totalAmountValue = (boxPrice + DELIVERY_PRICE).toFixed(2);
+    const cleanPhone = contactData.phone ? contactData.phone.replace(/[^\d]/g, '') : '';
 
     const paymentData = {
       amount: {
-        value: amount.toFixed(2),
+        value: totalAmountValue,
         currency: "RUB"
       },
       capture: true,
+      payment_method_data: {
+        type: yookassaMethodType
+      },
       confirmation: {
         type: "redirect",
         return_url: `${req.headers.origin}/?payment_success=true`
       },
-      description: paymentDescription,
+      description: `Заказ: ${selectedBox.title}. ${deliveryDescription}`,
       receipt: {
         customer: {
-          full_name: contactData.name,
-          phone: contactData.phone,
-          email: contactData.email
+          full_name: contactData.name || 'Покупатель',
+          phone: cleanPhone,
+          email: contactData.email || 'no-reply@example.com'
         },
-        items: [
-          {
-            description: selectedBox.title,
-            quantity: "1.00",
-            amount: {
-              value: (selectedBox.price - appliedDiscount).toFixed(2),
-              currency: "RUB"
-            },
-            vat_code: "1",
-            payment_mode: "full_prepayment",
-            payment_subject: "commodity"
-          },
-          {
-            description: "Доставка (" + deliveryDescription + ")",
-            quantity: "1.00",
-            amount: {
-              value: DELIVERY_PRICE.toFixed(2),
-              currency: "RUB"
-            },
-            vat_code: "1",
-            payment_mode: "full_prepayment",
-            payment_subject: "service"
-          }
-        ]
+        items: items
       },
       metadata: {
         theme: boxTheme,
         deliveryType: deliveryData.type,
-        deliveryPoint: deliveryData.pointName,
         recipientPhone: contactData.phone
       }
     };
+
+    console.log('Sending to Yookassa:', JSON.stringify(paymentData, null, 2));
+
+    const auth = Buffer.from(`${process.env.YOOKASSA_SHOP_ID}:${process.env.YOOKASSA_SECRET_KEY}`).toString('base64');
+    const idempotenceKey = uuidv4();
 
     const response = await axios.post('https://api.yookassa.ru/v3/payments', paymentData, {
       headers: {
@@ -126,12 +118,15 @@ export default async function handler(req, res) {
       }
     });
 
-    return res.status(200).json({ 
-      confirmationUrl: response.data.confirmation.confirmation_url 
+    return res.status(200).json({
+      confirmationUrl: response.data.confirmation.confirmation_url
     });
 
   } catch (error) {
-    console.error('Payment Error:', error.response?.data || error.message);
-    return res.status(500).json({ message: 'Ошибка создания платежа' });
+    console.error('Yookassa Error:', error.response?.data || error.message);
+    return res.status(500).json({
+      message: 'Ошибка оплаты',
+      yookassaError: error.response?.data
+    });
   }
 }
