@@ -28,8 +28,8 @@ export default async function handler(req, res) {
     }
 
     const paymentMap = {
-      'sbp': 'sbp',
       'card': 'bank_card',
+      'sbp': 'sbp',
       'sberpay': 'sberbank',
       'tpay': 'tinkoff_bank'
     };

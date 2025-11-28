@@ -144,6 +144,7 @@ export default function OrderModal({
       const payload = {
         boxTheme: currentTheme,
         promoCode: formData.promoCode,
+        paymentMethod: formData.paymentMethod,
         contactData: {
           name: formData.name,
           phone: formData.phone,
