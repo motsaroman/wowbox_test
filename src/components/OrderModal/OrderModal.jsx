@@ -137,16 +137,35 @@ export default function OrderModal({
     setIsProcessing(true);
 
     try {
-      const currentTheme = boxPersonalization?.theme || "techno";
+      const personalizationData = {
+        theme: boxPersonalization?.theme || "techno",
+        gender: boxPersonalization?.gender || "не указан",
+        recipient: boxPersonalization?.recipient || "не указан",
+        restrictions: boxPersonalization?.restrictions || "нет",
+        wishes: boxPersonalization?.additionalWishes || "нет",
+        boxPrice: totalPrice,
+      };
 
       const payload = {
-        boxTheme: currentTheme,
+        boxTheme: personalizationData.theme,
         promoCode: formData.promoCode,
         paymentMethod: formData.paymentMethod,
         contactData: {
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
+        },
+        recipientData: formData.isGift
+          ? {
+              name: formData.recipientName,
+              phone: formData.recipientPhone,
+            }
+          : null,
+
+        comments: {
+          user: formData.comment,
+          courier: formData.courierComment,
+          personalization: personalizationData,
         },
         deliveryData: {
           type: formData.deliveryType,
@@ -157,6 +176,25 @@ export default function OrderModal({
             formData.deliveryType === "courier"
               ? `${formData.city}, ${formData.deliveryAddress}, кв. ${formData.apartment}`
               : null,
+          details:
+            formData.deliveryType === "courier"
+              ? {
+                  city: formData.city,
+                  street: formData.deliveryAddress,
+                  flat: formData.apartment,
+                  floor: formData.floor,
+                  entrance: formData.entrance,
+                }
+              : { city: formData.city },
+        },
+        utm: {
+          source:
+            new URLSearchParams(window.location.search).get("utm_source") ||
+            "direct",
+          medium: new URLSearchParams(window.location.search).get("utm_medium"),
+          campaign: new URLSearchParams(window.location.search).get(
+            "utm_campaign"
+          ),
         },
       };
 
