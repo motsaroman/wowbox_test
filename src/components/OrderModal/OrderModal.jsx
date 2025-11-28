@@ -58,6 +58,7 @@ export default function OrderModal({
 
   const [promoApplied, setPromoApplied] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const boxPrice = 4900;
   const deliveryPrice = 99;
@@ -127,19 +128,59 @@ export default function OrderModal({
     setIsMapOpen(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.acceptTerms) {
-      alert(
-        "Пожалуйста, согласитесь с условиями публичной оферты и конфиденциальности"
-      );
+      alert("Пожалуйста, согласитесь с условиями публичной оферты и конфиденциальности");
       return;
     }
 
-    console.log("Order data:", formData);
-    if (onPayment) {
-      onPayment(formData.paymentMethod);
+    setIsProcessing(true);
+
+    try {
+      const currentTheme = boxPersonalization?.theme || 'techno';
+
+      const payload = {
+        boxTheme: currentTheme,
+        promoCode: formData.promoCode,
+        contactData: {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+        },
+        deliveryData: {
+          type: formData.deliveryType,
+          pointId: formData.deliveryType === '5post' ? formData.pvzCode : null,
+          pointName: formData.deliveryType === '5post' ? formData.deliveryPoint : null,
+          address: formData.deliveryType === 'courier' ? 
+            `${formData.city}, ${formData.deliveryAddress}, кв. ${formData.apartment}` : null
+        }
+      };
+
+      const response = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Ошибка сервера');
+      }
+
+      if (data.confirmationUrl) {
+        window.location.href = data.confirmationUrl;
+      }
+
+    } catch (error) {
+      console.error("Ошибка заказа:", error);
+      alert(error.message);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -797,8 +838,16 @@ export default function OrderModal({
 
             <div className={styles.finalPrice}>{totalPrice}₽</div>
 
-            <button type="submit" className={styles.submitButton}>
-              Оплатить
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={isProcessing}
+              style={{
+                opacity: isProcessing ? 0.7 : 1,
+                cursor: isProcessing ? "wait" : "pointer",
+              }}
+            >
+              {isProcessing ? "Обработка..." : "Оплатить"}
             </button>
           </div>
         </div>
