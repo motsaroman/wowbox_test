@@ -17,13 +17,15 @@ export default async function handler(req, res) {
         console.log(`Payment success for CRM Order #${crmId}. Creating payment transaction...`);
 
         const paymentParams = new URLSearchParams();
-        
+        const now = new Date();
+        const formattedDate = now.toISOString().replace('T', ' ').substring(0, 19);
+
         const paymentData = {
           order: { id: crmId },
           amount: object.amount.value,
-          type: 'bank-card',
+          type: 'bank-card',   
           status: 'paid',
-          paidAt: new Date().toISOString(),
+          paidAt: formattedDate,
           comment: `Оплата через ЮKassa. Транзакция: ${object.id}`
         };
 
@@ -47,9 +49,10 @@ export default async function handler(req, res) {
           console.error('RetailCRM Request Failed:', crmError.response?.data || crmError.message);
         }
       } else {
-        console.warn('Missing crmId in metadata or CRM credentials are not set');
+        console.warn('Missing crmId in metadata');
       }
     }
+
     return res.status(200).send('OK');
 
   } catch (error) {
