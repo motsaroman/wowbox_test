@@ -589,9 +589,11 @@
   background: #f5f5f7;
   border-bottom: 1px solid #e0e0e0;
 }
+
 h3 {
   font-size: 16px;
 }
+
 .citySelect {
   margin-top: 10px;
   width: 100%;
@@ -653,8 +655,8 @@ h3 {
 
 
 .imageMarker {
-  width: 40px;
-  height: 40px;
+  width: 25px;
+  height: 35px;
   cursor: pointer;
   transform: translate(-50%, -100%);
   transition: transform 0.2s;
