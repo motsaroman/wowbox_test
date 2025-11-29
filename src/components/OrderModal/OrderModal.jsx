@@ -1,4 +1,3 @@
-// src/components/OrderModal/OrderModal.jsx
 import { useState, useEffect } from "react";
 import styles from "./OrderModal.module.css";
 import DeliveryMapPage from "../DeliveryMapPage/DeliveryMapPage";
@@ -40,6 +39,7 @@ export default function OrderModal({
     deliveryType: "5post",
     pvzCode: "",
     city: "Москва",
+    cityFias: null,
     deliveryPoint: "",
     deliveryAddress: "",
     apartment: "",
@@ -54,10 +54,11 @@ export default function OrderModal({
 
   const [promoApplied, setPromoApplied] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false); // Состояние загрузки
 
+  // Цены теперь в стейте, чтобы могли меняться
+  const [deliveryPrice, setDeliveryPrice] = useState(99); 
   const boxPrice = 4900;
-  const deliveryPrice = 99;
   const promoDiscount = promoApplied ? 500 : 0;
   const totalPrice = boxPrice + deliveryPrice - promoDiscount;
 
@@ -102,15 +103,27 @@ export default function OrderModal({
     setIsMapOpen(false);
   };
 
+  // ОБНОВЛЕННАЯ ФУНКЦИЯ ВЫБОРА ДОСТАВКИ
   const handleDeliverySelect = (deliveryData) => {
+    // Если выбран самовывоз (5Post)
     if (deliveryData.mode === "pickup" && deliveryData.point) {
       setFormData((prev) => ({
         ...prev,
         deliveryType: "5post",
-        deliveryPoint: deliveryData.point.name,
+        // Формируем строку: Адрес (Название точки)
+        deliveryPoint: `${deliveryData.point.address} (${deliveryData.point.name})`,
         pvzCode: deliveryData.point.id,
+        // Сохраняем ФИАС код города для сервера
+        cityFias: deliveryData.cityFias 
       }));
-    } else if (deliveryData.mode === "courier") {
+      
+      // Обновляем цену доставки, если она пришла из карты
+      if (deliveryData.point.price) {
+        setDeliveryPrice(deliveryData.point.price);
+      }
+    } 
+    // Если выбран курьер
+    else if (deliveryData.mode === "courier") {
       setFormData((prev) => ({
         ...prev,
         deliveryType: "courier",
@@ -119,7 +132,10 @@ export default function OrderModal({
         entrance: deliveryData.entrance || prev.entrance,
         floor: deliveryData.floor || prev.floor,
         courierComment: deliveryData.comment || prev.courierComment,
+        // При курьерской доставке тоже можно сохранять город/ФИАС, если карта их возвращает
       }));
+      // Для курьера можно установить фиксированную или расчетную цену
+      setDeliveryPrice(450); // Пример цены для курьера (или берите из deliveryData)
     }
     setIsMapOpen(false);
   };
@@ -128,9 +144,7 @@ export default function OrderModal({
     e.preventDefault();
 
     if (!formData.acceptTerms) {
-      alert(
-        "Пожалуйста, согласитесь с условиями публичной оферты и конфиденциальности"
-      );
+      alert("Пожалуйста, согласитесь с условиями публичной оферты и конфиденциальности");
       return;
     }
 
@@ -138,12 +152,11 @@ export default function OrderModal({
 
     try {
       const personalizationData = {
-        theme: boxPersonalization?.theme || "techno",
-        gender: boxPersonalization?.gender || "не указан",
-        recipient: boxPersonalization?.recipient || "не указан",
-        restrictions: boxPersonalization?.restrictions || "нет",
-        wishes: boxPersonalization?.additionalWishes || "нет",
-        boxPrice: totalPrice,
+        theme: boxPersonalization?.theme || 'techno',
+        gender: boxPersonalization?.gender || 'не указан',
+        recipient: boxPersonalization?.recipient || 'не указан',
+        restrictions: boxPersonalization?.restrictions || 'нет',
+        wishes: boxPersonalization?.additionalWishes || 'нет',
       };
 
       const payload = {
@@ -155,69 +168,63 @@ export default function OrderModal({
           phone: formData.phone,
           email: formData.email,
         },
-        recipientData: formData.isGift
-          ? {
-              name: formData.recipientName,
-              phone: formData.recipientPhone,
-            }
-          : null,
-
+        recipientData: formData.isGift ? {
+          name: formData.recipientName,
+          phone: formData.recipientPhone
+        } : null,
         comments: {
           user: formData.comment,
           courier: formData.courierComment,
-          personalization: personalizationData,
+          personalization: personalizationData 
         },
         deliveryData: {
           type: formData.deliveryType,
-          pointId: formData.deliveryType === "5post" ? formData.pvzCode : null,
-          pointName:
-            formData.deliveryType === "5post" ? formData.deliveryPoint : null,
-          address:
-            formData.deliveryType === "courier"
-              ? `${formData.city}, ${formData.deliveryAddress}, кв. ${formData.apartment}`
-              : null,
-          details:
-            formData.deliveryType === "courier"
-              ? {
-                  city: formData.city,
-                  street: formData.deliveryAddress,
-                  flat: formData.apartment,
-                  floor: formData.floor,
-                  entrance: formData.entrance,
-                }
-              : { city: formData.city },
+          pointId: formData.deliveryType === '5post' ? formData.pvzCode : null,
+          pointName: formData.deliveryType === '5post' ? formData.deliveryPoint : null,
+          address: formData.deliveryType === 'courier' ? 
+            `${formData.city}, ${formData.deliveryAddress}, кв. ${formData.apartment}` : null,
+          details: {
+            city: formData.city,
+            cityFias: formData.cityFias, // ОТПРАВЛЯЕМ ФИАС НА СЕРВЕР
+            street: formData.deliveryAddress,
+            flat: formData.apartment,
+            floor: formData.floor,
+            entrance: formData.entrance
+          }
+        },
+        // Передаем рассчитанные цены для справки (сервер пересчитает сам, но это полезно)
+        clientPrices: {
+            box: boxPrice,
+            delivery: deliveryPrice,
+            total: totalPrice
         },
         utm: {
-          source:
-            new URLSearchParams(window.location.search).get("utm_source") ||
-            "direct",
+          source: new URLSearchParams(window.location.search).get("utm_source") || "direct",
           medium: new URLSearchParams(window.location.search).get("utm_medium"),
-          campaign: new URLSearchParams(window.location.search).get(
-            "utm_campaign"
-          ),
-        },
+          campaign: new URLSearchParams(window.location.search).get("utm_campaign"),
+        }
       };
 
-      const response = await fetch("/api/create-payment", {
-        method: "POST",
+      // Отправляем запрос на наш API
+      const response = await fetch('/api/create-payment', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Ошибка сервера");
+      if (response.ok && data.confirmationUrl) {
+        window.location.href = data.confirmationUrl;
+      } else {
+        alert('Ошибка при создании заказа: ' + (data.message || 'Попробуйте позже'));
       }
 
-      if (data.confirmationUrl) {
-        window.location.href = data.confirmationUrl;
-      }
     } catch (error) {
-      console.error("Ошибка заказа:", error);
-      alert(error.message);
+      console.error('Error:', error);
+      alert('Произошла ошибка сети. Попробуйте еще раз.');
     } finally {
       setIsProcessing(false);
     }
@@ -481,7 +488,7 @@ export default function OrderModal({
                 </p>
 
                 <div className={styles.select} onClick={handleOpenMap}>
-                  <p style={{ cursor: "pointer" }}>
+                  <p style={{ cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {formData.deliveryPoint || "Выберите пункт выдачи..."}
                   </p>
                   <img src={rightArrow} alt="" />
@@ -824,22 +831,17 @@ export default function OrderModal({
 
             <div className={styles.finalPrice}>{totalPrice}₽</div>
 
-            <button
-              type="submit"
+            <button 
+              type="submit" 
               className={styles.submitButton}
               disabled={isProcessing}
-              style={{
-                opacity: isProcessing ? 0.7 : 1,
-                cursor: isProcessing ? "wait" : "pointer",
-              }}
+              style={{ opacity: isProcessing ? 0.7 : 1, cursor: isProcessing ? 'wait' : 'pointer' }}
             >
-              {isProcessing ? "Обработка..." : "Оплатить"}
+              {isProcessing ? 'Обработка...' : 'Оплатить'}
             </button>
           </div>
         </div>
       </form>
-
-      {/* Delivery Map Modal */}
       {isMapOpen && (
         <DeliveryMapPage
           isOpen={isMapOpen}
