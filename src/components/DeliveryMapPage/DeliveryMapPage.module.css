@@ -543,6 +543,108 @@
   font-size: 0.95rem;
 }
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify_content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  width: 90%;
+  max-width: 1000px;
+  height: 80vh; /* ВАЖНО: Высота модального окна */
+  border-radius: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.header {
+  padding: 20px;
+  background: #f5f5f7;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.citySelect {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+/* САМОЕ ВАЖНОЕ: Контейнер карты должен иметь высоту */
+.mapContainer {
+  flex: 1; /* Занимает все оставшееся место */
+  width: 100%;
+  position: relative;
+  background-color: #f0f0f0; /* Серый фон, чтобы видеть, если карта не прогрузилась */
+}
+
+.loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Маркер на карте */
+.marker {
+    position: relative;
+    width: 0; 
+    height: 0;
+    /* Центрируем, чтобы точка координат была ровно посередине кружка */
+    display: flex;
+    justify_content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Видимая часть (кружок) */
+.markerDot {
+    width: 24px;       /* Обязательно должна быть ширина */
+    height: 24px;      /* Обязательно должна быть высота */
+    background-color: #6C5DD3; /* Яркий цвет */
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transform: translate(-50%, -50%); /* Сдвигаем, чтобы центр был в координате */
+    transition: transform 0.2s;
+}
+
+.markerDot:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    background-color: #5b4cc4;
+    z-index: 10;
+}
+
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {
