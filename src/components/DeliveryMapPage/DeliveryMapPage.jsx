@@ -1,11 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { 
   YMap, 
   YMapDefaultSchemeLayer, 
   YMapDefaultFeaturesLayer, 
-  YMapMarker 
+  YMapMarker,
+  YMapClusterer,
+  clusterByGrid
 } from "../../lib/ymaps"; 
 import { cities } from "../../data/cities"; 
+import markerIcon from "../../assets/images/5post-geo.png";
 import styles from "./DeliveryMapPage.module.css";
 import closeIcon from "../../assets/icons/close.svg";
 
@@ -19,46 +22,39 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect }) {
     zoom: 10 
   });
 
+  // 1. Метод кластеризации (сетка 64px)
+  // useMemo нужен, чтобы не пересоздавать объект при каждом рендере
+  const gridSizedMethod = useMemo(() => clusterByGrid({ gridSize: 64 }), []);
+
   useEffect(() => {
     if (isOpen && selectedCity) {
-      console.log(`[Front] Выбран город: ${selectedCity.name} (${selectedCity.fias})`); // ЛОГ 1
       fetchPoints(selectedCity.fias);
     }
   }, [isOpen, selectedCity]);
 
   const fetchPoints = async (fias) => {
     setLoading(true);
-    console.log(`[Front] Начинаем загрузку точек...`); // ЛОГ 2
-
     try {
       const res = await fetch(`/api/get-points?fias=${fias}`);
-      console.log(`[Front] Статус ответа: ${res.status}`); // ЛОГ 3
-
       if (!res.ok) throw new Error('Ошибка сети');
-      
       const data = await res.json();
-      console.log(`[Front] Получено данных:`, data); // ЛОГ 4 (Тут смотрите массив!)
-
       setPoints(data);
 
       if (data.length > 0) {
-        const firstPoint = data[0].coordinates; 
-        console.log(`[Front] Центрируем карту на:`, firstPoint); // ЛОГ 5
-        
+        // Центрируем карту на первой точке
         setLocation({ 
-          center: firstPoint, // Они уже перевернуты на бэкенде в [lng, lat]
-          zoom: 12 
+          center: data[0].coordinates, 
+          zoom: 10 
         });
       }
     } catch (e) {
-      console.error("[Front] Ошибка:", e);
+      console.error("Ошибка:", e);
     } finally {
       setLoading(false);
     }
   };
 
   const handlePointClick = (point) => {
-    console.log(`[Front] Выбрана точка:`, point); // ЛОГ 6
     onDeliverySelect({
       mode: "pickup",
       point: {
@@ -71,6 +67,48 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect }) {
     });
     onClose();
   };
+
+  const features = useMemo(() => points.map((pt) => ({
+    type: 'Feature',
+    id: pt.id,
+    geometry: { coordinates: pt.coordinates },
+    properties: { ...pt }
+  })), [points]);
+
+  const renderMarker = useCallback(
+    (feature) => (
+      <YMapMarker 
+        key={feature.id} 
+        coordinates={feature.geometry.coordinates}
+        source="my-source"
+      >
+        <img 
+          src={markerIcon} 
+          alt={feature.properties.name}
+          className={styles.imageMarker}
+          onClick={() => handlePointClick(feature.properties)}
+        />
+      </YMapMarker>
+    ),
+    [handlePointClick]
+  );
+
+  const renderCluster = useCallback(
+    (coordinates, features) => (
+      <YMapMarker 
+        key={`${coordinates.join('-')}`} 
+        coordinates={coordinates}
+        source="my-source"
+      >
+        <div className={styles.cluster}>
+          <div className={styles.clusterContent}>
+            <span className={styles.clusterText}>{features.length}</span>
+          </div>
+        </div>
+      </YMapMarker>
+    ),
+    []
+  );
 
   if (!isOpen) return null;
 
@@ -106,26 +144,12 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect }) {
               <YMapDefaultSchemeLayer />
               <YMapDefaultFeaturesLayer />
               
-              {/* Проверяем, рендерится ли цикл */}
-              {points.map((pt, index) => {
-                 // ЛОГ 7 (выведет первые 3 точки, чтобы не спамить)
-                 if (index < 3) console.log(`[Front] Рендер маркера #${index}:`, pt.coordinates);
-                 
-                 return (
-                    <YMapMarker 
-                      key={pt.id} 
-                      coordinates={pt.coordinates} 
-                    >
-                      <div 
-                        className={styles.marker}
-                        onClick={() => handlePointClick(pt)}
-                        title={pt.name}
-                      >
-                        <div className={styles.markerDot}></div>
-                      </div>
-                    </YMapMarker>
-                 );
-              })}
+              <YMapClusterer
+                marker={renderMarker}
+                cluster={renderCluster}
+                method={gridSizedMethod}
+                features={features}
+              />
            </YMap>
         </div>
       </div>
