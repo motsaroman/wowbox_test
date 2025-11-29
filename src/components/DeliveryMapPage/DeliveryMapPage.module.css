@@ -39,7 +39,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.3rem;
+  flex-wrap: wrap;
+
 }
 
 .backBtn,
@@ -768,6 +769,80 @@ h3 {
   height: 12px;
   background-color: white;
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.05);
+}
+
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  background: #f0f0f0;
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.activeTab {
+  background: white;
+  color: black;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Маркер курьера (простой эмодзи или картинка) */
+.courierPin {
+  font-size: 30px;
+  transform: translate(-50%, -100%); /* Ножка снизу */
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Панель курьера (снизу карты) */
+.courierPanel {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  z-index: 2000;
+  text-align: center;
+}
+
+.courierAddress {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #333;
+  font-weight: 500;
+}
+
+.confirmBtn {
+  width: 100%;
+  padding: 12px;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.confirmBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Responsive */

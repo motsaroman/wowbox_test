@@ -57,7 +57,7 @@ export default function OrderModal({
   const [isProcessing, setIsProcessing] = useState(false); // Состояние загрузки
 
   // Цены теперь в стейте, чтобы могли меняться
-  const [deliveryPrice, setDeliveryPrice] = useState(99); 
+  const [deliveryPrice, setDeliveryPrice] = useState(99);
   const boxPrice = 4900;
   const promoDiscount = promoApplied ? 500 : 0;
   const totalPrice = boxPrice + deliveryPrice - promoDiscount;
@@ -103,26 +103,23 @@ export default function OrderModal({
     setIsMapOpen(false);
   };
 
-  // ОБНОВЛЕННАЯ ФУНКЦИЯ ВЫБОРА ДОСТАВКИ
   const handleDeliverySelect = (deliveryData) => {
-    // Если выбран самовывоз (5Post)
+    // 1. САМОВЫВОЗ (5Post)
     if (deliveryData.mode === "pickup" && deliveryData.point) {
       setFormData((prev) => ({
         ...prev,
         deliveryType: "5post",
-        // Формируем строку: Адрес (Название точки)
         deliveryPoint: `${deliveryData.point.address} (${deliveryData.point.name})`,
         pvzCode: deliveryData.point.id,
-        // Сохраняем ФИАС код города для сервера
-        cityFias: deliveryData.cityFias 
+        cityFias: deliveryData.cityFias,
       }));
-      
-      // Обновляем цену доставки, если она пришла из карты
+
+      // Считаем цену: База из города + 50 руб
       if (deliveryData.point.price) {
-        setDeliveryPrice(deliveryData.point.price);
+        setDeliveryPrice(deliveryData.point.price + 50);
       }
-    } 
-    // Если выбран курьер
+    }
+    // 2. КУРЬЕР
     else if (deliveryData.mode === "courier") {
       setFormData((prev) => ({
         ...prev,
@@ -132,10 +129,16 @@ export default function OrderModal({
         entrance: deliveryData.entrance || prev.entrance,
         floor: deliveryData.floor || prev.floor,
         courierComment: deliveryData.comment || prev.courierComment,
-        // При курьерской доставке тоже можно сохранять город/ФИАС, если карта их возвращает
+        cityFias: deliveryData.cityFias,
+        city: deliveryData.cityName || prev.city,
       }));
-      // Для курьера можно установить фиксированную или расчетную цену
-      setDeliveryPrice(450); // Пример цены для курьера (или берите из deliveryData)
+
+      // Считаем цену: База из города + 180 руб
+      if (deliveryData.price) {
+        setDeliveryPrice(deliveryData.price + 180);
+      } else {
+        setDeliveryPrice(350 + 180);
+      }
     }
     setIsMapOpen(false);
   };
@@ -144,7 +147,9 @@ export default function OrderModal({
     e.preventDefault();
 
     if (!formData.acceptTerms) {
-      alert("Пожалуйста, согласитесь с условиями публичной оферты и конфиденциальности");
+      alert(
+        "Пожалуйста, согласитесь с условиями публичной оферты и конфиденциальности"
+      );
       return;
     }
 
@@ -152,64 +157,90 @@ export default function OrderModal({
 
     try {
       const personalizationData = {
-        theme: boxPersonalization?.theme || 'techno',
-        gender: boxPersonalization?.gender || 'не указан',
-        recipient: boxPersonalization?.recipient || 'не указан',
-        restrictions: boxPersonalization?.restrictions || 'нет',
-        wishes: boxPersonalization?.additionalWishes || 'нет',
+        theme: boxPersonalization?.theme || "techno",
+        gender: boxPersonalization?.gender || "не указан",
+        recipient: boxPersonalization?.recipient || "не указан",
+        restrictions: boxPersonalization?.restrictions || "нет",
+        wishes: boxPersonalization?.additionalWishes || "нет",
       };
+
+      let fullCourierAddress = null;
+      if (formData.deliveryType === "courier") {
+        const parts = [
+          formData.city,
+          formData.deliveryAddress,
+          formData.apartment ? `кв. ${formData.apartment}` : "",
+          formData.entrance ? `под. ${formData.entrance}` : "",
+          formData.floor ? `эт. ${formData.floor}` : "",
+        ];
+
+        fullCourierAddress = parts.filter(Boolean).join(", ");
+      }
 
       const payload = {
         boxTheme: personalizationData.theme,
         promoCode: formData.promoCode,
         paymentMethod: formData.paymentMethod,
+
         contactData: {
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
         },
-        recipientData: formData.isGift ? {
-          name: formData.recipientName,
-          phone: formData.recipientPhone
-        } : null,
+
+        recipientData: formData.isGift
+          ? {
+              name: formData.recipientName,
+              phone: formData.recipientPhone,
+            }
+          : null,
+
         comments: {
           user: formData.comment,
           courier: formData.courierComment,
-          personalization: personalizationData 
+          personalization: personalizationData,
         },
+
         deliveryData: {
           type: formData.deliveryType,
-          pointId: formData.deliveryType === '5post' ? formData.pvzCode : null,
-          pointName: formData.deliveryType === '5post' ? formData.deliveryPoint : null,
-          address: formData.deliveryType === 'courier' ? 
-            `${formData.city}, ${formData.deliveryAddress}, кв. ${formData.apartment}` : null,
+
+          pointId: formData.deliveryType === "5post" ? formData.pvzCode : null,
+          pointName:
+            formData.deliveryType === "5post" ? formData.deliveryPoint : null,
+
+          address: fullCourierAddress,
+
           details: {
             city: formData.city,
-            cityFias: formData.cityFias, // ОТПРАВЛЯЕМ ФИАС НА СЕРВЕР
+            cityFias: formData.cityFias,
             street: formData.deliveryAddress,
             flat: formData.apartment,
             floor: formData.floor,
-            entrance: formData.entrance
-          }
+            entrance: formData.entrance,
+          },
         },
-        // Передаем рассчитанные цены для справки (сервер пересчитает сам, но это полезно)
         clientPrices: {
-            box: boxPrice,
-            delivery: deliveryPrice,
-            total: totalPrice
+          box: boxPrice,
+          delivery: deliveryPrice,
+          total: totalPrice,
         },
+
+        // UTM метки
         utm: {
-          source: new URLSearchParams(window.location.search).get("utm_source") || "direct",
+          source:
+            new URLSearchParams(window.location.search).get("utm_source") ||
+            "direct",
           medium: new URLSearchParams(window.location.search).get("utm_medium"),
-          campaign: new URLSearchParams(window.location.search).get("utm_campaign"),
-        }
+          campaign: new URLSearchParams(window.location.search).get(
+            "utm_campaign"
+          ),
+        },
       };
 
-      // Отправляем запрос на наш API
-      const response = await fetch('/api/create-payment', {
-        method: 'POST',
+      const response = await fetch("/api/create-payment", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
@@ -219,12 +250,13 @@ export default function OrderModal({
       if (response.ok && data.confirmationUrl) {
         window.location.href = data.confirmationUrl;
       } else {
-        alert('Ошибка при создании заказа: ' + (data.message || 'Попробуйте позже'));
+        alert(
+          "Ошибка при создании заказа: " + (data.message || "Попробуйте позже")
+        );
       }
-
     } catch (error) {
-      console.error('Error:', error);
-      alert('Произошла ошибка сети. Попробуйте еще раз.');
+      console.error("Error:", error);
+      alert("Произошла ошибка сети. Попробуйте еще раз.");
     } finally {
       setIsProcessing(false);
     }
@@ -467,7 +499,7 @@ export default function OrderModal({
               </label>
             </div>
 
-            <div className={styles.inputGroup}>
+            {/*<div className={styles.inputGroup}>
               <label className={styles.label}>
                 Город<span className={styles.required}>*</span>
               </label>
@@ -479,7 +511,7 @@ export default function OrderModal({
                 className={styles.input}
                 required
               />
-            </div>
+            </div>*/}
 
             {formData.deliveryType === "5post" ? (
               <div className={styles.inputGroup}>
@@ -488,7 +520,14 @@ export default function OrderModal({
                 </p>
 
                 <div className={styles.select} onClick={handleOpenMap}>
-                  <p style={{ cursor: "pointer", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <p
+                    style={{
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
                     {formData.deliveryPoint || "Выберите пункт выдачи..."}
                   </p>
                   <img src={rightArrow} alt="" />
@@ -831,13 +870,16 @@ export default function OrderModal({
 
             <div className={styles.finalPrice}>{totalPrice}₽</div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={styles.submitButton}
               disabled={isProcessing}
-              style={{ opacity: isProcessing ? 0.7 : 1, cursor: isProcessing ? 'wait' : 'pointer' }}
+              style={{
+                opacity: isProcessing ? 0.7 : 1,
+                cursor: isProcessing ? "wait" : "pointer",
+              }}
             >
-              {isProcessing ? 'Обработка...' : 'Оплатить'}
+              {isProcessing ? "Обработка..." : "Оплатить"}
             </button>
           </div>
         </div>
