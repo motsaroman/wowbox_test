@@ -1,7 +1,7 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 
-const API_KEY = 'ff404e0a-8fd1-4724-83a1-c82ee98cd33a';
+const API_KEY = 'ff404e0a-8fd1-4724-83a1-c82ee98cd33a'; 
 
 const loadYmapsScript = () => {
   return new Promise((resolve, reject) => {
@@ -27,10 +27,9 @@ const [ymaps3React] = await Promise.all([
 
 export const reactify = ymaps3React.reactify.bindTo(React, ReactDOM);
 
-// Экспортируем компоненты
-export const {
-  YMap,
-  YMapDefaultSchemeLayer,
-  YMapDefaultFeaturesLayer,
-  YMapMarker
+export const { 
+  YMap, 
+  YMapDefaultSchemeLayer, 
+  YMapDefaultFeaturesLayer, 
+  YMapMarker 
 } = reactify.module(ymaps3);
