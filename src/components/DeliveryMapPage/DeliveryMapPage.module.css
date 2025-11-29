@@ -682,7 +682,7 @@ h3 {
   border: 2px solid white;
   border-radius: 50%;
   display: flex;
-  justify_content: center;
+  justify-content: center;
   align-items: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s;
