@@ -148,7 +148,7 @@ export default function OrderModal({
   };
 
   // временный, т.к юкасса еще не одобрила
-  const handleSubmit = async (e) => {
+  /*const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.acceptTerms) {
@@ -157,127 +157,129 @@ export default function OrderModal({
     }
 
     setIsSuccessOpen(true);
+  };*/
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.acceptTerms) {
+      alert(
+        "Пожалуйста, согласитесь с условиями публичной оферты и конфиденциальности"
+      );
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const personalizationData = {
+        theme: boxPersonalization?.theme || "techno",
+        gender: boxPersonalization?.gender || "не указан",
+        recipient: boxPersonalization?.recipient || "не указан",
+        restrictions: boxPersonalization?.restrictions || "нет",
+        wishes: boxPersonalization?.additionalWishes || "нет",
+      };
+
+      let fullCourierAddress = null;
+      if (formData.deliveryType === "courier") {
+        const parts = [
+          formData.city,
+          formData.deliveryAddress,
+          formData.apartment ? `кв. ${formData.apartment}` : "",
+          formData.entrance ? `под. ${formData.entrance}` : "",
+          formData.floor ? `эт. ${formData.floor}` : "",
+        ];
+
+        fullCourierAddress = parts.filter(Boolean).join(", ");
+      }
+
+      const payload = {
+        boxTheme: personalizationData.theme,
+        promoCode: formData.promoCode,
+        paymentMethod: formData.paymentMethod,
+
+        contactData: {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+        },
+
+        recipientData: formData.isGift
+          ? {
+              name: formData.recipientName,
+              phone: formData.recipientPhone,
+            }
+          : null,
+
+        comments: {
+          user: formData.comment,
+          courier: formData.courierComment,
+          personalization: personalizationData,
+        },
+
+        deliveryData: {
+          type: formData.deliveryType,
+
+          pointId: formData.deliveryType === "5post" ? formData.pvzCode : null,
+          pointName:
+            formData.deliveryType === "5post" ? formData.deliveryPoint : null,
+
+          address: fullCourierAddress,
+
+          details: {
+            city: formData.city,
+            cityFias: formData.cityFias,
+            street: formData.deliveryAddress,
+            flat: formData.apartment,
+            floor: formData.floor,
+            entrance: formData.entrance,
+          },
+        },
+        clientPrices: {
+          box: boxPrice,
+          delivery: deliveryPrice,
+          total: totalPrice,
+        },
+
+        utm: {
+          source:
+            new URLSearchParams(window.location.search).get("utm_source") ||
+            "direct",
+          medium: new URLSearchParams(window.location.search).get("utm_medium"),
+          campaign: new URLSearchParams(window.location.search).get(
+            "utm_campaign"
+          ),
+        },
+      };
+
+      const response = await fetch("https://wowbox.market/api/create-payment.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (data) {
+        setIsSuccessOpen(true);
+      }
+
+      /*if (response.ok && data.confirmationUrl) {
+         window.location.href = data.confirmationUrl;
+       } else {
+         alert(
+           "Ошибка при создании заказа: " + (data.message || "Попробуйте позже")
+         );
+       }*/
+    } catch (error) {
+      console.error("Error:", error);
+      /*alert("Произошла ошибка сети. Попробуйте еще раз.");*/
+    } finally {
+      setIsProcessing(false);
+    }
   };
-
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   if (!formData.acceptTerms) {
-  //     alert(
-  //       "Пожалуйста, согласитесь с условиями публичной оферты и конфиденциальности"
-  //     );
-  //     return;
-  //   }
-
-  //   setIsProcessing(true);
-
-  //   try {
-  //     const personalizationData = {
-  //       theme: boxPersonalization?.theme || "techno",
-  //       gender: boxPersonalization?.gender || "не указан",
-  //       recipient: boxPersonalization?.recipient || "не указан",
-  //       restrictions: boxPersonalization?.restrictions || "нет",
-  //       wishes: boxPersonalization?.additionalWishes || "нет",
-  //     };
-
-  //     let fullCourierAddress = null;
-  //     if (formData.deliveryType === "courier") {
-  //       const parts = [
-  //         formData.city,
-  //         formData.deliveryAddress,
-  //         formData.apartment ? `кв. ${formData.apartment}` : "",
-  //         formData.entrance ? `под. ${formData.entrance}` : "",
-  //         formData.floor ? `эт. ${formData.floor}` : "",
-  //       ];
-
-  //       fullCourierAddress = parts.filter(Boolean).join(", ");
-  //     }
-
-  //     const payload = {
-  //       boxTheme: personalizationData.theme,
-  //       promoCode: formData.promoCode,
-  //       paymentMethod: formData.paymentMethod,
-
-  //       contactData: {
-  //         name: formData.name,
-  //         phone: formData.phone,
-  //         email: formData.email,
-  //       },
-
-  //       recipientData: formData.isGift
-  //         ? {
-  //             name: formData.recipientName,
-  //             phone: formData.recipientPhone,
-  //           }
-  //         : null,
-
-  //       comments: {
-  //         user: formData.comment,
-  //         courier: formData.courierComment,
-  //         personalization: personalizationData,
-  //       },
-
-  //       deliveryData: {
-  //         type: formData.deliveryType,
-
-  //         pointId: formData.deliveryType === "5post" ? formData.pvzCode : null,
-  //         pointName:
-  //           formData.deliveryType === "5post" ? formData.deliveryPoint : null,
-
-  //         address: fullCourierAddress,
-
-  //         details: {
-  //           city: formData.city,
-  //           cityFias: formData.cityFias,
-  //           street: formData.deliveryAddress,
-  //           flat: formData.apartment,
-  //           floor: formData.floor,
-  //           entrance: formData.entrance,
-  //         },
-  //       },
-  //       clientPrices: {
-  //         box: boxPrice,
-  //         delivery: deliveryPrice,
-  //         total: totalPrice,
-  //       },
-
-  //       // UTM метки
-  //       utm: {
-  //         source:
-  //           new URLSearchParams(window.location.search).get("utm_source") ||
-  //           "direct",
-  //         medium: new URLSearchParams(window.location.search).get("utm_medium"),
-  //         campaign: new URLSearchParams(window.location.search).get(
-  //           "utm_campaign"
-  //         ),
-  //       },
-  //     };
-
-  //     const response = await fetch("/api/create-payment", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(payload),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (response.ok && data.confirmationUrl) {
-  //       window.location.href = data.confirmationUrl;
-  //     } else {
-  //       alert(
-  //         "Ошибка при создании заказа: " + (data.message || "Попробуйте позже")
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     alert("Произошла ошибка сети. Попробуйте еще раз.");
-  //   } finally {
-  //     setIsProcessing(false);
-  //   }
-  // };
 
   const getThemeDisplayName = (theme) => {
     const themeMap = {
@@ -470,8 +472,9 @@ export default function OrderModal({
 
             <div className={styles.deliveryOptions}>
               <label
-                className={`${styles.deliveryOption} ${formData.deliveryType === "5post" ? styles.active : ""
-                  }`}
+                className={`${styles.deliveryOption} ${
+                  formData.deliveryType === "5post" ? styles.active : ""
+                }`}
               >
                 <input
                   type="radio"
@@ -492,8 +495,9 @@ export default function OrderModal({
               </label>
 
               <label
-                className={`${styles.deliveryOption} ${formData.deliveryType === "courier" ? styles.active : ""
-                  }`}
+                className={`${styles.deliveryOption} ${
+                  formData.deliveryType === "courier" ? styles.active : ""
+                }`}
               >
                 <input
                   type="radio"
@@ -625,8 +629,9 @@ export default function OrderModal({
 
             <div className={styles.paymentOptions}>
               <label
-                className={`${styles.paymentOption} ${formData.paymentMethod === "sbp" ? styles.active : ""
-                  }`}
+                className={`${styles.paymentOption} ${
+                  formData.paymentMethod === "sbp" ? styles.active : ""
+                }`}
               >
                 <input
                   type="radio"
@@ -647,8 +652,9 @@ export default function OrderModal({
               </label>
 
               <label
-                className={`${styles.paymentOption} ${formData.paymentMethod === "sberpay" ? styles.active : ""
-                  }`}
+                className={`${styles.paymentOption} ${
+                  formData.paymentMethod === "sberpay" ? styles.active : ""
+                }`}
               >
                 <input
                   type="radio"
@@ -669,8 +675,9 @@ export default function OrderModal({
               </label>
 
               <label
-                className={`${styles.paymentOption} ${formData.paymentMethod === "tpay" ? styles.active : ""
-                  }`}
+                className={`${styles.paymentOption} ${
+                  formData.paymentMethod === "tpay" ? styles.active : ""
+                }`}
               >
                 <input
                   type="radio"
@@ -691,8 +698,9 @@ export default function OrderModal({
               </label>
 
               <label
-                className={`${styles.paymentOption} ${formData.paymentMethod === "card" ? styles.active : ""
-                  }`}
+                className={`${styles.paymentOption} ${
+                  formData.paymentMethod === "card" ? styles.active : ""
+                }`}
               >
                 <input
                   type="radio"
