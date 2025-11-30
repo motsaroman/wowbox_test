@@ -40,6 +40,7 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+  font-family: "SF Pro", sans-serif;
 
 }
 
@@ -92,6 +93,7 @@
 }
 
 .tabBtn {
+  font-family: "SF Pro", sans-serif;
   padding: 1.2rem;
   background: transparent;
   color: rgba(51, 51, 51, 1);
@@ -659,7 +661,7 @@ h3 {
   width: 25px;
   height: 35px;
   cursor: pointer;
- /* transform: translate(-50%, -100%);
+  /* transform: translate(-50%, -100%);
   transition: transform 0.2s;*/
 }
 
@@ -782,6 +784,7 @@ h3 {
 }
 
 .tab {
+  font-family: "SF Pro", sans-serif;
   flex: 1;
   padding: 10px;
   border: none;
@@ -796,20 +799,21 @@ h3 {
 .activeTab {
   background: white;
   color: black;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Маркер курьера (простой эмодзи или картинка) */
 .courierPin {
   font-size: 30px;
-  transform: translate(-50%, -100%); /* Ножка снизу */
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  transform: translate(-50%, -100%);
+  /* Ножка снизу */
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 /* Панель курьера (снизу карты) */
 .courierPanel {
   position: absolute;
-  bottom: 20px;
+  bottom: 25px;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
@@ -817,7 +821,7 @@ h3 {
   background: white;
   padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
   z-index: 2000;
   text-align: center;
 }
@@ -825,7 +829,21 @@ h3 {
 .courierAddress {
   font-size: 16px;
   margin-bottom: 15px;
+  font-family: "SF Pro", sans-serif;
   color: #333;
+  font-weight: 500;
+}
+
+.diclaimer a {
+  text-decoration: underline;
+  color: #000;
+}
+
+.diclaimer {
+  font-size: 16px;
+  margin-top: 10px;
+  font-family: "SF Pro", sans-serif;
+  color: #000;
   font-weight: 500;
 }
 
@@ -840,9 +858,96 @@ h3 {
   cursor: pointer;
 }
 
+.searchRow {
+  display: flex;
+  font-family: "SF Pro", sans-serif;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.addressInput {
+  width: 70%;
+  min-width: 0;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: #f9f9f9;
+}
+
+.addressInput:focus {
+  border-color: #333;
+  background-color: #fff;
+}
+.courierPrice {
+  font-size: 16px;
+  font-family: "SF Pro", sans-serif;
+}
+.searchBtn {
+  padding: 0 20px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s;
+  height: auto;
+  width: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchBtn:hover {
+  background-color: #000;
+  transform: translateY(-1px);
+}
+
+.searchBtn:active {
+  transform: translateY(0);
+}
+
 .confirmBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.inputGrid {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.inputGrid * {
+  font-family: "SF Pro", sans-serif;
+}
+.miniInput {
+  width: 33%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.fullInput {
+  width: 100%;
+  padding: 8px;
+  font-family: "SF Pro", sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.courierPanel {
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 /* Responsive */

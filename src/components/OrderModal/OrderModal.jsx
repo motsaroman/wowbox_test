@@ -108,7 +108,7 @@ export default function OrderModal({
   };
 
   const handleDeliverySelect = (deliveryData) => {
-    // 1. САМОВЫВОЗ (5Post)
+    // 1. САМОВЫВОЗ
     if (deliveryData.mode === "pickup" && deliveryData.point) {
       setFormData((prev) => ({
         ...prev,
@@ -116,32 +116,35 @@ export default function OrderModal({
         deliveryPoint: `${deliveryData.point.address} (${deliveryData.point.name})`,
         pvzCode: deliveryData.point.id,
         cityFias: deliveryData.cityFias,
+        // Очищаем курьерские поля
+        deliveryAddress: "", apartment: "", entrance: "", floor: "", courierComment: ""
       }));
-
-      // Считаем цену: База из города + 50 руб
+      
       if (deliveryData.point.price) {
-        setDeliveryPrice(deliveryData.point.price + 50);
+        setDeliveryPrice(deliveryData.point.price + 50); 
       }
-    }
+    } 
     // 2. КУРЬЕР
     else if (deliveryData.mode === "courier") {
       setFormData((prev) => ({
         ...prev,
         deliveryType: "courier",
         deliveryAddress: deliveryData.address,
-        apartment: deliveryData.apartment || prev.apartment,
-        entrance: deliveryData.entrance || prev.entrance,
-        floor: deliveryData.floor || prev.floor,
-        courierComment: deliveryData.comment || prev.courierComment,
+        // Заполняем поля из карты
+        apartment: deliveryData.apartment,
+        entrance: deliveryData.entrance,
+        floor: deliveryData.floor,
+        courierComment: deliveryData.comment,
+        
         cityFias: deliveryData.cityFias,
-        city: deliveryData.cityName || prev.city,
+        city: deliveryData.cityName || prev.city
       }));
 
-      // Считаем цену: База из города + 180 руб
+      // Расчет цены
       if (deliveryData.price) {
         setDeliveryPrice(deliveryData.price + 180);
       } else {
-        setDeliveryPrice(350 + 180);
+        setDeliveryPrice(350 + 180); // Дефолт
       }
     }
     setIsMapOpen(false);
