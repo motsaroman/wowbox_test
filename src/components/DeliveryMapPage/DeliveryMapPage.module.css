@@ -558,7 +558,7 @@
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify_content: center;
+  justify-content: center;
   align-items: center;
   z-index: 1000;
 }
@@ -633,7 +633,7 @@ h3 {
   height: 0;
   /* Центрируем, чтобы точка координат была ровно посередине кружка */
   display: flex;
-  justify_content: center;
+  justify-content: center;
   align-items: center;
   cursor: pointer;
 }
@@ -671,7 +671,7 @@ h3 {
 
 .cluster {
   display: flex;
-  justify_content: center;
+  justify-content: center;
   align-items: center;
   cursor: pointer;
   transform: translate(-50%, -50%);
@@ -699,7 +699,7 @@ h3 {
   position: relative;
   transform: translate(-50%, -100%);
   display: flex;
-  justify_content: center;
+  justify-content: center;
 }
 
 .clusterText {
