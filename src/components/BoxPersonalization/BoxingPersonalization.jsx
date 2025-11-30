@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import texno1 from "../../assets/images/texno1.webp";
 import texno2 from "../../assets/images/texno2.webp";
@@ -20,8 +20,22 @@ import toRight from "../../assets/icons/toRight.svg";
 
 import styles from "./BoxingPersonalization.module.css";
 
-const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
+const BoxPersonalization = ({
+  isOpen,
+  onClose,
+  onOrderClick,
+  savedData,
+  startStep = 1,
+}) => {
   const [currentStep, setCurrentStep] = useState(1);
+
+  // сбрасываем шаг при каждом открытии модалки
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentStep(startStep || 1);
+    }
+  }, [isOpen, startStep]);
+  
   const [selectedTheme, setSelectedTheme] = useState(
     savedData?.theme || "techno"
   );
@@ -138,9 +152,8 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
 
           <div className={styles.themesRow}>
             <div
-              className={`${styles.themeCard} ${
-                selectedTheme === "techno" ? styles.themeCardActive : ""
-              }`}
+              className={`${styles.themeCard} ${selectedTheme === "techno" ? styles.themeCardActive : ""
+                }`}
               onClick={() => handleThemeSelect("techno")}
             >
               <img
@@ -152,9 +165,8 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
               <div className={styles.themeLabel}>ТЕХНО</div>
             </div>
             <div
-              className={`${styles.themeCard} ${
-                selectedTheme === "cozy" ? styles.themeCardActive : ""
-              }`}
+              className={`${styles.themeCard} ${selectedTheme === "cozy" ? styles.themeCardActive : ""
+                }`}
               onClick={() => handleThemeSelect("cozy")}
             >
               <img
@@ -166,9 +178,8 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
               <div className={styles.themeLabel}>УЮТНЫЙ</div>
             </div>{" "}
             <div
-              className={`${styles.themeCard} ${
-                selectedTheme === "party" ? styles.themeCardActive : ""
-              }`}
+              className={`${styles.themeCard} ${selectedTheme === "party" ? styles.themeCardActive : ""
+                }`}
               onClick={() => handleThemeSelect("party")}
             >
               <img
@@ -180,9 +191,8 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
               <div className={styles.themeLabel}>ПАТИ</div>
             </div>{" "}
             <div
-              className={`${styles.themeCard} ${
-                selectedTheme === "sweet" ? styles.themeCardActive : ""
-              }`}
+              className={`${styles.themeCard} ${selectedTheme === "sweet" ? styles.themeCardActive : ""
+                }`}
               onClick={() => handleThemeSelect("sweet")}
             >
               <img
@@ -239,11 +249,10 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
               <h2 className={styles.question}>Пол получателя</h2>
               <div className={styles.optionsList}>
                 <button
-                  className={`${styles.optionButton} ${
-                    formData.gender === "female"
-                      ? styles.optionButtonActive
-                      : ""
-                  }`}
+                  className={`${styles.optionButton} ${formData.gender === "female"
+                    ? styles.optionButtonActive
+                    : ""
+                    }`}
                   onClick={() => handleGenderSelect("female")}
                 >
                   <span className={styles.optionIcon}>
@@ -252,9 +261,8 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
                   <span className={styles.optionText}>Женщина</span>
                 </button>
                 <button
-                  className={`${styles.optionButton} ${
-                    formData.gender === "male" ? styles.optionButtonActive : ""
-                  }`}
+                  className={`${styles.optionButton} ${formData.gender === "male" ? styles.optionButtonActive : ""
+                    }`}
                   onClick={() => handleGenderSelect("male")}
                 >
                   <span className={styles.optionIcon}>
@@ -263,11 +271,10 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
                   <span className={styles.optionText}>Мужчина</span>
                 </button>
                 <button
-                  className={`${styles.optionButton} ${
-                    formData.gender === "not-important"
-                      ? styles.optionButtonActive
-                      : ""
-                  }`}
+                  className={`${styles.optionButton} ${formData.gender === "not-important"
+                    ? styles.optionButtonActive
+                    : ""
+                    }`}
                   onClick={() => handleGenderSelect("not-important")}
                 >
                   <span className={styles.optionIcon}>
@@ -284,9 +291,8 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
               <h2 className={styles.question}>Есть ли ограничения?</h2>
               <div className={styles.optionsList}>
                 <button
-                  className={`${styles.optionButton} ${
-                    checkboxes.noParfume ? styles.optionButtonChecked : ""
-                  }`}
+                  className={`${styles.optionButton} ${checkboxes.noParfume ? styles.optionButtonChecked : ""
+                    }`}
                   onClick={() => toggleCheckbox("noParfume")}
                 >
                   <span className={styles.optionIcon}>
@@ -296,17 +302,15 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
                     Без ароматов (свечи, парфюм)
                   </span>
                   <span
-                    className={`${styles.checkmark} ${
-                      checkboxes.noParfume ? styles.checked : ""
-                    }`}
+                    className={`${styles.checkmark} ${checkboxes.noParfume ? styles.checked : ""
+                      }`}
                   >
                     ✓
                   </span>
                 </button>
                 <button
-                  className={`${styles.optionButton} ${
-                    checkboxes.noCosmetics ? styles.optionButtonChecked : ""
-                  }`}
+                  className={`${styles.optionButton} ${checkboxes.noCosmetics ? styles.optionButtonChecked : ""
+                    }`}
                   onClick={() => toggleCheckbox("noCosmetics")}
                 >
                   <span className={styles.optionIcon}>
@@ -314,17 +318,15 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
                   </span>
                   <span className={styles.optionText}>Без косметики</span>
                   <span
-                    className={`${styles.checkmark} ${
-                      checkboxes.noCosmetics ? styles.checked : ""
-                    }`}
+                    className={`${styles.checkmark} ${checkboxes.noCosmetics ? styles.checked : ""
+                      }`}
                   >
                     ✓
                   </span>
                 </button>
                 <button
-                  className={`${styles.optionButton} ${
-                    checkboxes.noCandy ? styles.optionButtonChecked : ""
-                  }`}
+                  className={`${styles.optionButton} ${checkboxes.noCandy ? styles.optionButtonChecked : ""
+                    }`}
                   onClick={() => toggleCheckbox("noCandy")}
                 >
                   <span className={styles.optionIcon}>
@@ -332,9 +334,8 @@ const BoxPersonalization = ({ isOpen, onClose, onOrderClick, savedData }) => {
                   </span>
                   <span className={styles.optionText}>Без сладкого</span>
                   <span
-                    className={`${styles.checkmark} ${
-                      checkboxes.noCandy ? styles.checked : ""
-                    }`}
+                    className={`${styles.checkmark} ${checkboxes.noCandy ? styles.checked : ""
+                      }`}
                   >
                     ✓
                   </span>

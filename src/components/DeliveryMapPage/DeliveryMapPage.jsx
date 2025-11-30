@@ -55,7 +55,7 @@ export default function DeliveryMapPage({
       let data = [];
       try {
         if (fias) {
-          const res = await fetch(`/api/get-points?fias=${fias}`);
+          const res = await fetch(`/api/get-points.php?fias=${fias}`);
           if (res.ok) data = await res.json();
         }
       } catch (err) {

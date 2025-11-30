@@ -1,0 +1,65 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  backdrop-filter: blur(4px);
+  font-family: "SF Pro", sans-serif;
+}
+
+.modal {
+  background: #ffffff;
+  width: 90%;
+  max-width: 460px;
+  border-radius: 24px;
+  padding: 38px 34px;
+  text-align: center;
+  animation: fadeIn 0.25s ease;
+  box-shadow: 0px 14px 44px rgba(0, 0, 0, 0.18);
+  font-family: "SF Pro", sans-serif;
+}
+
+.title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.text {
+  font-size: 1.55rem;
+  line-height: 1.55;
+  color: #3c3c3c;
+  font-weight: 400;
+  margin-bottom: 32px;
+}
+
+.button {
+  width: 100%;
+  padding: 16px 0;
+  background: #000;
+  color: #fff;
+  border-radius: 14px;
+  font-size: 1.6rem;
+  cursor: pointer;
+  border: none;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.button:hover {
+  opacity: 0.85;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
