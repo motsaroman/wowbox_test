@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import styles from "./OrderModal.module.css";
 import DeliveryMapPage from "../DeliveryMapPage/DeliveryMapPage";
 
-import OrderSuccessModal from "../OrderSuccessModal/OrderSuccessModal";
-
 // Icons and images
 import editIcon from "../../assets/icons/edit.svg";
 import rightArrow from "../../assets/icons/right-arrow.svg";
@@ -27,7 +25,9 @@ export default function OrderModal({
   onEdit,
   onOpenPrivacyPolicy,
   onOpenPublicOffer,
+  selectedTheme = "techno",
 }) {
+  // Инициализация состояния формы
   const [formData, setFormData] = useState({
     name: "",
     phone: "+7 ",
@@ -40,7 +40,7 @@ export default function OrderModal({
     comment: "",
     deliveryType: "5post",
     pvzCode: "",
-    city: "Москва",
+    city: "Москва", // Значение по умолчанию, будет перезаписано картой
     cityFias: null,
     deliveryPoint: "",
     deliveryAddress: "",
@@ -56,16 +56,19 @@ export default function OrderModal({
 
   const [promoApplied, setPromoApplied] = useState(false);
   const [isMapOpen, setIsMapOpen] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false); // Состояние загрузки
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Цены теперь в стейте, чтобы могли меняться
-  const [deliveryPrice, setDeliveryPrice] = useState(99);
+  // Состояния для ошибок и статусов
+  const [errors, setErrors] = useState({});
+  const [promoStatus, setPromoStatus] = useState(null); // 'success', 'error', null
+  const [promoMessage, setPromoMessage] = useState("");
+
+  const [deliveryPrice, setDeliveryPrice] = useState(0);
   const boxPrice = 4900;
   const promoDiscount = promoApplied ? 500 : 0;
   const totalPrice = boxPrice + deliveryPrice - promoDiscount;
 
-  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
-
+  // Блокировка скролла при открытом модальном окне
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -77,38 +80,68 @@ export default function OrderModal({
     };
   }, [isOpen]);
 
+  // Обработчик ввода текста
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    // Сброс ошибки поля при вводе
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: null }));
+    }
+
+    // Сброс статуса промокода при редактировании
+    if (name === "promoCode") {
+      setPromoStatus(null);
+      setPromoMessage("");
+      setPromoApplied(false);
+    }
   };
 
+  // Обработчик ввода телефона (маска +7)
   const handlePhoneChange = (e, fieldName) => {
     let value = e.target.value;
     if (!value.startsWith("+7 ")) {
       value = "+7 ";
     }
     setFormData((prev) => ({ ...prev, [fieldName]: value }));
-  };
 
-  const handlePromoApply = () => {
-    if (formData.promoCode.toUpperCase() === "ПЕРВЫЙ500") {
-      setPromoApplied(true);
+    if (errors[fieldName]) {
+      setErrors((prev) => ({ ...prev, [fieldName]: null }));
     }
   };
 
+  // Проверка промокода
+  const handlePromoApply = () => {
+    if (!formData.promoCode) return;
+
+    if (formData.promoCode.toUpperCase() === "ПЕРВЫЙ500") {
+      setPromoApplied(true);
+      setPromoStatus("success");
+      setPromoMessage("Промокод успешно применен!");
+    } else {
+      setPromoApplied(false);
+      setPromoStatus("error");
+      setPromoMessage("Промокод не найден или истек");
+    }
+  };
+
+  // Управление картой
   const handleOpenMap = () => {
     setIsMapOpen(true);
+    setErrors((prev) => ({ ...prev, delivery: null }));
   };
 
   const handleCloseMap = () => {
     setIsMapOpen(false);
   };
 
+  // Обработка выбора доставки из карты
   const handleDeliverySelect = (deliveryData) => {
-    // 1. САМОВЫВОЗ
+    // 1. САМОВЫВОЗ (5Post)
     if (deliveryData.mode === "pickup" && deliveryData.point) {
       setFormData((prev) => ({
         ...prev,
@@ -116,54 +149,109 @@ export default function OrderModal({
         deliveryPoint: `${deliveryData.point.address} (${deliveryData.point.name})`,
         pvzCode: deliveryData.point.id,
         cityFias: deliveryData.cityFias,
-        // Очищаем курьерские поля
-        deliveryAddress: "", apartment: "", entrance: "", floor: "", courierComment: ""
+        city: deliveryData.cityName || prev.city, // Обновляем город из карты
+        // Очищаем поля курьера
+        deliveryAddress: "",
+        apartment: "",
+        entrance: "",
+        floor: "",
+        courierComment: "",
       }));
-      
+
       if (deliveryData.point.price) {
-        setDeliveryPrice(deliveryData.point.price + 50); 
+        setDeliveryPrice(deliveryData.point.price + 50);
       }
-    } 
+    }
     // 2. КУРЬЕР
     else if (deliveryData.mode === "courier") {
       setFormData((prev) => ({
         ...prev,
         deliveryType: "courier",
         deliveryAddress: deliveryData.address,
-        // Заполняем поля из карты
+        // Заполняем поля, пришедшие из карты
         apartment: deliveryData.apartment,
         entrance: deliveryData.entrance,
         floor: deliveryData.floor,
         courierComment: deliveryData.comment,
-        
+
         cityFias: deliveryData.cityFias,
-        city: deliveryData.cityName || prev.city
+        city: deliveryData.cityName || prev.city, // Обновляем город из карты
       }));
 
-      // Расчет цены
+      // Используем точную цену из API (которую вернула карта)
       if (deliveryData.price) {
-        setDeliveryPrice(deliveryData.price + 180);
+        setDeliveryPrice(deliveryData.price);
       } else {
-        setDeliveryPrice(350 + 180); // Дефолт
+        setDeliveryPrice(0); // Или дефолт
       }
     }
+    // Сбрасываем ошибку
+    setErrors((prev) => ({ ...prev, delivery: null }));
     setIsMapOpen(false);
   };
 
-  // временный, т.к юкасса еще не одобрила
-  /*const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Валидация формы
+  const validateForm = () => {
+    const newErrors = {};
+    let isValid = true;
 
-    if (!formData.acceptTerms) {
-      alert("Пожалуйста, согласитесь с условиями публичной оферты и конфиденциальности");
-      return;
+    // Контакты
+    if (!formData.name.trim()) {
+      newErrors.name = "Введите ваше имя";
+      isValid = false;
+    }
+    if (!formData.phone || formData.phone.length < 12) {
+      newErrors.phone = "Введите корректный телефон";
+      isValid = false;
+    }
+    if (!formData.email.trim() || !formData.email.includes("@")) {
+      newErrors.email = "Введите корректный email";
+      isValid = false;
     }
 
-    setIsSuccessOpen(true);
-  };*/
+    // Доставка
+    if (formData.deliveryType === "5post") {
+      if (!formData.pvzCode) {
+        newErrors.delivery = "Выберите пункт выдачи на карте";
+        isValid = false;
+      }
+    } else if (formData.deliveryType === "courier") {
+      if (!formData.deliveryAddress) {
+        newErrors.delivery = "Укажите адрес доставки на карте";
+        isValid = false;
+      }
+    }
 
+    // Получатель (если подарок)
+    if (formData.isGift) {
+      if (!formData.recipientName.trim()) {
+        newErrors.recipientName = "Укажите имя получателя";
+        isValid = false;
+      }
+      if (!formData.recipientPhone || formData.recipientPhone.length < 12) {
+        newErrors.recipientPhone = "Укажите телефон получателя";
+        isValid = false;
+      }
+    }
+
+    // Соглашение
+    if (!formData.acceptTerms) {
+      newErrors.terms = "Необходимо согласие";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  // Отправка формы
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      console.log("Validation failed", errors);
+      return;
+    }
 
     if (!formData.acceptTerms) {
       alert(
@@ -176,13 +264,14 @@ export default function OrderModal({
 
     try {
       const personalizationData = {
-        theme: boxPersonalization?.theme || "techno",
+        theme: boxPersonalization?.theme || selectedTheme,
         gender: boxPersonalization?.gender || "не указан",
         recipient: boxPersonalization?.recipient || "не указан",
         restrictions: boxPersonalization?.restrictions || "нет",
         wishes: boxPersonalization?.additionalWishes || "нет",
       };
 
+      // Формируем полный адрес
       let fullCourierAddress = null;
       if (formData.deliveryType === "courier") {
         const parts = [
@@ -192,7 +281,6 @@ export default function OrderModal({
           formData.entrance ? `под. ${formData.entrance}` : "",
           formData.floor ? `эт. ${formData.floor}` : "",
         ];
-
         fullCourierAddress = parts.filter(Boolean).join(", ");
       }
 
@@ -200,35 +288,28 @@ export default function OrderModal({
         boxTheme: personalizationData.theme,
         promoCode: formData.promoCode,
         paymentMethod: formData.paymentMethod,
-
         contactData: {
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
         },
-
         recipientData: formData.isGift
           ? {
               name: formData.recipientName,
               phone: formData.recipientPhone,
             }
           : null,
-
         comments: {
           user: formData.comment,
           courier: formData.courierComment,
           personalization: personalizationData,
         },
-
         deliveryData: {
           type: formData.deliveryType,
-
           pointId: formData.deliveryType === "5post" ? formData.pvzCode : null,
           pointName:
             formData.deliveryType === "5post" ? formData.deliveryPoint : null,
-
           address: fullCourierAddress,
-
           details: {
             city: formData.city,
             cityFias: formData.cityFias,
@@ -243,7 +324,6 @@ export default function OrderModal({
           delivery: deliveryPrice,
           total: totalPrice,
         },
-
         utm: {
           source:
             new URLSearchParams(window.location.search).get("utm_source") ||
@@ -255,30 +335,25 @@ export default function OrderModal({
         },
       };
 
-      const response = await fetch("https://wowbox.market/api/create-payment.php", {
+      // Запрос на бэкенд (PHP)
+      const response = await fetch("/create-payment.php", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const data = await response.json();
 
-      if (data) {
-        setIsSuccessOpen(true);
+      if (response.ok && data.confirmationUrl) {
+        window.location.href = data.confirmationUrl;
+      } else {
+        alert(
+          "Ошибка при создании заказа: " + (data.message || "Попробуйте позже")
+        );
       }
-
-      /*if (response.ok && data.confirmationUrl) {
-         window.location.href = data.confirmationUrl;
-       } else {
-         alert(
-           "Ошибка при создании заказа: " + (data.message || "Попробуйте позже")
-         );
-       }*/
     } catch (error) {
       console.error("Error:", error);
-      /*alert("Произошла ошибка сети. Попробуйте еще раз.");*/
+      alert("Произошла ошибка сети. Попробуйте еще раз.");
     } finally {
       setIsProcessing(false);
     }
@@ -324,7 +399,7 @@ export default function OrderModal({
         </button>
       </div>
 
-      <form className={styles.form} onSubmit={handleSubmit}>
+      <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <div className={styles.leftColumn}>
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Контактные данные</h3>
@@ -339,9 +414,14 @@ export default function OrderModal({
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="Введите имя..."
-                className={styles.input}
+                className={`${styles.input} ${
+                  errors.name ? styles.inputError : ""
+                }`}
                 required
               />
+              {errors.name && (
+                <div className={styles.errorMessage}>{errors.name}</div>
+              )}
             </div>
 
             <div className={styles.inputGroup}>
@@ -354,9 +434,14 @@ export default function OrderModal({
                 value={formData.phone}
                 onChange={(e) => handlePhoneChange(e, "phone")}
                 placeholder="+7 (000) 000-00-00"
-                className={styles.input}
+                className={`${styles.input} ${
+                  errors.phone ? styles.inputError : ""
+                }`}
                 required
               />
+              {errors.phone && (
+                <div className={styles.errorMessage}>{errors.phone}</div>
+              )}
             </div>
 
             <div className={styles.inputGroup}>
@@ -369,9 +454,14 @@ export default function OrderModal({
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="Введите свою почту"
-                className={styles.input}
+                className={`${styles.input} ${
+                  errors.email ? styles.inputError : ""
+                }`}
                 required
               />
+              {errors.email && (
+                <div className={styles.errorMessage}>{errors.email}</div>
+              )}
             </div>
 
             <div className={styles.checkboxRow}>
@@ -434,14 +524,19 @@ export default function OrderModal({
                     value={formData.recipientName}
                     onChange={handleInputChange}
                     placeholder="Введите имя..."
-                    className={styles.input}
+                    className={`${styles.input} ${
+                      errors.recipientName ? styles.inputError : ""
+                    }`}
                   />
+                  {errors.recipientName && (
+                    <div className={styles.errorMessage}>
+                      {errors.recipientName}
+                    </div>
+                  )}
                 </div>
-
                 <div className={styles.inputGroup}>
                   <label className={styles.label}>
-                    Телефон получателя
-                    <span className={styles.required}>*</span>
+                    Телефон получателя<span className={styles.required}>*</span>
                   </label>
                   <input
                     type="tel"
@@ -449,8 +544,15 @@ export default function OrderModal({
                     value={formData.recipientPhone}
                     onChange={(e) => handlePhoneChange(e, "recipientPhone")}
                     placeholder="+7 (000) 000-00-00"
-                    className={styles.input}
+                    className={`${styles.input} ${
+                      errors.recipientPhone ? styles.inputError : ""
+                    }`}
                   />
+                  {errors.recipientPhone && (
+                    <div className={styles.errorMessage}>
+                      {errors.recipientPhone}
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -521,27 +623,32 @@ export default function OrderModal({
               </label>
             </div>
 
-            {/*<div className={styles.inputGroup}>
-              <label className={styles.label}>
-                Город<span className={styles.required}>*</span>
-              </label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleInputChange}
-                className={styles.input}
-                required
-              />
-            </div>*/}
+            {errors.delivery && (
+              <div
+                style={{
+                  color: "#ff4444",
+                  marginBottom: "10px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                ⚠️ {errors.delivery}
+              </div>
+            )}
+
+            {/* ПОЛЕ ГОРОДА УДАЛЕНО ОТСЮДА, КАК ВЫ И ПРОСИЛИ */}
 
             {formData.deliveryType === "5post" ? (
               <div className={styles.inputGroup}>
                 <p className={styles.label}>
                   Пункт выдачи<span className={styles.required}>*</span>
                 </p>
-
-                <div className={styles.select} onClick={handleOpenMap}>
+                <div
+                  className={`${styles.select} ${
+                    errors.delivery ? styles.inputError : ""
+                  }`}
+                  onClick={handleOpenMap}
+                >
                   <p
                     style={{
                       cursor: "pointer",
@@ -561,16 +668,29 @@ export default function OrderModal({
                   <label className={styles.label}>
                     Адрес доставки<span className={styles.required}>*</span>
                   </label>
-                  <div className={styles.input} onClick={handleOpenMap}>
-                    <input
-                      type="text"
-                      name="deliveryAddress"
-                      value={formData.deliveryAddress}
-                      onChange={handleInputChange}
-                      placeholder="Введите адрес..."
-                      className={styles.inputItem}
-                      required
-                    />
+                  <div
+                    className={`${styles.input} ${
+                      errors.delivery ? styles.inputError : ""
+                    }`}
+                    onClick={handleOpenMap}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <div
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        marginRight: "10px",
+                      }}
+                    >
+                      {formData.deliveryAddress ||
+                        "Нажмите, чтобы выбрать адрес..."}
+                    </div>
                     <img src={rightArrow} alt="" />
                   </div>
                 </div>
@@ -607,7 +727,6 @@ export default function OrderModal({
                     />
                   </div>
                 </div>
-
                 <div className={styles.inputGroup}>
                   <input
                     type="text"
@@ -629,7 +748,6 @@ export default function OrderModal({
 
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Оплата</h3>
-
             <div className={styles.paymentOptions}>
               <label
                 className={`${styles.paymentOption} ${
@@ -653,7 +771,6 @@ export default function OrderModal({
                   <span>СБП</span>
                 </div>
               </label>
-
               <label
                 className={`${styles.paymentOption} ${
                   formData.paymentMethod === "sberpay" ? styles.active : ""
@@ -676,7 +793,6 @@ export default function OrderModal({
                   <span>SberPay</span>
                 </div>
               </label>
-
               <label
                 className={`${styles.paymentOption} ${
                   formData.paymentMethod === "tpay" ? styles.active : ""
@@ -699,7 +815,6 @@ export default function OrderModal({
                   <span>T-Pay</span>
                 </div>
               </label>
-
               <label
                 className={`${styles.paymentOption} ${
                   formData.paymentMethod === "card" ? styles.active : ""
@@ -744,25 +859,21 @@ export default function OrderModal({
               <div className={styles.boxImageWrapper}>
                 <div className={styles.boxImage}>
                   <img
-                    src={
-                      boxPersonalization
-                        ? getThemeLogo(boxPersonalization.theme)
-                        : texno1
-                    }
-                    alt={
-                      boxPersonalization
-                        ? getThemeDisplayName(boxPersonalization.theme)
-                        : "Техно бокс"
-                    }
+                    src={getThemeLogo(
+                      boxPersonalization?.theme || selectedTheme
+                    )}
+                    alt={getThemeDisplayName(
+                      boxPersonalization?.theme || selectedTheme
+                    )}
                     className={styles.boxLogo}
                     loading="lazy"
                   />
                 </div>
                 <div className={styles.boxInfo}>
                   <h4 className={styles.boxTitle}>
-                    {boxPersonalization
-                      ? getThemeDisplayName(boxPersonalization.theme)
-                      : "ТЕХНО"}
+                    {getThemeDisplayName(
+                      boxPersonalization?.theme || selectedTheme
+                    )}
                   </h4>
                   <div className={styles.boxDetails}>
                     <p>
@@ -804,17 +915,36 @@ export default function OrderModal({
                   value={formData.promoCode}
                   onChange={handleInputChange}
                   placeholder="Промокод"
-                  className={styles.input}
+                  className={`${styles.input} ${
+                    promoStatus === "success"
+                      ? styles.inputSuccess
+                      : promoStatus === "error"
+                      ? styles.inputError
+                      : ""
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={handlePromoApply}
-                  className={styles.promoButton}
+                  className={`${styles.promoButton} ${
+                    promoApplied ? styles.promoButtonDisabled : ""
+                  }`}
                   disabled={promoApplied}
                 >
                   <img src={rightArrow} alt="Apply" loading="lazy" />
                 </button>
               </div>
+              {promoMessage && (
+                <div
+                  className={
+                    promoStatus === "success"
+                      ? styles.promoMessageSuccess
+                      : styles.promoMessageError
+                  }
+                >
+                  {promoMessage}
+                </div>
+              )}
             </div>
 
             <div className={styles.priceDetails}>
@@ -875,6 +1005,13 @@ export default function OrderModal({
                   </a>
                 </span>
               </label>
+              {errors.terms && (
+                <div
+                  style={{ color: "red", fontSize: "12px", marginLeft: "30px" }}
+                >
+                  {errors.terms}
+                </div>
+              )}
 
               <label className={styles.checkboxLabel2}>
                 <input
@@ -906,6 +1043,7 @@ export default function OrderModal({
           </div>
         </div>
       </form>
+
       {isMapOpen && (
         <DeliveryMapPage
           isOpen={isMapOpen}
@@ -923,10 +1061,6 @@ export default function OrderModal({
           }}
         />
       )}
-      <OrderSuccessModal
-        isOpen={isSuccessOpen}
-        onClose={() => setIsSuccessOpen(false)}
-      />
     </div>
   );
 }

@@ -788,6 +788,49 @@
   transform: translateY(0);
 }
 
+.inputError {
+  border: 1px solid #ff4444 !important;
+  background-color: #fff0f0 !important;
+}
+
+/* Текст ошибки под полем */
+.errorMessage {
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 4px;
+}
+
+/* --- СТАТУСЫ ПРОМОКОДА --- */
+
+.inputSuccess {
+  border: 1px solid #00c853 !important;
+  background-color: #f0fff4 !important;
+  color: #00c853;
+}
+
+.promoMessageSuccess {
+  color: #00c853;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 4px;
+}
+
+.promoMessageError {
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 4px;
+  font-family: "SF Pro", sans-serif;
+}
+
+
+.promoButtonDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
 /* АДАПТАЦИЯ: 1280px - плавное уменьшение для больших планшетов */
 @media (max-width: 1280px) {
   .pageContainer {

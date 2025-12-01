@@ -1,4 +1,3 @@
-// src\components\BoxesCarousel\BoxesCarousel.jsx
 import { useState } from "react";
 
 import selectYourOwnWowboxCardImg1 from "../../assets/images/selectYourOwnWowboxCardImg1.webp";
@@ -18,6 +17,7 @@ export default function BoxesCarousel({ onOrderClick }) {
 
   const carouselData = [
     {
+      id: "techno", // Добавили ID
       image: selectYourOwnWowboxCardImg1,
       title: "ТЕХНО БОКС",
       price: "4900₽",
@@ -30,10 +30,11 @@ export default function BoxesCarousel({ onOrderClick }) {
           "<strong>2-3</strong> новогодняя атмосфера",
         ],
         total: "9-12 товаров",
-        value: "от 4,900₽ до 120,000₽",
+        value: "от 4,900₽ до 100,000₽",
       },
     },
     {
+      id: "cozy", // Добавили ID
       image: selectYourOwnWowboxCardImg2,
       title: "УЮТНЫЙ БОКС",
       price: "4900₽",
@@ -46,10 +47,11 @@ export default function BoxesCarousel({ onOrderClick }) {
           "<strong>2-3</strong> элемента домашнего декора",
         ],
         total: "9-12 товаров",
-        value: "от 4,900₽ до 120,000₽",
+        value: "от 4,900₽ до 100,000₽",
       },
     },
     {
+      id: "party", // Добавили ID
       image: selectYourOwnWowboxCardImg3,
       title: "ПАТИ БОКС",
       price: "4900₽",
@@ -62,10 +64,11 @@ export default function BoxesCarousel({ onOrderClick }) {
           "<strong>3-4</strong> для новогодней тусовки",
         ],
         total: "9-12 товаров",
-        value: "от 4,900₽ до 120,000₽",
+        value: "от 4,900₽ до 100,000₽",
       },
     },
     {
+      id: "sweet", // Добавили ID
       image: selectYourOwnWowboxCardImg4,
       title: "СЛАДКИЙ БОКС",
       price: "4900₽",
@@ -78,7 +81,7 @@ export default function BoxesCarousel({ onOrderClick }) {
           "<strong>2-3</strong> предмета чтобы не слиплось",
         ],
         total: "9-12 товаров",
-        value: "от 4,900₽ до 120,000₽",
+        value: "от 4,900₽ до 100,000₽",
       },
     },
   ];
@@ -224,7 +227,7 @@ export default function BoxesCarousel({ onOrderClick }) {
             <div className={styles.boxesCarouselCardWrapper}>
               <button
                 className={styles.boxesCarouselCardButton}
-                onClick={onOrderClick}
+                onClick={() => onOrderClick(currentCard.id)}
               >
                 Заказать
               </button>

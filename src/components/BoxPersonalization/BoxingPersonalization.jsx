@@ -1,23 +1,17 @@
 import { useState, useEffect } from "react";
-
 import texno1 from "../../assets/images/texno1.webp";
 import texno2 from "../../assets/images/texno2.webp";
 import texno3 from "../../assets/images/texno3.webp";
 import texno4 from "../../assets/images/texno4.webp";
-
 import woman from "../../assets/images/womenIcon.webp";
 import man from "../../assets/images/manIcon.webp";
 import other from "../../assets/images/other.webp";
-
 import noParfume from "../../assets/images/noParfume.webp";
 import noCosmetics from "../../assets/images/no-cosmetic.webp";
 import noCandy from "../../assets/images/noCandy.webp";
-
 import weFoundYourSuperWowboxStar from "../../assets/icons/weFoundYourSuperWowboxStar.svg";
 import weFoundYourSuperWowboxTwoHeart from "../../assets/icons/weFoundYourSuperWowboxTwoHeart.svg";
-
 import toRight from "../../assets/icons/toRight.svg";
-
 import styles from "./BoxingPersonalization.module.css";
 
 const BoxPersonalization = ({
@@ -25,19 +19,11 @@ const BoxPersonalization = ({
   onClose,
   onOrderClick,
   savedData,
-  startStep = 1,
+  currentTheme,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
-
-  // сбрасываем шаг при каждом открытии модалки
-  useEffect(() => {
-    if (isOpen) {
-      setCurrentStep(startStep || 1);
-    }
-  }, [isOpen, startStep]);
-  
   const [selectedTheme, setSelectedTheme] = useState(
-    savedData?.theme || "techno"
+    savedData?.theme || currentTheme || "techno"
   );
   const [formData, setFormData] = useState({
     recipient: savedData?.recipient || "",
@@ -54,55 +40,33 @@ const BoxPersonalization = ({
     noCandy: savedData?.restrictions?.includes("Без сладкого") || false,
   });
 
-  const restrictions = [
-    { id: "no-scents", label: "Без ароматов (свечи, парфюм)", icon: "🕯️" },
-    { id: "no-cosmetics", label: "Без косметики", icon: "💄" },
-    { id: "no-sweets", label: "Без сладкого", icon: "🍭" },
-  ];
+  // Эффект для обновления темы при открытии модалки
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedTheme(savedData?.theme || currentTheme || "techno");
+    }
+  }, [isOpen, currentTheme, savedData]);
 
   const handleNext = () => {
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
-    }
+    if (currentStep < 4) setCurrentStep(currentStep + 1);
+  };
+  const handleBack = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
   const handleRecipientSelect = (recipient) => {
     setFormData({ ...formData, recipient });
     handleNext();
   };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  // const handleRecipientSelect = (value) => {
-  //   setFormData({ ...formData, recipient: value });
-  // };
-
   const handleGenderSelect = (value) => {
     setFormData({ ...formData, gender: value });
   };
-
   const handleThemeSelect = (theme) => {
     setSelectedTheme(theme);
   };
 
-  // const handleRestrictionToggle = (id) => {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     restrictions: prev.restrictions.includes(id)
-  //       ? prev.restrictions.filter((r) => r !== id)
-  //       : [...prev.restrictions, id],
-  //   }));
-  // };
-
   const toggleCheckbox = (key) => {
-    setCheckboxes((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    setCheckboxes((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleSave = () => {
@@ -118,24 +82,19 @@ const BoxPersonalization = ({
       restrictions: restrictions.join(", ") || "Нет",
       additionalWishes: formData.additionalWishes || "Нет",
     };
-
-    console.log("Данные персонализации:", personalizationData);
-    if (onOrderClick) {
-      onOrderClick(personalizationData);
-    }
+    if (onOrderClick) onOrderClick(personalizationData);
   };
 
   const handleSkip = () => {
-    console.log("Персонализация пропущена");
+    // При пропуске мы всё равно должны вернуть выбранную тему!
+    // Иначе заказ уйдет с дефолтным (техно)
     if (onOrderClick) {
-      onOrderClick();
+      onOrderClick({ theme: selectedTheme });
     }
   };
 
   const handleClose = () => {
-    if (onClose) {
-      onClose();
-    }
+    if (onClose) onClose();
   };
 
   if (!isOpen) return null;
@@ -146,14 +105,13 @@ const BoxPersonalization = ({
         <button className={styles.closeButton} onClick={handleClose}>
           ✕
         </button>
-
         <div className={styles.header}>
           <h1 className={styles.title}>Персонализация бокса</h1>
-
           <div className={styles.themesRow}>
             <div
-              className={`${styles.themeCard} ${selectedTheme === "techno" ? styles.themeCardActive : ""
-                }`}
+              className={`${styles.themeCard} ${
+                selectedTheme === "techno" ? styles.themeCardActive : ""
+              }`}
               onClick={() => handleThemeSelect("techno")}
             >
               <img
@@ -165,8 +123,9 @@ const BoxPersonalization = ({
               <div className={styles.themeLabel}>ТЕХНО</div>
             </div>
             <div
-              className={`${styles.themeCard} ${selectedTheme === "cozy" ? styles.themeCardActive : ""
-                }`}
+              className={`${styles.themeCard} ${
+                selectedTheme === "cozy" ? styles.themeCardActive : ""
+              }`}
               onClick={() => handleThemeSelect("cozy")}
             >
               <img
@@ -176,10 +135,11 @@ const BoxPersonalization = ({
                 loading="lazy"
               />
               <div className={styles.themeLabel}>УЮТНЫЙ</div>
-            </div>{" "}
+            </div>
             <div
-              className={`${styles.themeCard} ${selectedTheme === "party" ? styles.themeCardActive : ""
-                }`}
+              className={`${styles.themeCard} ${
+                selectedTheme === "party" ? styles.themeCardActive : ""
+              }`}
               onClick={() => handleThemeSelect("party")}
             >
               <img
@@ -189,10 +149,11 @@ const BoxPersonalization = ({
                 loading="lazy"
               />
               <div className={styles.themeLabel}>ПАТИ</div>
-            </div>{" "}
+            </div>
             <div
-              className={`${styles.themeCard} ${selectedTheme === "sweet" ? styles.themeCardActive : ""
-                }`}
+              className={`${styles.themeCard} ${
+                selectedTheme === "sweet" ? styles.themeCardActive : ""
+              }`}
               onClick={() => handleThemeSelect("sweet")}
             >
               <img
@@ -208,7 +169,6 @@ const BoxPersonalization = ({
 
         <div className={styles.content}>
           <div className={styles.stepIndicator}>ВОПРОС {currentStep}/4</div>
-
           {currentStep === 1 && (
             <>
               <h2 className={styles.question}>Для кого подарок?</h2>
@@ -220,7 +180,7 @@ const BoxPersonalization = ({
                   <span className={styles.optionIcon}>
                     <img
                       src={weFoundYourSuperWowboxStar}
-                      alt="weFoundYourSuperWowboxStar"
+                      alt=""
                       loading="lazy"
                     />
                   </span>
@@ -231,10 +191,7 @@ const BoxPersonalization = ({
                   onClick={() => handleRecipientSelect("Для другого человека")}
                 >
                   <span className={styles.optionIcon}>
-                    <img
-                      src={weFoundYourSuperWowboxTwoHeart}
-                      alt="weFoundYourSuperWowboxTwoHeart"
-                    />
+                    <img src={weFoundYourSuperWowboxTwoHeart} alt="" />
                   </span>
                   <span className={styles.optionText}>
                     Для другого человека
@@ -243,99 +200,106 @@ const BoxPersonalization = ({
               </div>
             </>
           )}
-
           {currentStep === 2 && (
             <>
               <h2 className={styles.question}>Пол получателя</h2>
               <div className={styles.optionsList}>
                 <button
-                  className={`${styles.optionButton} ${formData.gender === "female"
-                    ? styles.optionButtonActive
-                    : ""
-                    }`}
+                  className={`${styles.optionButton} ${
+                    formData.gender === "female"
+                      ? styles.optionButtonActive
+                      : ""
+                  }`}
                   onClick={() => handleGenderSelect("female")}
                 >
                   <span className={styles.optionIcon}>
-                    <img src={woman} alt="woman" loading="lazy" />
+                    <img src={woman} alt="" loading="lazy" />
                   </span>
                   <span className={styles.optionText}>Женщина</span>
                 </button>
                 <button
-                  className={`${styles.optionButton} ${formData.gender === "male" ? styles.optionButtonActive : ""
-                    }`}
+                  className={`${styles.optionButton} ${
+                    formData.gender === "male" ? styles.optionButtonActive : ""
+                  }`}
                   onClick={() => handleGenderSelect("male")}
                 >
                   <span className={styles.optionIcon}>
-                    <img src={man} alt="man" loading="lazy" />
+                    <img src={man} alt="" loading="lazy" />
                   </span>
                   <span className={styles.optionText}>Мужчина</span>
                 </button>
                 <button
-                  className={`${styles.optionButton} ${formData.gender === "not-important"
-                    ? styles.optionButtonActive
-                    : ""
-                    }`}
+                  className={`${styles.optionButton} ${
+                    formData.gender === "not-important"
+                      ? styles.optionButtonActive
+                      : ""
+                  }`}
                   onClick={() => handleGenderSelect("not-important")}
                 >
                   <span className={styles.optionIcon}>
-                    <img src={other} alt="other" loading="lazy" />
+                    <img src={other} alt="" loading="lazy" />
                   </span>
                   <span className={styles.optionText}>Не важно</span>
                 </button>
               </div>
             </>
           )}
-
           {currentStep === 3 && (
             <>
               <h2 className={styles.question}>Есть ли ограничения?</h2>
               <div className={styles.optionsList}>
                 <button
-                  className={`${styles.optionButton} ${checkboxes.noParfume ? styles.optionButtonChecked : ""
-                    }`}
+                  className={`${styles.optionButton} ${
+                    checkboxes.noParfume ? styles.optionButtonChecked : ""
+                  }`}
                   onClick={() => toggleCheckbox("noParfume")}
                 >
                   <span className={styles.optionIcon}>
-                    <img src={noParfume} alt="noParfume" loading="lazy" />
+                    <img src={noParfume} alt="" loading="lazy" />
                   </span>
                   <span className={styles.optionText}>
                     Без ароматов (свечи, парфюм)
                   </span>
                   <span
-                    className={`${styles.checkmark} ${checkboxes.noParfume ? styles.checked : ""
-                      }`}
+                    className={`${styles.checkmark} ${
+                      checkboxes.noParfume ? styles.checked : ""
+                    }`}
                   >
                     ✓
                   </span>
                 </button>
                 <button
-                  className={`${styles.optionButton} ${checkboxes.noCosmetics ? styles.optionButtonChecked : ""
-                    }`}
+                  className={`${styles.optionButton} ${
+                    checkboxes.noCosmetics ? styles.optionButtonChecked : ""
+                  }`}
                   onClick={() => toggleCheckbox("noCosmetics")}
                 >
                   <span className={styles.optionIcon}>
-                    <img src={noCosmetics} alt="noCosmetics" loading="lazy" />
+                    <img src={noCosmetics} alt="" loading="lazy" />
                   </span>
                   <span className={styles.optionText}>Без косметики</span>
                   <span
-                    className={`${styles.checkmark} ${checkboxes.noCosmetics ? styles.checked : ""
-                      }`}
+                    className={`${styles.checkmark} ${
+                      checkboxes.noCosmetics ? styles.checked : ""
+                    }`}
                   >
                     ✓
                   </span>
                 </button>
                 <button
-                  className={`${styles.optionButton} ${checkboxes.noCandy ? styles.optionButtonChecked : ""
-                    }`}
+                  className={`${styles.optionButton} ${
+                    checkboxes.noCandy ? styles.optionButtonChecked : ""
+                  }`}
                   onClick={() => toggleCheckbox("noCandy")}
                 >
                   <span className={styles.optionIcon}>
-                    <img src={noCandy} alt="noCandy" loading="lazy" />
+                    <img src={noCandy} alt="" loading="lazy" />
                   </span>
                   <span className={styles.optionText}>Без сладкого</span>
                   <span
-                    className={`${styles.checkmark} ${checkboxes.noCandy ? styles.checked : ""
-                      }`}
+                    className={`${styles.checkmark} ${
+                      checkboxes.noCandy ? styles.checked : ""
+                    }`}
                   >
                     ✓
                   </span>
@@ -343,7 +307,6 @@ const BoxPersonalization = ({
               </div>
             </>
           )}
-
           {currentStep === 4 && (
             <>
               <h2 className={styles.question}>Дополнительные пожелания</h2>

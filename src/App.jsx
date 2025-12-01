@@ -89,7 +89,7 @@ export default function App() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("sbp");
   const [boxPersonalization, setBoxPersonalization] = useState(null);
   const [quizAnswers, setQuizAnswers] = useState({});
-
+  const [selectedTheme, setSelectedTheme] = useState("techno");
   const [timeLeft, setTimeLeft] = useState({
     days: 15,
     hours: 21,
@@ -326,36 +326,26 @@ export default function App() {
 
   // src/App.jsx
   const getRecommendedBox = () => {
-    // 2-й индекс = 3-й вопрос: "Что больше всего нравится?"
-    const styleAnswer = quizAnswers[2];
-
+    const styleAnswer = quizAnswers[2]; // Исправлено: вопрос про стиль (Что больше всего нравится?) под индексом 2
     const styleMap = {
-      practical: "techno",  // Гаджеты и техно
-      emotions: "cozy",     // Уют и комфорт
-      quality: "party",     // Веселье и игры
-      surprise: "sweet",    // Сладости и вкусняшки
+      practical: "techno",
+      emotions: "cozy",
+      quality: "party",
+      surprise: "sweet",
     };
-
     const recommendedBoxId = styleMap[styleAnswer] || "techno";
     return boxData.find((box) => box.id === recommendedBoxId) || boxData[0];
   };
 
-
   const handleQuizAnswer = (questionIndex, answerId) => {
-    setQuizAnswers((prev) => ({
-      ...prev,
-      [questionIndex]: answerId,
-    }));
-
+    setQuizAnswers((prev) => ({ ...prev, [questionIndex]: answerId }));
     setTimeout(() => {
       setCurrentQuestion(questionIndex + 1);
     }, 300);
   };
 
   const handleQuizBack = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
-    }
+    if (currentQuestion > 0) setCurrentQuestion(currentQuestion - 1);
   };
 
   const handleQuizReset = () => {
@@ -364,42 +354,19 @@ export default function App() {
   };
 
   const handleQuizOrder = () => {
-    // 3-й вопрос (индекс 3) – "Что важнее всего в подарке?"
-    const importanceAnswerId = quizAnswers[3];
-    const importanceQuestion = quizData[3];
-
-    const importanceOption = importanceQuestion.options.find(
-      (o) => o.id === importanceAnswerId
-    );
-
-    const importanceText = importanceOption
-      ? `Что важнее в подарке: ${importanceOption.title}`
-      : "";
-
-    // прокидываем это как комментарий в персонализацию
-    setBoxPersonalization((prev) => ({
-      ...(prev || {}),
-      additionalWishes: importanceText,
-    }));
-
-    // из квиза начинаем с шага 3 — "Есть ли ограничения?"
-    setPersonalizationStartStep(3);
+    const box = getRecommendedBox();
+    setSelectedTheme(box.id);
     setIsPersonalizationOpen(true);
   };
 
-
   const scrollToWowbox = () => {
     const element = document.querySelector(`.${styles.selectYourOwnWowbox}`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const scrollToSection = (sectionClass) => {
     const element = document.querySelector(`.${sectionClass}`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const faqData = [
@@ -451,216 +418,759 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/privacy" element={<PrivacyPolicy isOpen={true} onClose={() => navigate('/')} />} />
-      <Route path="/public-offer" element={<PublicOffer isOpen={true} onClose={() => navigate('/')} />} />
-      <Route path="/" element={
-        <>
-          <PromoPopup />
-          <TelegramChat />
-          <header>
-            <div className={styles.navbar}>
-              <a href="#">
-                <img src={logo} alt="Logo" loading="lazy" />
-              </a>
-              <div className={styles.navbarNavigation}>
-                <div className={styles.navbarLinks}>
-                  <div className={styles.navbarLink}>
+      <Route
+        path="/privacy"
+        element={<PrivacyPolicy isOpen={true} onClose={() => navigate("/")} />}
+      />
+      <Route
+        path="/public-offer"
+        element={<PublicOffer isOpen={true} onClose={() => navigate("/")} />}
+      />
+      <Route
+        path="/"
+        element={
+          <>
+            <PromoPopup />
+            <TelegramChat />
+            <header>
+              <div className={styles.navbar}>
+                <a href="#">
+                  <img src={logo} alt="Logo" loading="lazy" />
+                </a>
+                <div className={styles.navbarNavigation}>
+                  <div className={styles.navbarLinks}>
+                    <div className={styles.navbarLink}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          scrollToSection(styles.hero);
+                        }}
+                      >
+                        Главная
+                      </a>
+                      <div></div>
+                    </div>
+                    <div className={styles.navbarLink}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          scrollToSection(styles.selectYourOwnWowbox);
+                        }}
+                      >
+                        Каталог
+                      </a>
+                      <div></div>
+                    </div>
+                    <div className={styles.navbarLink}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          scrollToSection(styles.weFoundYourSuperWowbox);
+                        }}
+                      >
+                        Подобрать WOWBOX
+                      </a>
+                      <div></div>
+                    </div>
+                    <div className={styles.navbarLink}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          scrollToSection(styles.howToWorkWowBox);
+                        }}
+                      >
+                        Как это работает
+                      </a>
+                      <div></div>
+                    </div>
+                    <div className={styles.navbarLink}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          scrollToSection(styles.quality);
+                        }}
+                      >
+                        Качество
+                      </a>
+                      <div></div>
+                    </div>
+                    <div className={styles.navbarLink}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          scrollToSection(styles.delivery);
+                        }}
+                      >
+                        Гарантии и доставка
+                      </a>
+                      <div></div>
+                    </div>
+                    <div className={styles.navbarLink}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          scrollToSection(styles.faq);
+                        }}
+                      >
+                        Вопросы и ответы
+                      </a>
+                      <div></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Burger Button */}
+                <button
+                  className={`${styles.burgerButton} ${
+                    isMobileMenuOpen ? styles.active : ""
+                  }`}
+                  onClick={toggleMobileMenu}
+                  aria-label="Menu"
+                >
+                  <span className={styles.burgerLine}></span>
+                  <span className={styles.burgerLine}></span>
+                  <span className={styles.burgerLine}></span>
+                </button>
+              </div>
+
+              {/* Mobile Overlay */}
+              <div
+                className={`${styles.mobileOverlay} ${
+                  isMobileMenuOpen ? styles.active : ""
+                }`}
+                onClick={closeMobileMenu}
+              ></div>
+
+              {/* Mobile Navigation */}
+              <nav
+                className={`${styles.mobileNav} ${
+                  isMobileMenuOpen ? styles.active : ""
+                }`}
+              >
+                <div className={styles.mobileNavLinks}>
+                  <div className={styles.mobileNavLink}>
                     <a
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
+                        closeMobileMenu();
                         scrollToSection(styles.hero);
                       }}
                     >
                       Главная
                     </a>
-                    <div></div>
                   </div>
-                  <div className={styles.navbarLink}>
+                  <div className={styles.mobileNavHr}></div>
+                  <div className={styles.mobileNavLink}>
                     <a
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
+                        closeMobileMenu();
                         scrollToSection(styles.selectYourOwnWowbox);
                       }}
                     >
                       Каталог
                     </a>
-                    <div></div>
                   </div>
-                  <div className={styles.navbarLink}>
+                  <div className={styles.mobileNavHr}></div>
+                  <div className={styles.mobileNavLink}>
                     <a
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
+                        closeMobileMenu();
                         scrollToSection(styles.weFoundYourSuperWowbox);
                       }}
                     >
                       Подобрать WOWBOX
                     </a>
-                    <div></div>
                   </div>
-                  <div className={styles.navbarLink}>
+                  <div className={styles.mobileNavHr}></div>
+                  <div className={styles.mobileNavLink}>
                     <a
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
+                        closeMobileMenu();
                         scrollToSection(styles.howToWorkWowBox);
                       }}
                     >
                       Как это работает
                     </a>
-                    <div></div>
                   </div>
-                  <div className={styles.navbarLink}>
+                  <div className={styles.mobileNavHr}></div>
+                  <div className={styles.mobileNavLink}>
                     <a
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
+                        closeMobileMenu();
                         scrollToSection(styles.quality);
                       }}
                     >
                       Качество
                     </a>
-                    <div></div>
                   </div>
-                  <div className={styles.navbarLink}>
+                  <div className={styles.mobileNavHr}></div>
+                  <div className={styles.mobileNavLink}>
                     <a
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
+                        closeMobileMenu();
                         scrollToSection(styles.delivery);
                       }}
                     >
                       Гарантии и доставка
                     </a>
-                    <div></div>
                   </div>
-                  <div className={styles.navbarLink}>
+                  <div className={styles.mobileNavHr}></div>
+                  <div className={styles.mobileNavLink}>
                     <a
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
+                        closeMobileMenu();
                         scrollToSection(styles.faq);
                       }}
                     >
                       Вопросы и ответы
                     </a>
-                    <div></div>
+                  </div>
+                </div>
+              </nav>
+
+              <div className={styles.hero}>
+                <div className={styles.heroTitle}>
+                  <h1>Участвуй в новогодней акции!</h1>
+                  <p>Собирай очки в игре и получай гарантированные подарки!</p>
+                </div>
+                <div className={styles.discount}>
+                  <div className={styles.discountOverTime}>
+                    <div>
+                      <span>{timeLeft.days}</span>
+                      <span>дней</span>
+                    </div>
+                    <div>
+                      <span>{timeLeft.hours}</span>
+                      <span>часа</span>
+                    </div>{" "}
+                    <div>
+                      <span>{timeLeft.minutes}</span>
+                      <span>минута</span>
+                    </div>
+                  </div>
+                  <div className={styles.discountOverTimeButtonWrapper}>
+                    <button className={styles.discountOverTimeButton}>
+                      Играть
+                    </button>
+                    <img src={santahat} alt="Santa Claus Hat" loading="lazy" />
+                  </div>
+                </div>
+                <div className={styles.heroLogo}>
+                  <img src={logoBig} alt="Hero Logo" loading="lazy" />
+                  <p>лучший способ порадовать себя и близких</p>
+                </div>
+                <div className={styles.heroBonus}>
+                  <div className={styles.heroBonusPlus}>
+                    <div className={styles.heroBonusWrapper}>
+                      <div
+                        className={`${styles.heroBonusItem} ${styles.heroBonusItem}`}
+                      >
+                        <p>УНИКАЛЬНАЯ УПАКОВКА</p>
+                      </div>
+                    </div>
+                    <img src={heroBonusSticker1} alt="sticker" loading="lazy" />
+                  </div>
+                  <div className={styles.heroBonusWrapper}>
+                    <div
+                      className={`${styles.heroBonusItem} ${styles.heroBonusItem2}`}
+                    >
+                      <p>НАПОЛНЕНИЕ ОТ 4900₽</p>
+                    </div>
+                  </div>
+                  <div className={styles.heroBonusWrapper}>
+                    <div
+                      className={`${styles.heroBonusItem} ${styles.heroBonusItem3}`}
+                    >
+                      <p>ЭФФЕКТ СЮРПРИЗА</p>
+                    </div>
+                  </div>
+                  <div className={styles.heroBonusPlus2}>
+                    <div className={styles.heroBonusWrapper}>
+                      <div
+                        className={`${styles.heroBonusItem} ${styles.heroBonusItem4}`}
+                      >
+                        <p>ТОЛЬКО ОРИГИНАЛ</p>
+                      </div>
+                    </div>
+                    <img src={heroBonusSticker2} alt="sticker" loading="lazy" />
+                  </div>
+                </div>
+                <div className={styles.heroSelectButtonWrapper}>
+                  <button
+                    className={styles.heroSelectButton}
+                    onClick={scrollToWowbox}
+                  >
+                    Выбрать бокс за 4900₽
+                  </button>
+                </div>
+              </div>
+            </header>
+            <main>
+              <div className={styles.selectYourOwnWowbox}>
+                <h1>Выберите свой WOWBOX</h1>
+                <BoxesCarousel
+                  onOrderClick={(themeId) => {
+                    setSelectedTheme(themeId);
+                    setIsPersonalizationOpen(true);
+                  }}
+                />
+              </div>
+              <div className={styles.weFoundYourSuperWowbox}>
+                <div className={styles.quizContainer}>
+                  <h2>
+                    Найдём ваш идеальный
+                    <br />
+                    WOWBOX за 30 секунд
+                  </h2>
+                  <p className={styles.quizSubtitle}>
+                    Ответьте на 4 вопроса - мы подберём бокс,
+                    <br />
+                    который точно вам подойдёт
+                  </p>
+
+                  <div className={styles.quizBox}>
+                    <div className={styles.quizHeader}>
+                      {/* Hide progress dots on results page (step 5) */}
+                      {currentQuestion < quizData.length && (
+                        <div className={styles.progressDots}>
+                          {quizData.map((_, index) => (
+                            <span
+                              key={index}
+                              className={
+                                currentQuestion === index ? styles.active : ""
+                              }
+                            ></span>
+                          ))}
+                        </div>
+                      )}
+
+                      {currentQuestion < quizData.length ? (
+                        <>
+                          <p className={styles.questionLabel}>
+                            ВОПРОС {currentQuestion + 1}/{quizData.length}:
+                          </p>
+                          <h3 className={styles.questionTitle}>
+                            {quizData[currentQuestion].question}
+                          </h3>
+                        </>
+                      ) : (
+                        <h3 className={styles.resultsTitle}>
+                          Ваш идеальный бокс:
+                        </h3>
+                      )}
+                    </div>
+
+                    {/* Quiz Questions or Results Page */}
+                    {currentQuestion < quizData.length ? (
+                      <>
+                        {/* Quiz Options */}
+                        <div className={styles.quizOptions}>
+                          {quizData[currentQuestion].options.map((option) => (
+                            <div
+                              key={option.id}
+                              className={styles.quizOption}
+                              onClick={() =>
+                                handleQuizAnswer(currentQuestion, option.id)
+                              }
+                            >
+                              <img
+                                className={styles.optionIcon}
+                                src={option.icon}
+                                alt={option.title}
+                                loading="lazy"
+                              />
+                              <div className={styles.optionText}>
+                                <p className={styles.optionTitle}>
+                                  {option.title}
+                                </p>
+                                {option.subtitle && (
+                                  <p className={styles.optionSubtitle}>
+                                    {option.subtitle}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Quiz Navigation - Back Button */}
+                        <div className={styles.quizActions}>
+                          {currentQuestion > 0 && (
+                            <button
+                              className={styles.quizBackButton}
+                              onClick={handleQuizBack}
+                            >
+                              <img src={toRight} alt="toRight" loading="lazy" />
+                              <span>Назад</span>
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Results Page */}
+                        <div className={styles.quizResults}>
+                          <div className={styles.recommendedBox}>
+                            <img
+                              src={getRecommendedBox().image}
+                              alt={getRecommendedBox().title}
+                              className={styles.boxImage}
+                              loading="lazy"
+                            />
+                            <h2 className={styles.boxTitle}>
+                              {getRecommendedBox().title}
+                            </h2>
+                            <p className={styles.boxPrice}>
+                              {getRecommendedBox().price}
+                            </p>
+
+                            <div className={styles.boxDetails}>
+                              <h4 className={styles.detailsTitle}>
+                                Что будет внутри:
+                              </h4>
+                              <ul className={styles.detailsList}>
+                                {getRecommendedBox().details.map(
+                                  (detail, index) => (
+                                    <li key={index}>{detail}</li>
+                                  )
+                                )}
+                              </ul>
+                              <div className={styles.boxSummary}>
+                                <p>
+                                  <strong>Всего:</strong>{" "}
+                                  {getRecommendedBox().total}
+                                </p>
+                                <p>
+                                  <strong>Розничная стоимость:</strong>{" "}
+                                  {getRecommendedBox().value}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Results Page Buttons */}
+                        <div className={styles.quizActions}>
+                          <div className={styles.quizFinalButtons}>
+                            <button
+                              className={styles.quizResetButton}
+                              onClick={handleQuizReset}
+                            >
+                              Пройти заново
+                            </button>
+                            <button
+                              className={styles.quizOrderButton}
+                              onClick={handleQuizOrder}
+                            >
+                              Заказать
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
+              <div className={styles.howToWorkWowBox}>
+                <h1>Как работает WOWBOX?</h1>
+                <div className={styles.howToWorkWowBoxMap}>
+                  <div className={styles.howToWorkWowBoxMapBox}>
+                    <img src={mapRaodImg1} alt="mapRaodImg1" loading="lazy" />.
+                    <div className={styles.howToWorkWowBoxMapBoxBody}>
+                      <img
+                        src={number1}
+                        alt="number1"
+                        className={styles.boxBodyNumber}
+                        loading="lazy"
+                      />
+                      <p>Выбираете тип бокса</p>
+                      <p>Пати бокс, Уютный бокс, Техно бокс, Сладкий бокс</p>
+                      <p>Тип бокса влияет на стиль, но не на ценность</p>
+                    </div>
+                  </div>
+                  <div className={styles.howToWorkWowBoxMapBox}>
+                    <img src={mapRaodImg2} alt="mapRaodImg2" loading="lazy" />.
+                    <div className={styles.howToWorkWowBoxMapBoxBody}>
+                      <img
+                        src={number2}
+                        alt="number1"
+                        className={styles.boxBodyNumber}
+                        loading="lazy"
+                      />
+                      <p>Мы собираем ваш бокс</p>
+                      <p>
+                        9–12 оригинальных премиум-товаровНаполнение от 4900 ₽ до
+                        120 000 ₽
+                      </p>
+                      <p>
+                        Каждый бокс собирается вручную и проходит проверку
+                        качества
+                      </p>
+                    </div>
+                  </div>
+                  <div className={styles.howToWorkWowBoxMapBox}>
+                    <img src={mapRaodImg3} alt="mapRaodImg3" loading="lazy" />.
+                    <div className={styles.howToWorkWowBoxMapBoxBody}>
+                      <img
+                        src={number3}
+                        alt="number3"
+                        className={styles.boxBodyNumber}
+                        loading="lazy"
+                      />
+                      <p>Получаете и наслаждаетесь</p>
+                      <p>Быстрая и безопасная доставка Отслеживание 24/7</p>
+                      <p>Доставка по всей России без задержек</p>
+                    </div>
+                  </div>
+                  <div className={styles.howToWorkWowBoxMapBox}>
+                    <img src={mapRaodImg4} alt="mapRaodImg4" loading="lazy" />.
+                    <div className={styles.howToWorkWowBoxMapBoxBody}>
+                      <img
+                        src={number4}
+                        alt="number4"
+                        className={styles.boxBodyNumber}
+                        loading="lazy"
+                      />
+                      <p>Наслаждение не только от распаковки</p>
+                      <p>Контроль качества даже после покупки</p>
+                      <p>Мы остаёмся на связи даже после получения заказа</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.quality}>
+                <h1>Наш подход к качеству</h1>
+                <div className={styles.qualityBoxes}>
+                  <div className={styles.qualityBox}>
+                    <h3>Качество с первого клика</h3>
+                    <p>
+                      Мы читаем ваши комментарии, учитываем ограничения и
+                      подбираем товары, которые подойдут именно вам
+                    </p>
 
-              {/* Burger Button */}
-              <button
-                className={`${styles.burgerButton} ${isMobileMenuOpen ? styles.active : ""
-                  }`}
-                onClick={toggleMobileMenu}
-                aria-label="Menu"
-              >
-                <span className={styles.burgerLine}></span>
-                <span className={styles.burgerLine}></span>
-                <span className={styles.burgerLine}></span>
-              </button>
-            </div>
+                    <p>Каждый бокс уникален</p>
+                  </div>
+                  <div className={`${styles.qualityBox} ${styles.qualityBox2}`}>
+                    <h3>Двойная проверка качества</h3>
+                    <p>
+                      Мы исключаем товары с браком, следим за состоянием
+                      упаковки, проверяем комплектацию
+                    </p>
 
-            {/* Mobile Overlay */}
-            <div
-              className={`${styles.mobileOverlay} ${isMobileMenuOpen ? styles.active : ""
-                }`}
-              onClick={closeMobileMenu}
-            ></div>
+                    <p>Лучше пусть мы перепроверим, чем вы разочаруетесь</p>
+                  </div>
+                  <div className={`${styles.qualityBox} ${styles.qualityBox3}`}>
+                    <h3>Забота во время ожидания</h3>
+                    <p>
+                      В течении 24 часов мы вышлем вам трек-номер - вы сможете
+                      следить где ваш бокс
+                    </p>
 
-            {/* Mobile Navigation */}
-            <nav
-              className={`${styles.mobileNav} ${isMobileMenuOpen ? styles.active : ""
-                }`}
-            >
-              <div className={styles.mobileNavLinks}>
-                <div className={styles.mobileNavLink}>
+                    <p>
+                      Собрали → Упаковали → Передали курьеру → В пути →
+                      Доставлено
+                    </p>
+                  </div>
+
+                  <div className={`${styles.qualityBox} ${styles.qualityBox4}`}>
+                    <h3>Упаковка - как ритуал</h3>
+                    <p>
+                      Мы упаковываем каждый бокс вручную - красиво, чисто,
+                      аккуратно. Еще до открытия вы прочувствуете "Тот самый
+                      момент"
+                    </p>
+
+                    <p>Подарок будет особенный именно для Вас</p>
+                  </div>
+
+                  <div className={`${styles.qualityBox} ${styles.qualityBox5}`}>
+                    <h3>Поддержка, которая действительно помогает</h3>
+                    <p>
+                      Если что-то пойдёт не так - мы решаем быстро,
+                      по-человечески, без споров. Без формальных отписок. Мы на
+                      вашей стороне
+                    </p>
+
+                    <p>Главная цель — чтобы вы остались счастливы</p>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.delivery}>
+                <h1>Гарантии и доставка</h1>
+                <div className={styles.deliveryBoxes}>
+                  <div className={styles.deliveryBox}>
+                    <img src={delivery1} alt="delivery1 " loading="lazy" />
+                    <h1>Гарантия качества</h1>
+                    <div className={styles.deliveryBoxDesc}>
+                      <div className={styles.deliveryBoxDescItem}>
+                        <img src={saved} alt="saved" loading="lazy" />
+                        <p>Розничная стоимость не менее 4,900₽</p>
+                      </div>{" "}
+                      <div className={styles.deliveryBoxDescItem}>
+                        <img src={rubl} alt="rubl" loading="lazy" />
+                        <p>Все товары новые</p>
+                      </div>
+                      <div className={styles.deliveryBoxDescItem}>
+                        <img src={check} alt="check" loading="lazy" />
+                        <p>Только оригинальные товары</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.deliveryBox}>
+                    <img src={delivery2} alt="delivery2 " loading="lazy" />
+                    <h1>Гарантия поддержки</h1>
+                    <div className={styles.deliveryBoxDesc}>
+                      <div className={styles.deliveryBoxDescItem}>
+                        <img src={clock} alt="clock" loading="lazy" />
+                        <p>Ответ в течение 1 часа</p>
+                      </div>
+                      <div className={styles.deliveryBoxDescItem}>
+                        <img src={messadge} alt="messadge" loading="lazy" />
+                        <p>Решаем любые вопросы</p>
+                      </div>{" "}
+                      <div className={styles.deliveryBoxDescItem}>
+                        <img src={reload} alt="reload" loading="lazy" />
+                        <p>Возврат в течение 7 дней</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.faq}>
+                <h1 className={styles.faqTitle}>FAQ</h1>
+                <p className={styles.faqSubtitle}>Часто задаваемые вопросы</p>
+
+                <div className={styles.faqItems}>
+                  {faqData.map((faq, index) => (
+                    <div
+                      key={index}
+                      className={`${styles.faqItem} ${
+                        openFaqIndex === index ? styles.faqItemOpen : ""
+                      }`}
+                    >
+                      <div
+                        className={styles.faqItemHeader}
+                        onClick={() => toggleFaq(index)}
+                      >
+                        <h3>{faq.question}</h3>
+                        <button className={styles.faqToggle}>
+                          {openFaqIndex === index ? "×" : "+"}
+                        </button>
+                      </div>
+                      {openFaqIndex === index && faq.answer && (
+                        <div className={styles.faqItemContent}>
+                          <p>{faq.answer}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className={styles.readyForSurprise}>
+                <h1 className={styles.readyForSurpriseTitle}>
+                  Готовы к сюрпризу?
+                </h1>
+                <p className={styles.readyForSurpriseSubtitle}>
+                  Закажите WOWBOX прямо сейчас
+                </p>
+                <div className={styles.readyForSurpriseButtonWrapper}>
+                  <button
+                    className={styles.readyForSurpriseButton}
+                    onClick={scrollToWowbox}
+                  >
+                    Выбрать бокс за 4900₽
+                  </button>
+                </div>
+              </div>
+            </main>
+            <footer className={styles.footer}>
+              <div className={styles.footerItem}>
+                <img src={footerLogo} alt="Footer Logo  " loading="lazy" />
+                <div className={styles.footerTopLinks}>
                   <a
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      closeMobileMenu();
                       scrollToSection(styles.hero);
                     }}
                   >
                     Главная
                   </a>
-                </div>
-                <div className={styles.mobileNavHr}></div>
-                <div className={styles.mobileNavLink}>
+                  <span></span>
                   <a
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      closeMobileMenu();
                       scrollToSection(styles.selectYourOwnWowbox);
                     }}
                   >
                     Каталог
                   </a>
-                </div>
-                <div className={styles.mobileNavHr}></div>
-                <div className={styles.mobileNavLink}>
+                  <span></span>
                   <a
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      closeMobileMenu();
                       scrollToSection(styles.weFoundYourSuperWowbox);
                     }}
                   >
                     Подобрать WOWBOX
                   </a>
-                </div>
-                <div className={styles.mobileNavHr}></div>
-                <div className={styles.mobileNavLink}>
+                  <span></span>
                   <a
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      closeMobileMenu();
                       scrollToSection(styles.howToWorkWowBox);
                     }}
                   >
                     Как это работает
                   </a>
-                </div>
-                <div className={styles.mobileNavHr}></div>
-                <div className={styles.mobileNavLink}>
+                  <span></span>
                   <a
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      closeMobileMenu();
                       scrollToSection(styles.quality);
                     }}
                   >
                     Качество
                   </a>
-                </div>
-                <div className={styles.mobileNavHr}></div>
-                <div className={styles.mobileNavLink}>
+                  <span></span>
                   <a
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      closeMobileMenu();
                       scrollToSection(styles.delivery);
                     }}
                   >
                     Гарантии и доставка
                   </a>
-                </div>
-                <div className={styles.mobileNavHr}></div>
-                <div className={styles.mobileNavLink}>
+                  <span></span>
                   <a
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      closeMobileMenu();
                       scrollToSection(styles.faq);
                     }}
                   >
@@ -668,594 +1178,83 @@ export default function App() {
                   </a>
                 </div>
               </div>
-            </nav>
-
-            <div className={styles.hero}>
-              <div className={styles.heroTitle}>
-                <h1>Участвуй в новогодней акции!</h1>
-                <p>Собирай очки в игре и получай гарантированные подарки!</p>
-              </div>
-              <div className={styles.discount}>
-                <div className={styles.discountOverTime}>
+              <div className={styles.footerLine}></div>
+              <div className={`${styles.footerItem} ${styles.footerItem2}`}>
+                <p className={styles.footerItemContact}>Контакты:</p>
+                <div className={styles.footerItemContactSocials}>
                   <div>
-                    <span>{timeLeft.days}</span>
-                    <span>дней</span>
+                    <span>Email: </span>{" "}
+                    <a href="mailto:hello@wowbox.market">hello@wowbox.market</a>
                   </div>
                   <div>
-                    <span>{timeLeft.hours}</span>
-                    <span>часа</span>
-                  </div>{" "}
-                  <div>
-                    <span>{timeLeft.minutes}</span>
-                    <span>минута</span>
+                    <a href="#">
+                      <img src={whatsup} alt="WhatsApp" loading="lazy" />
+                    </a>
+                    <a href="#">
+                      <img src={telegram} alt="Telegram" loading="lazy" />
+                    </a>
                   </div>
-                </div>
-                <div className={styles.discountOverTimeButtonWrapper}>
-                  <button className={styles.discountOverTimeButton}>Играть</button>
-                  <img src={santahat} alt="Santa Claus Hat" loading="lazy" />
                 </div>
               </div>
-              <div className={styles.heroLogo}>
-                <img src={logoBig} alt="Hero Logo" loading="lazy" />
-                <p>лучший способ порадовать себя и близких</p>
-              </div>
-              <div className={styles.heroBonus}>
-                <div className={styles.heroBonusPlus}>
-                  <div className={styles.heroBonusWrapper}>
-                    <div
-                      className={`${styles.heroBonusItem} ${styles.heroBonusItem}`}
-                    >
-                      <p>УНИКАЛЬНАЯ УПАКОВКА</p>
-                    </div>
-                  </div>
-                  <img src={heroBonusSticker1} alt="sticker" loading="lazy" />
-                </div>
-                <div className={styles.heroBonusWrapper}>
-                  <div
-                    className={`${styles.heroBonusItem} ${styles.heroBonusItem2}`}
-                  >
-                    <p>НАПОЛНЕНИЕ ОТ 4900₽</p>
-                  </div>
-                </div>
-                <div className={styles.heroBonusWrapper}>
-                  <div
-                    className={`${styles.heroBonusItem} ${styles.heroBonusItem3}`}
-                  >
-                    <p>ЭФФЕКТ СЮРПРИЗА</p>
-                  </div>
-                </div>
-                <div className={styles.heroBonusPlus2}>
-                  <div className={styles.heroBonusWrapper}>
-                    <div
-                      className={`${styles.heroBonusItem} ${styles.heroBonusItem4}`}
-                    >
-                      <p>ТОЛЬКО ОРИГИНАЛ</p>
-                    </div>
-                  </div>
-                  <img src={heroBonusSticker2} alt="sticker" loading="lazy" />
-                </div>
-              </div>
-              <div className={styles.heroSelectButtonWrapper}>
-                <button
-                  className={styles.heroSelectButton}
-                  onClick={scrollToWowbox}
-                >
-                  Выбрать бокс за 4900₽
-                </button>
-              </div>
-            </div>
-          </header>
-          <main>
-            <div className={styles.selectYourOwnWowbox}>
-              <h1>Выберите свой WOWBOX</h1>
-              <BoxesCarousel
-                onOrderClick={() => {
-                  setPersonalizationStartStep(1);      // обычный заказ – с первого шага
-                  setIsPersonalizationOpen(true);
-                }}
-              />
-
-            </div>
-            <div className={styles.weFoundYourSuperWowbox}>
-              <div className={styles.quizContainer}>
-                <h2>
-                  Найдём ваш идеальный
-                  <br />
-                  WOWBOX за 30 секунд
-                </h2>
-                <p className={styles.quizSubtitle}>
-                  Ответьте на 4 вопроса - мы подберём бокс,
-                  <br />
-                  который точно вам подойдёт
+              <div className={styles.footerLine}></div>{" "}
+              <div className={`${styles.footerItem} ${styles.footerItem2}`}>
+                <p className={styles.footerItemContact}>
+                  Юридическая информация
                 </p>
-
-                <div className={styles.quizBox}>
-                  <div className={styles.quizHeader}>
-                    {/* Hide progress dots on results page (step 5) */}
-                    {currentQuestion < quizData.length && (
-                      <div className={styles.progressDots}>
-                        {quizData.map((_, index) => (
-                          <span
-                            key={index}
-                            className={
-                              currentQuestion === index ? styles.active : ""
-                            }
-                          ></span>
-                        ))}
-                      </div>
-                    )}
-
-                    {currentQuestion < quizData.length ? (
-                      <>
-                        <p className={styles.questionLabel}>
-                          ВОПРОС {currentQuestion + 1}/{quizData.length}:
-                        </p>
-                        <h3 className={styles.questionTitle}>
-                          {quizData[currentQuestion].question}
-                        </h3>
-                      </>
-                    ) : (
-                      <h3 className={styles.resultsTitle}>Ваш идеальный бокс:</h3>
-                    )}
-                  </div>
-
-                  {/* Quiz Questions or Results Page */}
-                  {currentQuestion < quizData.length ? (
-                    <>
-                      {/* Quiz Options */}
-                      <div className={styles.quizOptions}>
-                        {quizData[currentQuestion].options.map((option) => (
-                          <div
-                            key={option.id}
-                            className={styles.quizOption}
-                            onClick={() =>
-                              handleQuizAnswer(currentQuestion, option.id)
-                            }
-                          >
-                            <img
-                              className={styles.optionIcon}
-                              src={option.icon}
-                              alt={option.title}
-                              loading="lazy"
-                            />
-                            <div className={styles.optionText}>
-                              <p className={styles.optionTitle}>{option.title}</p>
-                              {option.subtitle && (
-                                <p className={styles.optionSubtitle}>
-                                  {option.subtitle}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Quiz Navigation - Back Button */}
-                      <div className={styles.quizActions}>
-                        {currentQuestion > 0 && (
-                          <button
-                            className={styles.quizBackButton}
-                            onClick={handleQuizBack}
-                          >
-                            <img src={toRight} alt="toRight" loading="lazy" />
-                            <span>Назад</span>
-                          </button>
-                        )}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {/* Results Page */}
-                      <div className={styles.quizResults}>
-                        <div className={styles.recommendedBox}>
-                          <img
-                            src={getRecommendedBox().image}
-                            alt={getRecommendedBox().title}
-                            className={styles.boxImage}
-                            loading="lazy"
-                          />
-                          <h2 className={styles.boxTitle}>
-                            {getRecommendedBox().title}
-                          </h2>
-                          <p className={styles.boxPrice}>
-                            {getRecommendedBox().price}
-                          </p>
-
-                          <div className={styles.boxDetails}>
-                            <h4 className={styles.detailsTitle}>
-                              Что будет внутри:
-                            </h4>
-                            <ul className={styles.detailsList}>
-                              {getRecommendedBox().details.map((detail, index) => (
-                                <li key={index}>{detail}</li>
-                              ))}
-                            </ul>
-                            <div className={styles.boxSummary}>
-                              <p>
-                                <strong>Всего:</strong> {getRecommendedBox().total}
-                              </p>
-                              <p>
-                                <strong>Розничная стоимость:</strong>{" "}
-                                {getRecommendedBox().value}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Results Page Buttons */}
-                      <div className={styles.quizActions}>
-                        <div className={styles.quizFinalButtons}>
-                          <button
-                            className={styles.quizResetButton}
-                            onClick={handleQuizReset}
-                          >
-                            Пройти заново
-                          </button>
-                          <button
-                            className={styles.quizOrderButton}
-                            onClick={handleQuizOrder}
-                          >
-                            Заказать
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
+                <div className={styles.footerItemContactDesc}>
+                  <p>ООО “ИНВОРЛДС”</p>
+                  <p>Резидент ОЭЗ ИННОПОЛИС</p>
+                  <p>ИНН: 1683023860</p>
+                  <p>ОГРН: 1241600048689</p>
                 </div>
               </div>
-            </div>
-            <div className={styles.howToWorkWowBox}>
-              <h1>Как работает WOWBOX?</h1>
-              <div className={styles.howToWorkWowBoxMap}>
-                <div className={styles.howToWorkWowBoxMapBox}>
-                  <img src={mapRaodImg1} alt="mapRaodImg1" loading="lazy" />.
-                  <div className={styles.howToWorkWowBoxMapBoxBody}>
-                    <img
-                      src={number1}
-                      alt="number1"
-                      className={styles.boxBodyNumber}
-                      loading="lazy"
-                    />
-                    <p>Выбираете тип бокса</p>
-                    <p>Пати бокс, Уютный бокс, Техно бокс, Сладкий бокс</p>
-                    <p>Тип бокса влияет на стиль, но не на ценность</p>
-                  </div>
-                </div>
-                <div className={styles.howToWorkWowBoxMapBox}>
-                  <img src={mapRaodImg2} alt="mapRaodImg2" loading="lazy" />.
-                  <div className={styles.howToWorkWowBoxMapBoxBody}>
-                    <img
-                      src={number2}
-                      alt="number1"
-                      className={styles.boxBodyNumber}
-                      loading="lazy"
-                    />
-                    <p>Мы собираем ваш бокс</p>
-                    <p>
-                      9–12 оригинальных премиум-товаровНаполнение от 4900 ₽ до 120
-                      000 ₽
-                    </p>
-                    <p>
-                      Каждый бокс собирается вручную и проходит проверку качества
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.howToWorkWowBoxMapBox}>
-                  <img src={mapRaodImg3} alt="mapRaodImg3" loading="lazy" />.
-                  <div className={styles.howToWorkWowBoxMapBoxBody}>
-                    <img
-                      src={number3}
-                      alt="number3"
-                      className={styles.boxBodyNumber}
-                      loading="lazy"
-                    />
-                    <p>Получаете и наслаждаетесь</p>
-                    <p>Быстрая и безопасная доставка Отслеживание 24/7</p>
-                    <p>Доставка по всей России без задержек</p>
-                  </div>
-                </div>
-                <div className={styles.howToWorkWowBoxMapBox}>
-                  <img src={mapRaodImg4} alt="mapRaodImg4" loading="lazy" />.
-                  <div className={styles.howToWorkWowBoxMapBoxBody}>
-                    <img
-                      src={number4}
-                      alt="number4"
-                      className={styles.boxBodyNumber}
-                      loading="lazy"
-                    />
-                    <p>Наслаждение не только от распаковки</p>
-                    <p>Контроль качества даже после покупки</p>
-                    <p>Мы остаёмся на связи даже после получения заказа</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className={styles.quality}>
-              <h1>Наш подход к качеству</h1>
-              <div className={styles.qualityBoxes}>
-                <div className={styles.qualityBox}>
-                  <h3>Качество с первого клика</h3>
-                  <p>
-                    Мы читаем ваши комментарии, учитываем ограничения и подбираем
-                    товары, которые подойдут именно вам
-                  </p>
-
-                  <p>Каждый бокс уникален</p>
-                </div>
-                <div className={`${styles.qualityBox} ${styles.qualityBox2}`}>
-                  <h3>Двойная проверка качества</h3>
-                  <p>
-                    Мы исключаем товары с браком, следим за состоянием упаковки,
-                    проверяем комплектацию
-                  </p>
-
-                  <p>Лучше пусть мы перепроверим, чем вы разочаруетесь</p>
-                </div>
-                <div className={`${styles.qualityBox} ${styles.qualityBox3}`}>
-                  <h3>Забота во время ожидания</h3>
-                  <p>
-                    В течении 24 часов мы вышлем вам трек-номер - вы сможете следить
-                    где ваш бокс
-                  </p>
-
-                  <p>
-                    Собрали → Упаковали → Передали курьеру → В пути → Доставлено
-                  </p>
-                </div>
-
-                <div className={`${styles.qualityBox} ${styles.qualityBox4}`}>
-                  <h3>Упаковка - как ритуал</h3>
-                  <p>
-                    Мы упаковываем каждый бокс вручную - красиво, чисто, аккуратно.
-                    Еще до открытия вы прочувствуете "Тот самый момент"
-                  </p>
-
-                  <p>Подарок будет особенный именно для Вас</p>
-                </div>
-
-                <div className={`${styles.qualityBox} ${styles.qualityBox5}`}>
-                  <h3>Поддержка, которая действительно помогает</h3>
-                  <p>
-                    Если что-то пойдёт не так - мы решаем быстро, по-человечески,
-                    без споров. Без формальных отписок. Мы на вашей стороне
-                  </p>
-
-                  <p>Главная цель — чтобы вы остались счастливы</p>
-                </div>
-              </div>
-            </div>
-            <div className={styles.delivery}>
-              <h1>Гарантии и доставка</h1>
-              <div className={styles.deliveryBoxes}>
-                <div className={styles.deliveryBox}>
-                  <img src={delivery1} alt="delivery1 " loading="lazy" />
-                  <h1>Гарантия качества</h1>
-                  <div className={styles.deliveryBoxDesc}>
-                    <div className={styles.deliveryBoxDescItem}>
-                      <img src={saved} alt="saved" loading="lazy" />
-                      <p>Розничная стоимость не менее 4,900₽</p>
-                    </div>{" "}
-                    <div className={styles.deliveryBoxDescItem}>
-                      <img src={rubl} alt="rubl" loading="lazy" />
-                      <p>Все товары новые</p>
-                    </div>
-                    <div className={styles.deliveryBoxDescItem}>
-                      <img src={check} alt="check" loading="lazy" />
-                      <p>Только оригинальные товары</p>
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.deliveryBox}>
-                  <img src={delivery2} alt="delivery2 " loading="lazy" />
-                  <h1>Гарантия поддержки</h1>
-                  <div className={styles.deliveryBoxDesc}>
-                    <div className={styles.deliveryBoxDescItem}>
-                      <img src={clock} alt="clock" loading="lazy" />
-                      <p>Ответ в течение 1 часа</p>
-                    </div>
-                    <div className={styles.deliveryBoxDescItem}>
-                      <img src={messadge} alt="messadge" loading="lazy" />
-                      <p>Решаем любые вопросы</p>
-                    </div>{" "}
-                    <div className={styles.deliveryBoxDescItem}>
-                      <img src={reload} alt="reload" loading="lazy" />
-                      <p>Возврат в течение 7 дней</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className={styles.faq}>
-              <h1 className={styles.faqTitle}>FAQ</h1>
-              <p className={styles.faqSubtitle}>Часто задаваемые вопросы</p>
-
-              <div className={styles.faqItems}>
-                {faqData.map((faq, index) => (
-                  <div
-                    key={index}
-                    className={`${styles.faqItem} ${openFaqIndex === index ? styles.faqItemOpen : ""
-                      }`}
+              <div className={styles.footerLine}></div>{" "}
+              <div className={`${styles.footerItem} ${styles.footerItem3}`}>
+                <p className={styles.footerItemContact}>
+                  ® 2025 ВауБокс. Все права защищены.
+                </p>
+                <div className={styles.footerItempoliticsLinks}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate("/privacy");
+                    }}
                   >
-                    <div
-                      className={styles.faqItemHeader}
-                      onClick={() => toggleFaq(index)}
-                    >
-                      <h3>{faq.question}</h3>
-                      <button className={styles.faqToggle}>
-                        {openFaqIndex === index ? "×" : "+"}
-                      </button>
-                    </div>
-                    {openFaqIndex === index && faq.answer && (
-                      <div className={styles.faqItemContent}>
-                        <p>{faq.answer}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className={styles.readyForSurprise}>
-              <h1 className={styles.readyForSurpriseTitle}>Готовы к сюрпризу?</h1>
-              <p className={styles.readyForSurpriseSubtitle}>
-                Закажите WOWBOX прямо сейчас
-              </p>
-              <div className={styles.readyForSurpriseButtonWrapper}>
-                <button
-                  className={styles.readyForSurpriseButton}
-                  onClick={scrollToWowbox}
-                >
-                  Выбрать бокс за 4900₽
-                </button>
-              </div>
-            </div>
-          </main>
-          <footer className={styles.footer}>
-            <div className={styles.footerItem}>
-              <img src={footerLogo} alt="Footer Logo  " loading="lazy" />
-              <div className={styles.footerTopLinks}>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(styles.hero);
-                  }}
-                >
-                  Главная
-                </a>
-                <span></span>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(styles.selectYourOwnWowbox);
-                  }}
-                >
-                  Каталог
-                </a>
-                <span></span>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(styles.weFoundYourSuperWowbox);
-                  }}
-                >
-                  Подобрать WOWBOX
-                </a>
-                <span></span>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(styles.howToWorkWowBox);
-                  }}
-                >
-                  Как это работает
-                </a>
-                <span></span>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(styles.quality);
-                  }}
-                >
-                  Качество
-                </a>
-                <span></span>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(styles.delivery);
-                  }}
-                >
-                  Гарантии и доставка
-                </a>
-                <span></span>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(styles.faq);
-                  }}
-                >
-                  Вопросы и ответы
-                </a>
-              </div>
-            </div>
-            <div className={styles.footerLine}></div>
-            <div className={`${styles.footerItem} ${styles.footerItem2}`}>
-              <p className={styles.footerItemContact}>Контакты:</p>
-              <div className={styles.footerItemContactSocials}>
-                <div>
-                  <span>Email: </span>{" "}
-                  <a href="mailto:hello@wowbox.market">hello@wowbox.market</a>
-                </div>
-                <div>
-                  <a href="#">
-                    <img src={whatsup} alt="WhatsApp" loading="lazy" />
+                    Политика конфиденциальности
                   </a>
-                  <a href="#">
-                    <img src={telegram} alt="Telegram" loading="lazy" />
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate("/public-offer");
+                    }}
+                  >
+                    Публичная оферта
                   </a>
                 </div>
               </div>
-            </div>
-            <div className={styles.footerLine}></div>{" "}
-            <div className={`${styles.footerItem} ${styles.footerItem2}`}>
-              <p className={styles.footerItemContact}>Юридическая информация</p>
-              <div className={styles.footerItemContactDesc}>
-                <p>ООО “ИНВОРЛДС”</p>
-                <p>Резидент ОЭЗ ИННОПОЛИС</p>
-                <p>ИНН: 1683023860</p>
-                <p>ОГРН: 1241600048689</p>
-              </div>
-            </div>
-            <div className={styles.footerLine}></div>{" "}
-            <div className={`${styles.footerItem} ${styles.footerItem3}`}>
-              <p className={styles.footerItemContact}>
-                ® 2025 ВауБокс. Все права защищены.
-              </p>
-              <div className={styles.footerItempoliticsLinks}>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate('/privacy');
-                  }}
-                >
-                  Политика конфиденциальности
-                </a>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate('/public-offer');
-                  }}
-                >
-                  Публичная оферта
-                </a>
-              </div>
-            </div>
-          </footer>
-          <BoxingPersonalization
+            </footer>
+            <BoxingPersonalization
             isOpen={isPersonalizationOpen}
             onClose={() => setIsPersonalizationOpen(false)}
             savedData={boxPersonalization}
-            startStep={personalizationStartStep}
+            currentTheme={selectedTheme} 
             onOrderClick={(personalizationData) => {
+
+              if (personalizationData?.theme) setSelectedTheme(personalizationData.theme);
+              
               setBoxPersonalization(personalizationData);
               setIsPersonalizationOpen(false);
               setIsOrderModalOpen(true);
             }}
           />
-
           <OrderModal
             isOpen={isOrderModalOpen}
             onClose={() => setIsOrderModalOpen(false)}
             boxPersonalization={boxPersonalization}
+            // Передаем тему в модалку заказа
+            selectedTheme={selectedTheme} 
             onEdit={() => {
               setIsOrderModalOpen(false);
               setIsPersonalizationOpen(true);
@@ -1267,73 +1266,74 @@ export default function App() {
             onOpenPrivacyPolicy={() => navigate('/privacy')}
             onOpenPublicOffer={() => navigate('/public-offer')}
           />
-          <DeliveryModal
-            isOpen={isDeliveryModalOpen}
-            onClose={() => setIsDeliveryModalOpen(false)}
-            onAccept={() => {
-              setIsDeliveryModalOpen(false);
-              if (selectedPaymentMethod === "sbp") {
-                // SBP flow: open BankSelectionModal
-                setIsBankSelectionModalOpen(true);
-              } else {
-                // Card/SberPay/TPay flow: open SmsModal
-                setIsSmsModalOpen(true);
-              }
-            }}
-          />
-          <BankSelectionModal
-            isOpen={isBankSelectionModalOpen}
-            onClose={() => setIsBankSelectionModalOpen(false)}
-            onSelectBank={(bank) => {
-              console.log("Selected bank:", bank);
-              setIsBankSelectionModalOpen(false);
-              setIsPaymentWaitingModalOpen(true);
+            <DeliveryModal
+              isOpen={isDeliveryModalOpen}
+              onClose={() => setIsDeliveryModalOpen(false)}
+              onAccept={() => {
+                setIsDeliveryModalOpen(false);
+                if (selectedPaymentMethod === "sbp") {
+                  // SBP flow: open BankSelectionModal
+                  setIsBankSelectionModalOpen(true);
+                } else {
+                  // Card/SberPay/TPay flow: open SmsModal
+                  setIsSmsModalOpen(true);
+                }
+              }}
+            />
+            <BankSelectionModal
+              isOpen={isBankSelectionModalOpen}
+              onClose={() => setIsBankSelectionModalOpen(false)}
+              onSelectBank={(bank) => {
+                console.log("Selected bank:", bank);
+                setIsBankSelectionModalOpen(false);
+                setIsPaymentWaitingModalOpen(true);
 
-              // Simulate payment processing
-              setTimeout(() => {
-                setIsPaymentWaitingModalOpen(false);
+                // Simulate payment processing
+                setTimeout(() => {
+                  setIsPaymentWaitingModalOpen(false);
+                  setIsPaymentResultModalOpen(true);
+                }, 3000);
+              }}
+            />
+            <PaymentWaitingModal
+              isOpen={isPaymentWaitingModalOpen}
+              onClose={() => setIsPaymentWaitingModalOpen(false)}
+            />
+            <SmsModal
+              isOpen={isSmsModalOpen}
+              onClose={() => {
+                setIsSmsModalOpen(false);
+              }}
+              onVerify={(code) => {
+                console.log("SMS code verified:", code);
+                setIsSmsModalOpen(false);
                 setIsPaymentResultModalOpen(true);
-              }, 3000);
-            }}
-          />
-          <PaymentWaitingModal
-            isOpen={isPaymentWaitingModalOpen}
-            onClose={() => setIsPaymentWaitingModalOpen(false)}
-          />
-          <SmsModal
-            isOpen={isSmsModalOpen}
-            onClose={() => {
-              setIsSmsModalOpen(false);
-            }}
-            onVerify={(code) => {
-              console.log("SMS code verified:", code);
-              setIsSmsModalOpen(false);
-              setIsPaymentResultModalOpen(true);
-            }}
-            phoneNumber="+998 XX XXX-XX-XX"
-          />
-          <PaymentResultModal
-            isOpen={isPaymentResultModalOpen}
-            onClose={() => {
-              setIsPaymentResultModalOpen(false);
-              setIsOrderModalOpen(false);
-              setBoxPersonalization(null);
-            }}
-            isSuccess={true}
-            orderNumber="OO OOO OOO1"
-            onRetry={() => {
-              console.log("Retry payment");
-              setIsPaymentResultModalOpen(false);
-              setIsDeliveryModalOpen(true);
-            }}
-            onGoHome={() => {
-              setIsPaymentResultModalOpen(false);
-              setIsOrderModalOpen(false);
-              setBoxPersonalization(null);
-            }}
-          />
-        </>
-      } />
+              }}
+              phoneNumber="+998 XX XXX-XX-XX"
+            />
+            <PaymentResultModal
+              isOpen={isPaymentResultModalOpen}
+              onClose={() => {
+                setIsPaymentResultModalOpen(false);
+                setIsOrderModalOpen(false);
+                setBoxPersonalization(null);
+              }}
+              isSuccess={true}
+              orderNumber="OO OOO OOO1"
+              onRetry={() => {
+                console.log("Retry payment");
+                setIsPaymentResultModalOpen(false);
+                setIsDeliveryModalOpen(true);
+              }}
+              onGoHome={() => {
+                setIsPaymentResultModalOpen(false);
+                setIsOrderModalOpen(false);
+                setBoxPersonalization(null);
+              }}
+            />
+          </>
+        }
+      />
     </Routes>
   );
 }
