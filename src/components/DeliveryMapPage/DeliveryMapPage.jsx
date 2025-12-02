@@ -7,12 +7,31 @@ import {
   YMapClusterer,
   clusterByGrid,
   YMapListener,
+  YMapFeature,
 } from "../../lib/ymaps";
 import { cities } from "../../data/cities";
 import markerIcon from "../../assets/images/5post-geo.png";
-// import homeIcon from "../../assets/images/home-pin.png";
+// import homeIcon from "../../assets/images/home-pin.png"; // Раскомментируйте, если есть иконка
 import styles from "./DeliveryMapPage.module.css";
 import closeIcon from "../../assets/icons/close.svg";
+
+// --- ФУНКЦИЯ: Проверка попадания точки в полигон (Ray-casting) ---
+function isPointInPolygon(point, vs) {
+  // point = [lng, lat], vs = массив координат полигона [[lng, lat], ...]
+  const x = point[0],
+    y = point[1];
+  let inside = false;
+  for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+    const xi = vs[i][0],
+      yi = vs[i][1];
+    const xj = vs[j][0],
+      yj = vs[j][1];
+    const intersect =
+      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
 
 export default function DeliveryMapPage({
   isOpen,
@@ -21,47 +40,73 @@ export default function DeliveryMapPage({
   initialMode = "pickup",
   currentData = {},
 }) {
+  // Выбор города (по умолчанию первый из списка - Москва)
   const [selectedCity, setSelectedCity] = useState(cities[0]);
-  const [points, setPoints] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [deliveryMode, setDeliveryMode] = useState(initialMode);
-  const [isCalculating, setIsCalculating] = useState(false);
 
-  // --- СОСТОЯНИЕ ФОРМЫ КУРЬЕРА ---
+  // Данные карты
+  const [points, setPoints] = useState([]); // Точки ПВЗ (5Post)
+  const [polygons, setPolygons] = useState(null); // Полигоны (Dalli)
+
+  // Состояния интерфейса
+  const [loading, setLoading] = useState(false);
+  const [isCalculating, setIsCalculating] = useState(false); // Загрузка цены
+  const [deliveryMode, setDeliveryMode] = useState(initialMode);
+
+  // Данные курьера
   const [courierMarker, setCourierMarker] = useState(null);
   const [courierAddress, setCourierAddress] = useState(
     currentData.address || ""
   );
+  const [addressError, setAddressError] = useState("");
 
-  // Инициализация полей ввода
+  // Поля ввода (квартира, этаж...)
   const [apartment, setApartment] = useState(currentData.apartment || "");
   const [entrance, setEntrance] = useState(currentData.entrance || "");
   const [floor, setFloor] = useState(currentData.floor || "");
   const [comment, setComment] = useState(currentData.comment || "");
 
-  const [matchedCity, setMatchedCity] = useState(null);
-  const [addressError, setAddressError] = useState("");
-
-  // Состояние тултипа
+  // Тултип для ПВЗ
   const [hoveredPointId, setHoveredPointId] = useState(null);
 
+  // Позиция карты (Москва)
   const [location, setLocation] = useState({
-    center: [37.57, 55.75],
+    center: [37.6176, 55.7558],
     zoom: 10,
   });
 
+  // Синхронизация режима при открытии
   useEffect(() => {
     setDeliveryMode(initialMode);
   }, [initialMode]);
 
   const gridSizedMethod = useMemo(() => clusterByGrid({ gridSize: 64 }), []);
 
+  // --- ГЛАВНЫЙ ЭФФЕКТ: ЗАГРУЗКА ДАННЫХ ---
   useEffect(() => {
-    if (isOpen && selectedCity && deliveryMode === "pickup") {
+    if (!isOpen || !selectedCity) return;
+
+    setAddressError("");
+
+    // 1. Режим ПВЗ -> Грузим точки 5Post
+    if (deliveryMode === "pickup") {
       fetchPoints(selectedCity.fias);
+      setPolygons(null); // Чистим полигоны
+    }
+
+    // 2. Режим КУРЬЕР -> Грузим полигоны Dalli
+    if (deliveryMode === "courier") {
+      setPoints([]); // Чистим точки
+
+      if (selectedCity.filialId) {
+        fetchPolygons(selectedCity.filialId);
+      } else {
+        setPolygons(null);
+        console.warn("Для этого города нет курьерской доставки (нет filialId)");
+      }
     }
   }, [isOpen, selectedCity, deliveryMode]);
 
+  // --- ЗАГРУЗКА ТОЧЕК 5POST ---
   const fetchPoints = async (fias) => {
     setLoading(true);
     try {
@@ -77,8 +122,9 @@ export default function DeliveryMapPage({
         console.warn("API error");
       }
       setPoints(Array.isArray(data) ? data : []);
+
       if (data.length > 0)
-        setLocation({ center: data[0].coordinates, zoom: 12 });
+        setLocation({ center: data[0].coordinates, zoom: 11 });
     } catch (e) {
       console.error(e);
     } finally {
@@ -86,6 +132,180 @@ export default function DeliveryMapPage({
     }
   };
 
+  // --- ЗАГРУЗКА ПОЛИГОНОВ DALLI ---
+  const fetchPolygons = async (filialId) => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `https://wowbox.market/api/get-polygons.php?filial_id=${filialId}`
+      );
+      if (res.ok) {
+        const geoJson = await res.json();
+        setPolygons(geoJson);
+
+        // Центрируем карту по первому полигону
+        if (geoJson.features && geoJson.features.length > 0) {
+          const firstPolygon = geoJson.features[0].geometry.coordinates[0];
+          if (firstPolygon && firstPolygon.length > 0) {
+            setLocation({ center: firstPolygon[0], zoom: 10 });
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Ошибка загрузки полигонов:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- ПРОВЕРКА ЗОНЫ ---
+  const checkDeliveryZone = (coords) => {
+    if (!polygons || !polygons.features) return false;
+    for (const feature of polygons.features) {
+      if (feature.geometry.type === "Polygon") {
+        const polygonCoords = feature.geometry.coordinates[0];
+        if (isPointInPolygon(coords, polygonCoords)) return true;
+      }
+    }
+    return false;
+  };
+
+  // --- РУЧНОЙ ПОИСК АДРЕСА ---
+  const handleManualSearch = async () => {
+    if (!courierAddress || courierAddress.length < 3) return;
+
+    setLoading(true);
+    setAddressError("");
+    setCourierMarker(null);
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          courierAddress
+        )}&accept-language=ru&limit=1`
+      );
+      const data = await res.json();
+
+      if (data && data.length > 0) {
+        const result = data[0];
+        const coords = [parseFloat(result.lon), parseFloat(result.lat)]; // [lng, lat]
+
+        // Проверяем зону
+        const isInside = checkDeliveryZone(coords);
+
+        if (isInside) {
+          setCourierMarker({ coordinates: coords });
+          setLocation({ center: coords, zoom: 16 });
+          // Можно обновить адрес на официальный из базы, если нужно:
+          // setCourierAddress(result.display_name);
+        } else {
+          setAddressError("Адрес вне зоны доставки. Выберите другой адрес.");
+          // Всё равно покажем на карте, где это, чтобы юзер понял
+          setLocation({ center: coords, zoom: 14 });
+        }
+      } else {
+        setAddressError("Адрес не найден");
+      }
+    } catch (e) {
+      console.error(e);
+      setAddressError("Ошибка поиска");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // --- КЛИК ПО КАРТЕ ---
+  const handleMapClick = useCallback(
+    async (object, event) => {
+      if (deliveryMode !== "courier") return;
+
+      const coords = event.coordinates; // [lng, lat]
+      setAddressError("");
+      setCourierAddress("Определяем адрес...");
+
+      // 1. Проверяем полигоны
+      const isInside = checkDeliveryZone(coords);
+
+      if (!isInside) {
+        setCourierMarker(null); // Убираем маркер, если кликнули мимо
+        setAddressError(
+          "Выбранная точка находится вне зоны курьерской доставки."
+        );
+        setCourierAddress("Вне зоны доставки");
+        return;
+      }
+
+      // 2. Ставим маркер и ищем адрес
+      setCourierMarker({ coordinates: coords });
+
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[1]}&lon=${coords[0]}&accept-language=ru`
+        );
+        const data = await res.json();
+        setCourierAddress(
+          data.display_name || "Адрес определен по координатам"
+        );
+      } catch (e) {
+        setCourierAddress("Адрес на карте");
+      }
+    },
+    [deliveryMode, polygons]
+  );
+
+  // --- ПОДТВЕРЖДЕНИЕ И РАСЧЕТ ЦЕНЫ ---
+  const handleCourierConfirm = async () => {
+    // Разрешаем, если маркер стоит ИЛИ адрес введен вручную и нет ошибок
+    if (
+      (!courierMarker && !currentData.address && !courierAddress) ||
+      addressError
+    ) {
+      alert("Пожалуйста, укажите корректный адрес в зоне доставки.");
+      return;
+    }
+
+    setIsCalculating(true);
+    let finalPrice = 0;
+
+    try {
+      // Запрос к API Dalli для точного расчета
+      const res = await fetch(
+        `https://wowbox.market/api/get-delivery-price.php?address=${encodeURIComponent(
+          courierAddress
+        )}`
+      );
+      const data = await res.json();
+
+      if (data.price && data.price > 0) {
+        finalPrice = data.price;
+      } else {
+        console.warn("API цены вернуло ошибку или 0:", data.error);
+        // Fallback: цена из таблицы городов + наценка 180р
+        finalPrice = (selectedCity.price || 350) + 180;
+      }
+    } catch (e) {
+      console.error("Ошибка расчета цены:", e);
+      finalPrice = (selectedCity.price || 350) + 180;
+    } finally {
+      setIsCalculating(false);
+    }
+
+    // Передаем данные в OrderModal
+    onDeliverySelect({
+      mode: "courier",
+      address: courierAddress,
+      apartment,
+      entrance,
+      floor,
+      comment,
+      cityFias: selectedCity.fias,
+      price: finalPrice,
+      cityName: selectedCity.name,
+    });
+    onClose();
+  };
+
+  // --- ВЫБОР ПВЗ ---
   const handlePointClick = (point) => {
     onDeliverySelect({
       mode: "pickup",
@@ -100,153 +320,7 @@ export default function DeliveryMapPage({
     onClose();
   };
 
-  const checkZoneAvailability = (nominatimAddress) => {
-    const potentialNames = [
-      nominatimAddress.city,
-      nominatimAddress.town,
-      nominatimAddress.village,
-      nominatimAddress.state,
-      nominatimAddress.city_district,
-    ]
-      .filter(Boolean)
-      .map((n) => n.toLowerCase());
-
-    return cities.find((c) => {
-      const cityName = c.name.toLowerCase();
-      return potentialNames.some(
-        (addrPart) => addrPart.includes(cityName) || cityName.includes(addrPart)
-      );
-    });
-  };
-
-  // --- РУЧНОЙ ПОИСК АДРЕСА ---
-  const handleManualSearch = async () => {
-    if (!courierAddress || courierAddress.length < 3) return;
-
-    setLoading(true);
-    setAddressError("");
-
-    try {
-      // Поиск координат по тексту (Forward Geocoding)
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          courierAddress
-        )}&accept-language=ru&addressdetails=1&limit=1`
-      );
-      const data = await res.json();
-
-      if (data && data.length > 0) {
-        const result = data[0];
-        const coords = [parseFloat(result.lon), parseFloat(result.lat)]; // [lng, lat] для YMap v3
-
-        // Обновляем маркер и карту
-        setCourierMarker({ coordinates: coords });
-        setLocation({ center: coords, zoom: 16 }); // Приближаем карту
-
-        // Валидируем зону
-        const validCity = checkZoneAvailability(result.address);
-        if (validCity) {
-          setMatchedCity(validCity);
-          // Обновляем адрес на полный официальный, если нужно, или оставляем то что ввел юзер
-          // setCourierAddress(result.display_name);
-        } else {
-          setAddressError("Доставка в этот населенный пункт недоступна");
-        }
-      } else {
-        setAddressError("Адрес не найден");
-      }
-    } catch (e) {
-      console.error(e);
-      setAddressError("Ошибка поиска");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMapClick = useCallback(
-    async (object, event) => {
-      if (deliveryMode !== "courier") return;
-      const coords = event.coordinates;
-      setCourierMarker({ coordinates: coords });
-      // setCourierAddress("Определяем адрес..."); // Можно не сбрасывать, если хотите оставить введенное
-      setAddressError("");
-      setMatchedCity(null);
-
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[1]}&lon=${coords[0]}&accept-language=ru&addressdetails=1`
-        );
-        const data = await res.json();
-        const validCity = checkZoneAvailability(data.address);
-
-        if (validCity) {
-          setMatchedCity(validCity);
-          setCourierAddress(data.display_name);
-        } else {
-          setCourierAddress(data.display_name);
-          setAddressError("Доставка в этот населенный пункт недоступна");
-        }
-      } catch (e) {
-        setCourierAddress("Ошибка");
-      }
-    },
-    [deliveryMode]
-  );
-
-  const handleCourierConfirm = async () => {
-    // 1. Проверки
-    if (!courierMarker && !currentData.address && !courierAddress) {
-      alert("Пожалуйста, введите адрес или выберите точку на карте.");
-      return;
-    }
-
-    if (addressError) {
-      alert("К сожалению, мы не доставляем заказы в эту зону.");
-      return;
-    }
-
-    setIsCalculating(true); // Включаем спиннер на кнопке
-
-    try {
-      const res = await fetch(
-        `https://wowbox.market/api/get-delivery-price.php?address=${encodeURIComponent(
-          courierAddress
-        )}`
-      );
-      const data = await res.json();
-
-      let finalPrice = 0;
-
-      if (data.price && data.price > 0) {
-        finalPrice = data.price;
-      } else {
-        console.warn("API не вернуло цену:", data.error);
-        finalPrice = (matchedCity?.price || 350) + 180;
-      }
-
-      onDeliverySelect({
-        mode: "courier",
-        address: courierAddress,
-        apartment: apartment,
-        entrance: entrance,
-        floor: floor,
-        comment: comment,
-
-        cityFias: matchedCity?.fias || selectedCity.fias,
-        price: finalPrice,
-        cityName: matchedCity?.name || selectedCity.name,
-      });
-
-      onClose();
-    } catch (e) {
-      console.error("Ошибка расчета цены:", e);
-      alert(
-        "Не удалось рассчитать точную стоимость доставки. Попробуйте еще раз."
-      );
-    } finally {
-      setIsCalculating(false);
-    }
-  };
+  // --- РЕНДЕР МАРКЕРОВ ---
   const features = useMemo(
     () =>
       points.map((pt) => ({
@@ -343,30 +417,64 @@ export default function DeliveryMapPage({
               Курьером
             </button>
           </div>
-          {deliveryMode === "pickup" && (
-            <select
-              className={styles.citySelect}
-              value={selectedCity.fias || ""}
-              onChange={(e) => {
-                const city = cities.find((c) => c.fias === e.target.value);
-                if (city) setSelectedCity(city);
-              }}
-            >
-              {cities.map((c, i) => (
-                <option key={c.fias || i} value={c.fias || ""}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          )}
+
+          {/* Селект города показываем всегда для смены региона */}
+          <select
+            className={styles.citySelect}
+            value={selectedCity.fias || ""}
+            onChange={(e) => {
+              const city = cities.find((c) => c.fias === e.target.value);
+              if (city) setSelectedCity(city);
+            }}
+          >
+            {cities.map((c, i) => (
+              <option key={c.fias || i} value={c.fias || ""}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className={styles.mapContainer}>
           {loading && <div className={styles.loader}>Загрузка...</div>}
+
           <YMap location={location} mode="vector">
             <YMapDefaultSchemeLayer />
             <YMapDefaultFeaturesLayer />
             <YMapListener onClick={handleMapClick} />
+
+            {/* 1. ПОЛИГОНЫ */}
+            {deliveryMode === "courier" &&
+              polygons &&
+              polygons.features &&
+              polygons.features.map((feature, idx) => (
+                <YMapFeature
+                  key={idx}
+                  geometry={feature.geometry}
+                  style={{
+                    // Делаем заливку заметнее (0.4)
+                    fill: "rgba(0, 200, 83, 0.6)",
+                    stroke: [{ color: "#00C853", width: 3 }],
+                  }}
+                />
+              ))}
+
+            {/* 2. МАРКЕР КУРЬЕРА */}
+            {deliveryMode === "courier" && courierMarker && (
+              <YMapMarker coordinates={courierMarker.coordinates}>
+                <div
+                  style={{
+                    fontSize: "34px",
+                    transform: "translate(-50%, -100%)",
+                    filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.3))",
+                  }}
+                >
+                  🏠
+                </div>
+              </YMapMarker>
+            )}
+
+            {/* 3. ТОЧКИ ПВЗ */}
             {deliveryMode === "pickup" && (
               <YMapClusterer
                 marker={renderMarker}
@@ -375,28 +483,16 @@ export default function DeliveryMapPage({
                 features={features}
               />
             )}
-            {deliveryMode === "courier" && courierMarker && (
-              <YMapMarker coordinates={courierMarker.coordinates}>
-                <div
-                  style={{
-                    fontSize: "30px",
-                    transform: "translate(-50%, -100%)",
-                  }}
-                >
-                  🏠
-                </div>
-              </YMapMarker>
-            )}
           </YMap>
 
+          {/* ПАНЕЛЬ КУРЬЕРА */}
           {deliveryMode === "courier" && (
             <div className={styles.courierPanel}>
-              {/* Поле поиска адреса */}
               <div className={styles.searchRow}>
                 <input
                   type="text"
                   className={styles.addressInput}
-                  placeholder="Введите город и адрес..."
+                  placeholder="Введите адрес или кликните на карту"
                   value={courierAddress}
                   onChange={(e) => setCourierAddress(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleManualSearch()}
@@ -452,17 +548,11 @@ export default function DeliveryMapPage({
                 onChange={(e) => setComment(e.target.value)}
               />
 
-              {matchedCity && !addressError && (
-                <div className={styles.courierPrice}>
-                  Доставка: <b>{matchedCity.price + 180}₽</b>
-                </div>
-              )}
-
               <button
                 className={styles.confirmBtn}
                 onClick={handleCourierConfirm}
-                disabled={isCalculating || !!addressError}
-                style={{ opacity: isCalculating || !!addressError ? 0.7 : 1 }}
+                disabled={!!addressError || isCalculating}
+                style={{ opacity: !!addressError || isCalculating ? 0.7 : 1 }}
               >
                 {isCalculating
                   ? "Расчет стоимости..."

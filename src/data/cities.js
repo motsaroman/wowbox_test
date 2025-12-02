@@ -1,86 +1,88 @@
 export const cities = [
-  { name: "Москва", fias: "0c5b2444-70a0-4932-980c-b4dc0d3f02b5", price: 211 },
-  { name: "Московская область", fias: "29251dcf-00a1-4e34-98d4-5c47484a36d4", price: 232 },
-  
-  { name: "Санкт-Петербург", fias: "c2deb16a-0330-4f05-821f-1d09c93331e6", price: 220 },
+  // --- МОСКВА И ОБЛАСТЬ ---
+  // Используем ID филиала Москвы (Запад или основной, обычно основной 1)
+  { name: "Москва", fias: "0c5b2444-70a0-4932-980c-b4dc0d3f02b5", price: 211, filialId: "1" },
+  { name: "Московская область", fias: "29251dcf-00a1-4e34-98d4-5c47484a36d4", price: 232, filialId: "1" },
 
-  // --- ГОРОДА (Сортировка А-Я) ---
-  { name: "Абакан", fias: null, price: 614 }, // TODO: Найти ФИАС
-  { name: "Архангельск", fias: "06814fb6-0dc3-4bec-ba20-11f894a0faf5", price: 398 },
-  { name: "Астрахань", fias: "a101dd8b-3aee-4bda-9c61-9df106f145ff", price: 233 },
-  { name: "Барнаул", fias: "d13945a8-7017-46ab-b1e6-ede1e89317ad", price: 398 },
-  { name: "Белгород", fias: "02e9c019-ab4d-4fa0-928e-d6c0a41dc256", price: 233 },
-  { name: "Брянск", fias: "414b71cf-921e-4bfc-b6e0-f7395d16aaef", price: 233 },
-  { name: "Великий Новгород", fias: "8d0a05bf-3b8a-43e9-ac26-7ce61d7c4560", price: 287 },
+  // --- САНКТ-ПЕТЕРБУРГ ---
+  { name: "Санкт-Петербург", fias: "c2deb16a-0330-4f05-821f-1d09c93331e6", price: 220, filialId: "7157" },
+
+  // --- ГОРОДА (Алфавитный порядок) ---
+  { name: "Абакан", fias: null, price: 614 }, // Нет в списке филиалов
+  { name: "Армавир", fias: "fc9c55d0-c66e-455e-8034-b0944b025c38", price: 337, filialId: "94368" },
+  { name: "Архангельск", fias: "06814fb6-0dc3-4bec-ba20-11f894a0faf5", price: 398, filialId: "94321" },
+  { name: "Астрахань", fias: "a101dd8b-3aee-4bda-9c61-9df106f145ff", price: 233, filialId: "93958" },
+  { name: "Барнаул", fias: "d13945a8-7017-46ab-b1e6-ede1e89317ad", price: 398, filialId: "94113" },
+  { name: "Белгород", fias: "02e9c019-ab4d-4fa0-928e-d6c0a41dc256", price: 233, filialId: "83954" },
+  { name: "Брянск", fias: "414b71cf-921e-4bfc-b6e0-f7395d16aaef", price: 233, filialId: "89250" },
+  { name: "Великий Новгород", fias: "8d0a05bf-3b8a-43e9-ac26-7ce61d7c4560", price: 287, filialId: "90502" },
   { name: "Владивосток", fias: null, price: 744 },
-  { name: "Владикавказ", fias: "20ea2341-4f49-4c5c-a9dc-a54688c8cc61", price: 287 },
-  { name: "Владимир", fias: "f66a00e6-179e-4de9-8ecb-78b0277c9f10", price: 233 },
-  { name: "Волгоград", fias: "a52b7389-0cfe-46fb-ae15-298652a64cf8", price: 233 },
-  { name: "Вологда", fias: "023484a5-f98d-4849-82e1-b7e0444b54ef", price: 233 },
-  { name: "Воронеж", fias: "5bf5ddff-6353-4a3d-80c4-6fb27f00c6c1", price: 233 },
-  { name: "Горно-Алтайск", fias: null, price: 398 }, // TODO: Найти ФИАС
-  { name: "Екатеринбург", fias: "2763c110-cb8b-416a-9dac-ad28a55b4402", price: 287 },
-  { name: "Иваново", fias: "40c6863e-2a5f-4033-a377-3416533948bd", price: 233 },
-  { name: "Ижевск", fias: null, price: 233 }, // TODO: Найти ФИАС
-  { name: "Иркутск", fias: null, price: 614 }, // TODO: Найти ФИАС
-  { name: "Йошкар-Ола", fias: null, price: 233 }, // TODO: Найти ФИАС
-  { name: "Казань", fias: "93b3df57-4c89-44df-ac42-96f05e9cd3b9", price: 233 },
-  { name: "Калуга", fias: "b502ae45-897e-4b6f-9776-6ff49740b537", price: 233 },
-  { name: "Кемерово", fias: "94bb19a3-c1fa-410b-8651-ac1bf7c050cd", price: 398 },
-  { name: "Киров", fias: "452a2ddf-88a1-4e35-8d8d-8635493768d4", price: 233 },
-  { name: "Кострома", fias: "14c73394-b886-40a9-9e5c-547cfd4d6aad", price: 233 },
-  { name: "Краснодар", fias: "7dfa745e-aa19-4688-b121-b655c11e482f", price: 233 },
-  { name: "Красноярск", fias: "9b968c73-f4d4-4012-8da8-3dacd4d4c1bd", price: 614 },
-  { name: "Курган", fias: null, price: 287 }, // TODO: Найти ФИАС
-  { name: "Курск", fias: "d790c72e-479b-4da2-90d7-842b1712a71c", price: 233 },
-  { name: "Кызыл", fias: null, price: 614 }, // TODO: Найти ФИАС
-  { name: "Липецк", fias: "eacb5f15-1a2e-432e-904a-ca56bd635f1b", price: 233 },
-  { name: "Майкоп", fias: null, price: 233 }, // TODO: Найти ФИАС
-  { name: "Мурманск", fias: null, price: 287 }, // TODO: Найти ФИАС
-  { name: "Нальчик", fias: "913a82e3-b671-43d5-97b4-8a08b8ee2d28", price: 287 },
-  { name: "Нижний Новгород", fias: "555e7d61-d9a7-4ba6-9770-6caa8198c483", price: 233 },
-  { name: "Новосибирск", fias: "8dea00e3-9aab-4d8e-887c-ef2aaa546456", price: 398 },
-  { name: "Омск", fias: "140e31da-27bf-4519-9ea0-6185d681d44e", price: 398 },
-  { name: "Орел", fias: "2abed4d9-5565-4885-bc96-f4ffccc6cba4", price: 233 },
-  { name: "Оренбург", fias: "dce97bff-deb2-4fd9-9aec-4f4327bbf89b", price: 233 },
-  { name: "Пенза", fias: "ff3292b1-a1d2-47d4-b35b-ac06b50555cc", price: 233 },
-  { name: "Пермь", fias: "a309e4ce-2f36-4106-b1ca-53e0f48a6d95", price: 233 },
-  { name: "Петрозаводск", fias: null, price: 287 }, // TODO: Найти ФИАС
-  { name: "Псков", fias: null, price: 233 }, // TODO: Найти ФИАС
-  { name: "Ростов-на-Дону", fias: "c1cfe4b9-f7c2-423c-abfa-6ed1c05a15c5", price: 233 },
-  { name: "Рязань", fias: "86e5bae4-ef58-4031-b34f-5e9ff914cd55", price: 233 },
-  { name: "Самара", fias: "bb035cc3-1dc2-4627-9d25-a1bf2d4b936b", price: 233 },
-  { name: "Саранск", fias: null, price: 233 }, // TODO: Найти ФИАС
-  { name: "Саратов", fias: "bf465fda-7834-47d5-986b-ccdb584a85a6", price: 233 },
-  { name: "Смоленск", fias: "d414a2e8-9e1e-48c1-94a4-7308d5608177", price: 233 },
-  { name: "Ставрополь", fias: "2a1c7bdb-05ea-492f-9e1c-b3999f79dcbc", price: 287 },
-  { name: "Сыктывкар", fias: null, price: 287 }, // TODO: Найти ФИАС
-  { name: "Тамбов", fias: "ea2a1270-1e19-4224-b1a0-4228b9de3c7a", price: 233 },
-  { name: "Тверь", fias: "c52ea942-555e-45c6-9751-58897717b02f", price: 233 },
-  { name: "Томск", fias: "e3b0eae8-a4ce-4779-ae04-5c0797de66be", price: 398 },
-  { name: "Тула", fias: "b2601b18-6da2-4789-9fbe-800dde06a2bb", price: 233 },
-  { name: "Тюмень", fias: "9ae64229-9f7b-4149-b27a-d1f6ec74b5ce", price: 287 },
-  { name: "Улан-Удэ", fias: null, price: 614 }, // TODO: Найти ФИАС
-  { name: "Ульяновск", fias: "bebfd75d-a0da-4bf9-8307-2e2c85eac463", price: 233 },
-  { name: "Уфа", fias: "7339e834-2cb4-4734-a4c7-1fca2c66e562", price: 233 },
-  { name: "Ханты-Мансийск", fias: null, price: 454 }, // TODO: Найти ФИАС
-  { name: "Чебоксары", fias: "dd8caeab-c685-4f2a-bf5f-550aca1bbc48", price: 233 },
-  { name: "Челябинск", fias: "a376e68d-724a-4472-be7c-891bdb09ae32", price: 287 },
-  { name: "Черкесск", fias: null, price: 287 }, // TODO: Найти ФИАС
-  { name: "Чита", fias: null, price: 614 }, // TODO: Найти ФИАС
-  { name: "Элиста", fias: null, price: 233 }, // TODO: Найти ФИАС
-  { name: "Ярославль", fias: "6b1bab7d-ee45-4168-a2a6-4ce2880d90d3", price: 233 },
-  
-  // --- ДОПОЛНИТЕЛЬНЫЕ ИЗ ВАШЕГО СПИСКА ФИАС ---
-  { name: "Армавир", fias: "fc9c55d0-c66e-455e-8034-b0944b025c38", price: 337 }, // Краснодарский край
-  { name: "Грозный", fias: "a2072dc5-45be-4db3-ab13-10784ba8b2ae", price: 410 }, // Регион
-  { name: "Магнитогорск", fias: "988157bf-d6d5-4c2a-80ec-4ad531eea056", price: 410 }, // Челябинская обл
-  { name: "Махачкала", fias: "727cdf1e-1b70-4e07-8995-9bf7ca9abefb", price: 410 }, // Дагестан
-  { name: "Нижний Тагил", fias: "cc73d6af-6e2e-4a1f-be8e-682c289b0b57", price: 410 }, // Свердловская обл
-  { name: "Новокузнецк", fias: "b28b6f6f-1435-444e-95a6-68c499b0d27a", price: 468 }, // Кемеровская обл
-  { name: "Пятигорск", fias: "9b0efbd0-22bb-400d-86db-ddc69b9939d9", price: 410 }, // Ставропольский край
-  { name: "Симферополь", fias: "b9001e55-72ed-43bf-b7eb-41b86a14380e", price: 410 }, // Крым
-  { name: "Сочи", fias: "79da737a-603b-4c19-9b54-9114c96fb912", price: 337 }, // Краснодарский край
-  { name: "Тольятти", fias: "242e87c1-584d-4360-8c4c-aae2fe90048e", price: 337 }, // Самарская обл
-  { name: "Череповец", fias: "b4c30848-5181-44b4-88fa-456e1c4aeb0f", price: 337 }, // Вологодская обл
+  { name: "Владикавказ", fias: "20ea2341-4f49-4c5c-a9dc-a54688c8cc61", price: 287, filialId: "95501" },
+  { name: "Владимир", fias: "f66a00e6-179e-4de9-8ecb-78b0277c9f10", price: 233, filialId: "83953" },
+  { name: "Волгоград", fias: "a52b7389-0cfe-46fb-ae15-298652a64cf8", price: 233, filialId: "91321" },
+  { name: "Вологда", fias: "023484a5-f98d-4849-82e1-b7e0444b54ef", price: 233, filialId: "91198" },
+  { name: "Воронеж", fias: "5bf5ddff-6353-4a3d-80c4-6fb27f00c6c1", price: 233, filialId: "74325" },
+  { name: "Горно-Алтайск", fias: null, price: 398 },
+  { name: "Грозный", fias: "a2072dc5-45be-4db3-ab13-10784ba8b2ae", price: 410, filialId: "97378" },
+  { name: "Екатеринбург", fias: "2763c110-cb8b-416a-9dac-ad28a55b4402", price: 287, filialId: "86246" },
+  { name: "Иваново", fias: "40c6863e-2a5f-4033-a377-3416533948bd", price: 233, filialId: "89248" },
+  { name: "Ижевск", fias: null, price: 233 },
+  { name: "Иркутск", fias: null, price: 614 },
+  { name: "Йошкар-Ола", fias: null, price: 233 },
+  { name: "Казань", fias: "93b3df57-4c89-44df-ac42-96f05e9cd3b9", price: 233, filialId: "92339" },
+  { name: "Калуга", fias: "b502ae45-897e-4b6f-9776-6ff49740b537", price: 233, filialId: "74326" },
+  { name: "Кемерово", fias: "94bb19a3-c1fa-410b-8651-ac1bf7c050cd", price: 398, filialId: "94356" },
+  { name: "Киров", fias: "452a2ddf-88a1-4e35-8d8d-8635493768d4", price: 233, filialId: "97150" },
+  { name: "Кострома", fias: "14c73394-b886-40a9-9e5c-547cfd4d6aad", price: 233, filialId: "89249" },
+  { name: "Краснодар", fias: "7dfa745e-aa19-4688-b121-b655c11e482f", price: 233, filialId: "90107" },
+  { name: "Красноярск", fias: "9b968c73-f4d4-4012-8da8-3dacd4d4c1bd", price: 614, filialId: "94013" },
+  { name: "Курган", fias: null, price: 287 },
+  { name: "Курск", fias: "d790c72e-479b-4da2-90d7-842b1712a71c", price: 233, filialId: "83955" },
+  { name: "Кызыл", fias: null, price: 614 },
+  { name: "Липецк", fias: "eacb5f15-1a2e-432e-904a-ca56bd635f1b", price: 233, filialId: "83956" },
+  { name: "Магнитогорск", fias: "988157bf-d6d5-4c2a-80ec-4ad531eea056", price: 410, filialId: "94025" },
+  { name: "Майкоп", fias: null, price: 233 },
+  { name: "Махачкала", fias: "727cdf1e-1b70-4e07-8995-9bf7ca9abefb", price: 410, filialId: "94230" },
+  { name: "Мурманск", fias: null, price: 287 },
+  { name: "Набережные Челны", fias: null, price: 233, filialId: "95500" }, // Добавил из списка филиалов
+  { name: "Нальчик", fias: "913a82e3-b671-43d5-97b4-8a08b8ee2d28", price: 287, filialId: "96449" },
+  { name: "Нижний Новгород", fias: "555e7d61-d9a7-4ba6-9770-6caa8198c483", price: 233, filialId: "83958" },
+  { name: "Нижний Тагил", fias: "cc73d6af-6e2e-4a1f-be8e-682c289b0b57", price: 410, filialId: "94240" },
+  { name: "Новокузнецк", fias: "b28b6f6f-1435-444e-95a6-68c499b0d27a", price: 468, filialId: "95662" },
+  { name: "Новосибирск", fias: "8dea00e3-9aab-4d8e-887c-ef2aaa546456", price: 398, filialId: "91128" },
+  { name: "Омск", fias: "140e31da-27bf-4519-9ea0-6185d681d44e", price: 398, filialId: "91353" },
+  { name: "Орел", fias: "2abed4d9-5565-4885-bc96-f4ffccc6cba4", price: 233, filialId: "74324" },
+  { name: "Оренбург", fias: "dce97bff-deb2-4fd9-9aec-4f4327bbf89b", price: 233, filialId: "96036" },
+  { name: "Пенза", fias: "ff3292b1-a1d2-47d4-b35b-ac06b50555cc", price: 233, filialId: "97275" },
+  { name: "Пермь", fias: "a309e4ce-2f36-4106-b1ca-53e0f48a6d95", price: 233, filialId: "90106" },
+  { name: "Петрозаводск", fias: null, price: 287 },
+  { name: "Псков", fias: null, price: 233 },
+  { name: "Пятигорск", fias: "9b0efbd0-22bb-400d-86db-ddc69b9939d9", price: 410, filialId: "94293" },
+  { name: "Ростов-на-Дону", fias: "c1cfe4b9-f7c2-423c-abfa-6ed1c05a15c5", price: 233, filialId: "90785" },
+  { name: "Рязань", fias: "86e5bae4-ef58-4031-b34f-5e9ff914cd55", price: 233, filialId: "89251" },
+  { name: "Самара", fias: "bb035cc3-1dc2-4627-9d25-a1bf2d4b936b", price: 233, filialId: "90210" },
+  { name: "Саранск", fias: null, price: 233 },
+  { name: "Саратов", fias: "bf465fda-7834-47d5-986b-ccdb584a85a6", price: 233, filialId: "92042" },
+  { name: "Симферополь", fias: "b9001e55-72ed-43bf-b7eb-41b86a14380e", price: 410, filialId: "97527" },
+  { name: "Смоленск", fias: "d414a2e8-9e1e-48c1-94a4-7308d5608177", price: 233, filialId: "89252" },
+  { name: "Сочи", fias: "79da737a-603b-4c19-9b54-9114c96fb912", price: 337, filialId: "94014" },
+  { name: "Ставрополь", fias: "2a1c7bdb-05ea-492f-9e1c-b3999f79dcbc", price: 287, filialId: "91580" },
+  { name: "Сыктывкар", fias: null, price: 287 },
+  { name: "Тамбов", fias: "ea2a1270-1e19-4224-b1a0-4228b9de3c7a", price: 233, filialId: "83957" },
+  { name: "Тверь", fias: "c52ea942-555e-45c6-9751-58897717b02f", price: 233, filialId: "74145" },
+  { name: "Тольятти", fias: "242e87c1-584d-4360-8c4c-aae2fe90048e", price: 337, filialId: "92530" },
+  { name: "Томск", fias: "e3b0eae8-a4ce-4779-ae04-5c0797de66be", price: 398, filialId: "94357" },
+  { name: "Тула", fias: "b2601b18-6da2-4789-9fbe-800dde06a2bb", price: 233, filialId: "74322" },
+  { name: "Тюмень", fias: "9ae64229-9f7b-4149-b27a-d1f6ec74b5ce", price: 287, filialId: "91515" },
+  { name: "Улан-Удэ", fias: null, price: 614 },
+  { name: "Ульяновск", fias: "bebfd75d-a0da-4bf9-8307-2e2c85eac463", price: 233, filialId: "94019" },
+  { name: "Уфа", fias: "7339e834-2cb4-4734-a4c7-1fca2c66e562", price: 233, filialId: "91581" },
+  { name: "Ханты-Мансийск", fias: null, price: 454 },
+  { name: "Чебоксары", fias: "dd8caeab-c685-4f2a-bf5f-550aca1bbc48", price: 233, filialId: "92306" },
+  { name: "Челябинск", fias: "a376e68d-724a-4472-be7c-891bdb09ae32", price: 287, filialId: "90503" },
+  { name: "Череповец", fias: "b4c30848-5181-44b4-88fa-456e1c4aeb0f", price: 337, filialId: "94229" },
+  { name: "Черкесск", fias: null, price: 287 },
+  { name: "Чита", fias: null, price: 614 },
+  { name: "Элиста", fias: null, price: 233 },
+  { name: "Ярославль", fias: "6b1bab7d-ee45-4168-a2a6-4ce2880d90d3", price: 233, filialId: "74323" },
 ];

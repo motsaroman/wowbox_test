@@ -36,7 +36,8 @@ export const {
   YMapMarker,
   YMapFeatureDataSource,
   YMapLayer,
-  YMapListener
+  YMapListener,
+  YMapFeature
 } = reactify.module(ymaps3);
 
 export const {

@@ -159,7 +159,7 @@ export default function OrderModal({
       }));
 
       if (deliveryData.point.price) {
-        setDeliveryPrice(deliveryData.point.price + 50);
+        setDeliveryPrice(deliveryData.point.price);
       }
     }
     // 2. КУРЬЕР

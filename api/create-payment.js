@@ -325,7 +325,7 @@ export default async function handler(req, res) {
     if (deliveryData.type === 'courier') {
       deliveryPrice += 180;
     } else if (deliveryData.type === '5post') {
-      deliveryPrice += 50;
+      deliveryPrice += 0;
     }
 
     const totalAmountValue = (boxPrice + deliveryPrice).toFixed(2);
