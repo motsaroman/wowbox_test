@@ -31,10 +31,10 @@ export default function DeliverySection({ onOpenMap }) {
 
       {errors.delivery && <div style={{ color: '#ff4444', marginBottom: '10px', fontSize: '14px', fontWeight: '500' }}>⚠️ {errors.delivery}</div>}
 
-      <div className={styles.inputGroup}>
+      {/*<div className={styles.inputGroup}>
         <label className={styles.label}>Город<span className={styles.required}>*</span></label>
         <input type="text" value={formData.city} readOnly className={styles.input} style={{opacity: 0.7, cursor: 'not-allowed'}} />
-      </div>
+      </div>*/}
 
       {formData.deliveryType === "5post" ? (
         <div className={styles.inputGroup}>

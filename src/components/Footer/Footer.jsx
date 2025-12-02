@@ -48,8 +48,8 @@ export default function Footer() {
             <a href="mailto:hello@wowbox.market">hello@wowbox.market</a>
           </div>
           <div>
-            <a href="#"><img src={whatsup} alt="WhatsApp" loading="lazy" /></a>
-            <a href="#"><img src={telegram} alt="Telegram" loading="lazy" /></a>
+            {/*<a href="#"><img src={whatsup} alt="WhatsApp" loading="lazy" /></a>*/}
+            <a href="https://t.me/wowboxofficial"><img src={telegram} alt="Telegram" loading="lazy" /></a>
           </div>
         </div>
       </div>

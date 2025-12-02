@@ -2,7 +2,8 @@ import { useEffect, useMemo, useCallback, useState } from "react";
 import { useDeliveryStore } from "../../store/deliveryStore";
 import {
   YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer,
-  YMapMarker, YMapClusterer, clusterByGrid, YMapListener, YMapFeature
+  YMapMarker, YMapClusterer, clusterByGrid, YMapListener, YMapFeature,
+  YMapControls, YMapZoomControl, YMapGeolocationControl // Импортируем новые компоненты
 } from "../../lib/ymaps";
 import markerIcon from "../../assets/images/5post-geo.png";
 import DeliveryHeader from "./components/DeliveryHeader";
@@ -27,7 +28,7 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
     }
   }, [isOpen]);
 
-  // Хендлер клика по ПВЗ (остался здесь, т.к. зависит от пропса onDeliverySelect)
+  // Хендлер клика по ПВЗ
   const handlePointClick = (point) => {
     onDeliverySelect({
       mode: "pickup",
@@ -83,6 +84,12 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
               <YMapDefaultSchemeLayer />
               <YMapDefaultFeaturesLayer />
               <YMapListener onClick={(_, e) => handleMapClickAction(e.coordinates)} />
+
+              {/* Элементы управления: Зум и Геолокация */}
+              <YMapControls position="right">
+                <YMapZoomControl />
+                <YMapGeolocationControl />
+              </YMapControls>
 
               {/* Полигоны */}
               {deliveryMode === 'courier' && polygons?.features?.map((feature, idx) => (

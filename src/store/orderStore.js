@@ -31,7 +31,7 @@ export const useOrderStore = create((set, get) => ({
   formData: { ...initialFormData },
   errors: {},
   isProcessing: false,
-  
+
   // Цены и Промокод
   deliveryPrice: 0,
   boxPrice: 4900,
@@ -56,21 +56,21 @@ export const useOrderStore = create((set, get) => ({
   setField: (name, value) => set((state) => {
     const newErrors = { ...state.errors };
     delete newErrors[name]; // Сбрасываем ошибку поля при вводе
-    
+
     // Спец. логика для промокода (сброс статуса при редактировании)
     if (name === 'promoCode') {
-        return { 
-            formData: { ...state.formData, [name]: value }, 
-            errors: newErrors,
-            promoStatus: null, 
-            promoMessage: "", 
-            promoApplied: false 
-        };
+      return {
+        formData: { ...state.formData, [name]: value },
+        errors: newErrors,
+        promoStatus: null,
+        promoMessage: "",
+        promoApplied: false
+      };
     }
 
-    return { 
-        formData: { ...state.formData, [name]: value }, 
-        errors: newErrors 
+    return {
+      formData: { ...state.formData, [name]: value },
+      errors: newErrors
     };
   }),
 
@@ -86,37 +86,37 @@ export const useOrderStore = create((set, get) => ({
 
   updateDelivery: (data) => set((state) => {
     const isPickup = data.mode === "pickup";
-    
+
     // 1. РАСЧЕТ ЦЕНЫ С НАЦЕНКАМИ
     let newPrice = 0;
     if (isPickup) {
-        const base = data.point?.price || 0;
-        newPrice = base > 0 ? base + 0 : 0; 
+      const base = data.point?.price || 0;
+      newPrice = base > 0 ? base + 0 : 0;
     } else {
-        const base = data.price || 0;
-        newPrice = base > 0 ? base + 180 : 0;
+      const base = data.price || 0;
+      newPrice = base > 0 ? base + 180 : 0;
     }
 
     return {
-        deliveryPrice: newPrice,
-        formData: {
-            ...state.formData,
-            deliveryType: isPickup ? "5post" : "courier",
-            cityFias: data.cityFias,
-            city: data.cityName || state.formData.city,
-            
-            // Если ПВЗ
-            deliveryPoint: isPickup ? `${data.point.address} (${data.point.name})` : "",
-            pvzCode: isPickup ? data.point.id : "",
-            
-            // Если Курьер
-            deliveryAddress: !isPickup ? data.address : "",
-            apartment: !isPickup ? (data.apartment || "") : "",
-            entrance: !isPickup ? (data.entrance || "") : "",
-            floor: !isPickup ? (data.floor || "") : "",
-            courierComment: !isPickup ? (data.comment || "") : "",
-        },
-        errors: { ...state.errors, delivery: null } // Сбрасываем ошибку доставки
+      deliveryPrice: newPrice,
+      formData: {
+        ...state.formData,
+        deliveryType: isPickup ? "5post" : "courier",
+        cityFias: data.cityFias,
+        city: data.cityName || state.formData.city,
+
+        // Если ПВЗ
+        deliveryPoint: isPickup ? `${data.point.address} (${data.point.name})` : "",
+        pvzCode: isPickup ? data.point.id : "",
+
+        // Если Курьер
+        deliveryAddress: !isPickup ? data.address : "",
+        apartment: !isPickup ? (data.apartment || "") : "",
+        entrance: !isPickup ? (data.entrance || "") : "",
+        floor: !isPickup ? (data.floor || "") : "",
+        courierComment: !isPickup ? (data.comment || "") : "",
+      },
+      errors: { ...state.errors, delivery: null } // Сбрасываем ошибку доставки
     };
   }),
 
@@ -141,17 +141,20 @@ export const useOrderStore = create((set, get) => ({
     if (!formData.name.trim()) { newErrors.name = "Введите ваше имя"; isValid = false; }
     if (!formData.phone || formData.phone.length < 12) { newErrors.phone = "Введите корректный телефон"; isValid = false; }
     if (!formData.email.trim() || !formData.email.includes('@')) { newErrors.email = "Введите корректный email"; isValid = false; }
-
+    if (formData.telegramNotify && !formData.telegramUsername.trim()) {
+      newErrors.telegramUsername = "Укажите ваш никнейм";
+      isValid = false;
+    }
     if (formData.deliveryType === '5post' && !formData.pvzCode) {
-        newErrors.delivery = "Выберите пункт выдачи на карте"; isValid = false;
+      newErrors.delivery = "Выберите пункт выдачи на карте"; isValid = false;
     }
     if (formData.deliveryType === 'courier' && !formData.deliveryAddress) {
-        newErrors.delivery = "Укажите адрес доставки на карте"; isValid = false;
+      newErrors.delivery = "Укажите адрес доставки на карте"; isValid = false;
     }
 
     if (formData.isGift) {
-        if (!formData.recipientName.trim()) { newErrors.recipientName = "Укажите имя получателя"; isValid = false; }
-        if (!formData.recipientPhone || formData.recipientPhone.length < 12) { newErrors.recipientPhone = "Укажите телефон получателя"; isValid = false; }
+      if (!formData.recipientName.trim()) { newErrors.recipientName = "Укажите имя получателя"; isValid = false; }
+      if (!formData.recipientPhone || formData.recipientPhone.length < 12) { newErrors.recipientPhone = "Укажите телефон получателя"; isValid = false; }
     }
 
     if (!formData.acceptTerms) { newErrors.terms = "Необходимо согласие"; isValid = false; }
