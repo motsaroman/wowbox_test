@@ -1,0 +1,82 @@
+import styles from "../../App.module.css";
+
+// Изображения
+import mapRaodImg1 from "../../assets/images/mapRoadImg1.webp";
+import mapRaodImg2 from "../../assets/images/mapRoadImg2.webp";
+import mapRaodImg3 from "../../assets/images/mapRoadImg3.webp";
+import mapRaodImg4 from "../../assets/images/mapRoadImg4.webp";
+
+import number1 from "../../assets/images/number1.webp";
+import number2 from "../../assets/images/number2.webp";
+import number3 from "../../assets/images/number3.webp";
+import number4 from "../../assets/images/number4.webp";
+
+export default function HowItWorksSection() {
+  return (
+    <div className={styles.howToWorkWowBox}>
+      <h1>Как работает WOWBOX?</h1>
+      <div className={styles.howToWorkWowBoxMap}>
+        <div className={styles.howToWorkWowBoxMapBox}>
+          <img src={mapRaodImg1} alt="mapRoad" loading="lazy" />.
+          <div className={styles.howToWorkWowBoxMapBoxBody}>
+            <img
+              src={number1}
+              alt="1"
+              className={styles.boxBodyNumber}
+              loading="lazy"
+            />
+            <p>Выбираете тип бокса</p>
+            <p>Пати бокс, Уютный бокс, Техно бокс, Сладкий бокс</p>
+            <p>Тип бокса влияет на стиль, но не на ценность</p>
+          </div>
+        </div>
+        <div className={styles.howToWorkWowBoxMapBox}>
+          <img src={mapRaodImg2} alt="mapRaodImg2" loading="lazy" />.
+          <div className={styles.howToWorkWowBoxMapBoxBody}>
+            <img
+              src={number2}
+              alt="number2"
+              className={styles.boxBodyNumber}
+              loading="lazy"
+            />
+            <p>Мы собираем ваш бокс</p>
+            <p>
+              9–12 оригинальных премиум-товаров
+              <br />
+              Наполнение от 4900 ₽ до 120 000 ₽
+            </p>
+            <p>Каждый бокс собирается вручную и проходит проверку качества</p>
+          </div>
+        </div>
+        <div className={styles.howToWorkWowBoxMapBox}>
+          <img src={mapRaodImg3} alt="mapRaodImg3" loading="lazy" />.
+          <div className={styles.howToWorkWowBoxMapBoxBody}>
+            <img
+              src={number3}
+              alt="number3"
+              className={styles.boxBodyNumber}
+              loading="lazy"
+            />
+            <p>Получаете и наслаждаетесь</p>
+            <p>Быстрая и безопасная доставка Отслеживание 24/7</p>
+            <p>Доставка по всей России без задержек</p>
+          </div>
+        </div>
+        <div className={styles.howToWorkWowBoxMapBox}>
+          <img src={mapRaodImg4} alt="mapRaodImg4" loading="lazy" />.
+          <div className={styles.howToWorkWowBoxMapBoxBody}>
+            <img
+              src={number4}
+              alt="number4"
+              className={styles.boxBodyNumber}
+              loading="lazy"
+            />
+            <p>Наслаждение не только от распаковки</p>
+            <p>Контроль качества даже после покупки</p>
+            <p>Мы остаёмся на связи даже после получения заказа</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
