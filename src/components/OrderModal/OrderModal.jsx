@@ -21,24 +21,24 @@ export default function OrderModal({
   onOpenPublicOffer,
 }) {
   // Данные формы и логика валидации из OrderStore
-  const { 
-    resetForm, 
-    validateForm, 
-    formData, 
-    setProcessing, 
-    updateDelivery, 
-    deliveryPrice, 
-    boxPrice, 
-    promoApplied 
+  const {
+    resetForm,
+    validateForm,
+    formData,
+    setProcessing,
+    updateDelivery,
+    deliveryPrice,
+    boxPrice,
+    promoApplied,
   } = useOrderStore();
-  
+
   // Данные товара и управление модалкой из BoxStore
-  const { 
-      isOrderModalOpen, 
-      closeOrderModal, 
-      editOrder, 
-      selectedTheme, 
-      personalizationData 
+  const {
+    isOrderModalOpen,
+    closeOrderModal,
+    editOrder,
+    selectedTheme,
+    personalizationData,
   } = useBoxStore();
 
   const [isMapOpen, setIsMapOpen] = useState(false);
@@ -51,16 +51,18 @@ export default function OrderModal({
     } else {
       document.body.style.overflow = "unset";
     }
-    return () => { document.body.style.overflow = "unset"; };
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [isOrderModalOpen, resetForm]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Запускаем валидацию полей в сторе
     if (!validateForm()) {
-        console.log("Ошибка валидации формы");
-        return; 
+      console.log("Ошибка валидации формы");
+      return;
     }
 
     setProcessing(true);
@@ -68,79 +70,87 @@ export default function OrderModal({
     try {
       // Расчет итоговой суммы
       const totalPrice = boxPrice + deliveryPrice - (promoApplied ? 500 : 0);
-      
+
       // Формируем данные персонализации (если есть, или берем дефолт)
-      const personalData = {
+      const fullPersonalData = {
         theme: personalizationData?.theme || selectedTheme,
-        gender: personalizationData?.gender || 'не указан',
         recipient: personalizationData?.recipient || 'не указан',
+        gender: personalizationData?.gender || 'не указан',
         restrictions: personalizationData?.restrictions || 'нет',
         wishes: personalizationData?.additionalWishes || 'нет',
+        quizAnswers: personalizationData?.quiz || {}, 
       };
 
       // Формируем полный адрес для курьера (строкой)
       let fullCourierAddress = null;
-      if (formData.deliveryType === 'courier') {
+      if (formData.deliveryType === "courier") {
         const parts = [
           formData.city,
           formData.deliveryAddress,
-          formData.apartment ? `кв. ${formData.apartment}` : '',
-          formData.entrance ? `под. ${formData.entrance}` : '',
-          formData.floor ? `эт. ${formData.floor}` : ''
+          formData.apartment ? `кв. ${formData.apartment}` : "",
+          formData.entrance ? `под. ${formData.entrance}` : "",
+          formData.floor ? `эт. ${formData.floor}` : "",
         ];
-        fullCourierAddress = parts.filter(Boolean).join(', ');
+        fullCourierAddress = parts.filter(Boolean).join(", ");
       }
 
       // Основной пейлоад
       const payload = {
-        boxTheme: personalData.theme,
+        //boxTheme: personalData.theme,
         promoCode: formData.promoCode,
         paymentMethod: formData.paymentMethod,
-        contactData: { 
-            name: formData.name, 
-            phone: formData.phone, 
-            email: formData.email 
+        contactData: {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
         },
-        recipientData: formData.isGift ? { 
-            name: formData.recipientName, 
-            phone: formData.recipientPhone 
-        } : null,
+        recipientData: formData.isGift
+          ? {
+              name: formData.recipientName,
+              phone: formData.recipientPhone,
+            }
+          : null,
         comments: {
           user: formData.comment,
           courier: formData.courierComment,
-          personalization: personalData 
+          personalization: fullPersonalData,
         },
         deliveryData: {
           type: formData.deliveryType,
           pointId: formData.pvzCode,
-          // Очищаем название точки от лишнего
-          pointName: formData.deliveryPoint ? formData.deliveryPoint.split(' (')[1]?.replace(')', '') : null, 
-          address: fullCourierAddress, 
+          pointName: formData.deliveryPoint
+            ? formData.deliveryPoint.split(" (")[1]?.replace(")", "")
+            : null,
+          address: fullCourierAddress,
           details: {
             city: formData.city,
             cityFias: formData.cityFias,
             street: formData.deliveryAddress,
             flat: formData.apartment,
             floor: formData.floor,
-            entrance: formData.entrance
-          }
+            entrance: formData.entrance,
+          },
         },
-        clientPrices: { 
-            box: boxPrice, 
-            delivery: deliveryPrice, 
-            total: totalPrice 
+        clientPrices: {
+          box: boxPrice,
+          delivery: deliveryPrice,
+          total: totalPrice,
         },
         utm: {
-          source: new URLSearchParams(window.location.search).get("utm_source") || "direct",
+          source:
+            new URLSearchParams(window.location.search).get("utm_source") ||
+            "direct",
           medium: new URLSearchParams(window.location.search).get("utm_medium"),
-          campaign: new URLSearchParams(window.location.search).get("utm_campaign"),
-        }
+          campaign: new URLSearchParams(window.location.search).get(
+            "utm_campaign"
+          ),
+        },
       };
 
       // Отправляем на бэкенд
-      const response = await fetch('/create-payment.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("https://wowbox.market/api/create-payment.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -149,16 +159,16 @@ export default function OrderModal({
       if (response.ok && data.confirmationUrl) {
         // Переход на оплату
         window.location.href = data.confirmationUrl;
-        
+
         // (Опционально) Сообщаем родителю об успехе, если нужно открыть модалку ожидания
-        onPayment(formData.paymentMethod); 
+        onPayment(formData.paymentMethod);
         closeOrderModal();
       } else {
-        alert('Ошибка: ' + (data.message || 'Попробуйте позже'));
+        alert("Ошибка: " + (data.message || "Попробуйте позже"));
       }
     } catch (error) {
       console.error(error);
-      alert('Ошибка сети. Проверьте соединение.');
+      alert("Ошибка сети. Проверьте соединение.");
     } finally {
       setProcessing(false);
     }
@@ -166,20 +176,78 @@ export default function OrderModal({
 
   // Хелперы для отображения
   const getThemeDisplayName = (theme) => {
-    const themeMap = { techno: "ТЕХНО", cozy: "УЮТНЫЙ", party: "ПАТИ", sweet: "СЛАДКИЙ" };
+    const themeMap = {
+      techno: "ТЕХНО",
+      cozy: "УЮТНЫЙ",
+      party: "ПАТИ",
+      sweet: "СЛАДКИЙ",
+    };
     return themeMap[theme] || theme?.toUpperCase() || "ТЕХНО";
   };
-  
+
   const getThemeLogo = (theme) => {
-    const logoMap = { techno: texno1, cozy: texno2, party: texno3, sweet: texno4 };
+    const logoMap = {
+      techno: texno1,
+      cozy: texno2,
+      party: texno3,
+      sweet: texno4,
+    };
     return logoMap[theme] || texno1;
   };
 
-  const getGenderDisplayName = (gender) => ({ 
-      female: "Женский", 
-      male: "Мужской", 
-      "not-important": "Не важно" 
-  }[gender] || "Не указано");
+  const getGenderDisplayName = (gender) =>
+    ({
+      female: "Женский",
+      male: "Мужской",
+      "not-important": "Не важно",
+    }[gender] || "Не указано");
+  const getPersonalizationDetails = () => {
+    if (!personalizationData) return [];
+
+    const details = [];
+    const quiz = personalizationData.quiz || {};
+
+    // 1. Получатель (из шага 1 персонализации)
+    // Используем optional chaining (?.) и trim() для безопасного извлечения и очистки значения
+    const recipientValue = personalizationData.recipient?.trim() || 'Не указано';
+    details.push({ key: 'recipient', label: 'Для кого', value: recipientValue });
+
+    // 2. Пол получателя (из шага 2 персонализации)
+    const genderValue = getGenderDisplayName(personalizationData.gender);
+    details.push({ key: 'gender', label: 'Пол', value: genderValue });
+    
+    // --- Ответы Квиза ---
+    // ... (логика квиза остается без изменений)
+    
+    // Пример Q2: Стиль предпочтения (ключ '2' в quizAnswers)
+    if (quiz['2']) {
+        const styleMap = { practical: "Практичность", emotions: "Эмоции/Впечатления", quality: "Качество/Надежность", surprise: "Сюрприз/Вау-эффект" };
+        details.push({ key: 'stylePreference', label: 'Стиль', value: styleMap[quiz['2']] || quiz['2'] });
+    }
+
+    // Пример Q3: Бюджет (ключ '3')
+    if (quiz['3']) {
+        const spendingMap = { low: "до 5 000 ₽", medium: "5 000 ₽ - 15 000 ₽", high: "свыше 15 000 ₽" };
+        details.push({ key: 'spendingHabits', label: 'Бюджет', value: spendingMap[quiz['3']] || quiz['3'] });
+    }
+    
+    // Пример Q4: Возраст (ключ '4')
+    if (quiz['4']) {
+        const ageMap = { teen: "13-17 лет", young_adult: "18-25 лет", adult: "26-40 лет", mature: "40+ лет" };
+        details.push({ key: 'ageGroup', label: 'Возраст', value: ageMap[quiz['4']] || quiz['4'] });
+    }
+    // --- Конец ответов Квиза ---
+
+    // 3. Ограничения (из шага 3 персонализации)
+    details.push({ key: 'restrictions', label: 'Ограничения', value: personalizationData.restrictions || 'Нет' });
+    
+    // 4. Пожелания (из шага 4 персонализации)
+    // Используем optional chaining и trim() для безопасного извлечения
+    const wishesValue = personalizationData.additionalWishes?.trim() || 'Нет';
+    details.push({ key: 'wishes', label: 'Пожелания', value: wishesValue });
+    
+    return details;
+  }
 
   if (!isOrderModalOpen) return null;
 
@@ -187,7 +255,9 @@ export default function OrderModal({
     <div className={styles.pageContainer}>
       <div className={styles.header}>
         <h2 className={styles.title}>Оформление заказа</h2>
-        <button className={styles.closeButton} onClick={closeOrderModal}>✕</button>
+        <button className={styles.closeButton} onClick={closeOrderModal}>
+          ✕
+        </button>
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
@@ -202,27 +272,38 @@ export default function OrderModal({
         <div className={styles.rightColumn}>
           <div className={styles.rightColumnTopContent}>
             <div className={styles.selectedBox}>
-              <button type="button" className={styles.editButton} onClick={editOrder} title="Редактировать">
-                  <img src={editIcon} alt="Edit" />
+              <button
+                type="button"
+                className={styles.editButton}
+                onClick={editOrder}
+                title="Редактировать"
+              >
+                <img src={editIcon} alt="Edit" />
               </button>
-              
+
               <div className={styles.boxImageWrapper}>
                 <div className={styles.boxImage}>
-                  <img 
-                    src={getThemeLogo(personalizationData?.theme || selectedTheme)} 
-                    alt="box" 
-                    className={styles.boxLogo} 
+                  <img
+                    src={getThemeLogo(
+                      personalizationData?.theme || selectedTheme
+                    )}
+                    alt="box"
+                    className={styles.boxLogo}
                   />
                 </div>
                 <div className={styles.boxInfo}>
                   <h4 className={styles.boxTitle}>
-                      {getThemeDisplayName(personalizationData?.theme || selectedTheme)}
+                    {getThemeDisplayName(
+                      personalizationData?.theme || selectedTheme
+                    )}
                   </h4>
                   <div className={styles.boxDetails}>
-                    <p>Для кого: <span>{personalizationData?.recipient || "Не указано"}</span></p>
-                    <p>Пол: <span>{getGenderDisplayName(personalizationData?.gender)}</span></p>
-                    <p>Ограничения: <span>{personalizationData?.restrictions || "Нет"}</span></p>
-                    <p>Пожелания: <span>{personalizationData?.additionalWishes || "Нет"}</span></p>
+                    {/* ИЗМЕНЕНИЕ ЗДЕСЬ: Динамический вывод всех деталей */}
+                    {getPersonalizationDetails().map(detail => (
+                        <p key={detail.key}>
+                            {detail.label}: <span>{detail.value}</span>
+                        </p>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -230,10 +311,10 @@ export default function OrderModal({
           </div>
 
           {/* Компонент с итогами, промокодом и кнопкой отправки */}
-          <OrderSummary 
-            onSubmit={handleSubmit} 
-            onOpenPrivacy={onOpenPrivacyPolicy} 
-            onOpenOffer={onOpenPublicOffer} 
+          <OrderSummary
+            onSubmit={handleSubmit}
+            onOpenPrivacy={onOpenPrivacyPolicy}
+            onOpenOffer={onOpenPublicOffer}
           />
         </div>
       </form>
@@ -243,7 +324,9 @@ export default function OrderModal({
           isOpen={isMapOpen}
           onClose={() => setIsMapOpen(false)}
           onDeliverySelect={updateDelivery} // Экшен из OrderStore
-          initialMode={formData.deliveryType === "courier" ? "courier" : "pickup"}
+          initialMode={
+            formData.deliveryType === "courier" ? "courier" : "pickup"
+          }
           currentData={{
             address: formData.deliveryAddress,
             apartment: formData.apartment,

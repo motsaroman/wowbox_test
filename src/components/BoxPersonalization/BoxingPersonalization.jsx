@@ -28,6 +28,16 @@ const BoxPersonalization = () => {
   const savePersonalization = useBoxStore((state) => state.savePersonalization);
   const globalSelectedTheme = useBoxStore((state) => state.selectedTheme);
   const savedData = useBoxStore((state) => state.personalizationData);
+  
+  // Получаем флаг пропуска
+  const skipInitialSteps = useBoxStore(
+    (state) => state.skipInitialPersonalizationSteps
+  );
+  const setSkipInitialPersonalization = useBoxStore(
+    (state) => state.setSkipInitialPersonalization
+  ); 
+  // quizAnswers больше не нужен здесь, так как данные уже в savedData
+  // const quizAnswers = useBoxStore((state) => state.quizAnswers); 
 
   // Локальное состояние формы (пока пользователь не нажмет "Сохранить")
   const [currentStep, setCurrentStep] = useState(1);
@@ -50,43 +60,64 @@ const BoxPersonalization = () => {
 
   // Синхронизация при открытии модального окна
   useEffect(() => {
-    if (isOpen) {
-      setCurrentStep(1);
-      // Если тема была выбрана в карусели, устанавливаем её
-      setSelectedTheme(globalSelectedTheme || "techno");
+    if (!isOpen) return;
 
-      // Если уже были сохраненные данные персонализации, восстанавливаем их
+    // --- 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ ---
+    setSelectedTheme(globalSelectedTheme || "techno");
+
+    let startStep = 1; 
+    let newFormData = {
+      recipient: "",
+      gender: "",
+      restrictions: [],
+      additionalWishes: "",
+    };
+    let newCheckboxes = { noParfume: false, noCosmetics: false, noCandy: false };
+
+    // 2. ЛОГИКА ПРОПУСКА ИЗ КВИЗА: ПРИОРИТЕТ
+    if (skipInitialSteps) {
+      startStep = 3; // <-- Начинаем строго с шага 3
+      setSkipInitialPersonalization(false); // Сбрасываем флаг
+
+      // Данные уже предзаполнены в savedData методом applyRecommendation
       if (savedData) {
-        setFormData({
-          recipient: savedData.recipient || "",
-          gender: savedData.gender || "",
-          additionalWishes:
-            savedData.additionalWishes === "Нет"
-              ? ""
-              : savedData.additionalWishes,
-        });
-
-        // Восстанавливаем чекбоксы из строки ограничений
-        const restrictionsStr = savedData.restrictions || "";
-        setCheckboxes({
-          noParfume: restrictionsStr.includes("Без ароматов"),
-          noCosmetics: restrictionsStr.includes("Без косметики"),
-          noCandy: restrictionsStr.includes("Без сладкого"),
-        });
-      } else {
-        // Сброс формы, если данных нет
-        setFormData({
-          recipient: "",
-          gender: "",
-          restrictions: [],
-          additionalWishes: "",
-        });
-        setCheckboxes({ noParfume: false, noCosmetics: false, noCandy: false });
+          newFormData.recipient = savedData.recipient || "Для себя"; 
+          newFormData.gender = savedData.gender || "not-important";
+          newFormData.additionalWishes = savedData.additionalWishes === "Нет" ? "" : savedData.additionalWishes;
       }
-    }
-  }, [isOpen, globalSelectedTheme, savedData]);
+      
+    } else if (savedData) {
+      // 3. ЛОГИКА ВОССТАНОВЛЕНИЯ (Редактирование или обычный повторный вход)
+      startStep = currentStep; // Сохраняем текущий шаг (если редактируем)
+      
+      newFormData.recipient = savedData.recipient || "";
+      newFormData.gender = savedData.gender || "";
+      newFormData.additionalWishes = savedData.additionalWishes === "Нет" ? "" : savedData.additionalWishes;
+      
+      const restrictionsStr = savedData.restrictions || "";
+      newCheckboxes = {
+        noParfume: restrictionsStr.includes("Без ароматов"),
+        noCosmetics: restrictionsStr.includes("Без косметики"),
+        noCandy: restrictionsStr.includes("Без сладкого"),
+      };
+    } else {
+        // 4. Полный сброс для обычного старта с Шага 1
+        newFormData = { recipient: "", gender: "", restrictions: [], additionalWishes: "" };
+        newCheckboxes = { noParfume: false, noCosmetics: false, noCandy: false };
+    } 
+
+    // 5. Установка финального состояния
+    setCurrentStep(startStep);
+    setFormData(newFormData);
+    setCheckboxes(newCheckboxes);
+    
+  }, [isOpen, globalSelectedTheme, savedData, skipInitialSteps, setSkipInitialPersonalization]);
+
 
   const handleNext = () => {
+    // Добавлена проверка, чтобы нельзя было перейти без выбора пола
+    if (currentStep === 2 && !formData.gender) return; 
+    
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
@@ -124,10 +155,11 @@ const BoxPersonalization = () => {
     if (checkboxes.noCosmetics) restrictions.push("Без косметики");
     if (checkboxes.noCandy) restrictions.push("Без сладкого");
 
+    // Используем текущее состояние formData, которое было предзаполнено или заполнено вручную.
     const personalizationData = {
       theme: selectedTheme,
-      recipient: formData.recipient,
-      gender: formData.gender,
+      recipient: formData.recipient || "Не указано",
+      gender: formData.gender || "not-important",
       restrictions: restrictions.join(", ") || "Нет",
       additionalWishes: formData.additionalWishes || "Нет",
     };
@@ -137,8 +169,14 @@ const BoxPersonalization = () => {
   };
 
   const handleSkip = () => {
-    // При пропуске мы всё равно должны сохранить выбранную тему
-    savePersonalization({ theme: selectedTheme });
+    // При полном пропуске (с шага 1) сохраняем только тему и дефолты
+    savePersonalization({ 
+        theme: selectedTheme,
+        recipient: "Для себя", 
+        gender: "not-important", 
+        restrictions: "Нет",
+        additionalWishes: "Нет",
+    });
   };
 
   if (!isOpen) return null;
@@ -222,8 +260,11 @@ const BoxPersonalization = () => {
             <>
               <h2 className={styles.question}>Для кого подарок?</h2>
               <div className={styles.optionsList}>
+                {/* Если поле уже заполнено ответом из квиза, выделяем его */}
                 <button
-                  className={styles.optionButton}
+                  className={`${styles.optionButton} ${
+                    formData.recipient === "Для себя" ? styles.optionButtonActive : ""
+                  }`}
                   onClick={() => handleRecipientSelect("Для себя")}
                 >
                   <span className={styles.optionIcon}>
@@ -236,7 +277,9 @@ const BoxPersonalization = () => {
                   <span className={styles.optionText}>Для себя</span>
                 </button>
                 <button
-                  className={styles.optionButton}
+                  className={`${styles.optionButton} ${
+                    formData.recipient === "Для другого человека" ? styles.optionButtonActive : ""
+                  }`}
                   onClick={() => handleRecipientSelect("Для другого человека")}
                 >
                   <span className={styles.optionIcon}>
@@ -408,7 +451,11 @@ const BoxPersonalization = () => {
                 />
                 <span>Назад</span>
               </button>
-              <button className={styles.nextButton} onClick={handleNext}>
+              <button 
+                  className={styles.nextButton} 
+                  onClick={handleNext}
+                  disabled={currentStep === 2 && !formData.gender}
+              >
                 Далее
               </button>
             </>

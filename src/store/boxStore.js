@@ -62,6 +62,31 @@ export const BOXES_DATA = [
   },
 ];
 
+// Функция для маппинга ID квиза в нужные строковые значения
+const getQuizAnswerValue = (questionIndex, answerId) => {
+    // Mapping for Question 0 (Recipient) -> Full Title String
+    if (questionIndex === 0) {
+        const map = {
+            "self": "Для себя",
+            "partner": "Для партнёра",
+            "friend": "Для друга",
+            "colleague": "Для коллеги",
+            "relative": "Для родственника",
+        };
+        return map[answerId] || "Не указано";
+    }
+    // Mapping for Question 1 (Gender) -> Internal ID ("female", "male", "not-important")
+    if (questionIndex === 1) {
+        const map = {
+            "woman": "female",
+            "man": "male",
+            "other": "not-important",
+        };
+        return map[answerId] || "not-important";
+    }
+    return answerId;
+};
+
 export const useBoxStore = create((set, get) => ({
   // --- STATE ---
   selectedTheme: "techno", // Текущий выбранный бокс
@@ -74,6 +99,9 @@ export const useBoxStore = create((set, get) => ({
   // Квиз
   quizAnswers: {},
   currentQuestionIndex: 0,
+  
+  // НОВОЕ: Флаг для пропуска первых шагов персонализации после квиза
+  skipInitialPersonalizationSteps: false, 
 
   // --- ACTIONS ---
 
@@ -86,12 +114,21 @@ export const useBoxStore = create((set, get) => ({
   
   // Сохранение персонализации и переход к заказу
   savePersonalization: (data) => {
+    const { quizAnswers } = get(); 
+    
     // Если в персонализации сменили тему, обновляем и её
     if (data?.theme) {
         set({ selectedTheme: data.theme });
     }
+    
+    // Объединяем персонализацию (шаги 1-4) с ответами квиза
+    const mergedData = { 
+        ...data, 
+        quiz: quizAnswers // Добавляем ответы квиза под ключом 'quiz'
+    };
+    
     set({ 
-        personalizationData: data, 
+        personalizationData: mergedData, 
         isPersonalizationOpen: false, 
         isOrderModalOpen: true 
     });
@@ -132,9 +169,34 @@ export const useBoxStore = create((set, get) => ({
     return BOXES_DATA.find((b) => b.id === recommendedId) || BOXES_DATA[0];
   },
   
-  // Применение рекомендации (переход к заказу)
+  // НОВОЕ: Действие для установки флага
+  setSkipInitialPersonalization: (skip) => set({ skipInitialPersonalizationSteps: skip }),
+
+  // Применение рекомендации (переход к персонализации с пропуском шагов)
   applyRecommendation: () => {
+      const { quizAnswers } = get(); 
       const box = get().getRecommendedBox();
-      set({ selectedTheme: box.id, isPersonalizationOpen: true });
+      
+      // 1. Конвертируем ID в нужные строковые значения
+      const quizRecipient = getQuizAnswerValue(0, quizAnswers[0]) || "Не указано"; 
+      const quizGender = getQuizAnswerValue(1, quizAnswers[1]) || "not-important"; 
+      
+      // 2. Предварительно заполняем personalizationData этими ответами
+      const initialPersonalData = {
+          theme: box.id,
+          recipient: quizRecipient, // Теперь это строка-заголовок
+          gender: quizGender,       // Теперь это внутренний ID ("female", "male", "not-important")
+          restrictions: "Нет",
+          additionalWishes: "Нет",
+      };
+
+      set({ 
+          selectedTheme: box.id, 
+          isPersonalizationOpen: true,
+          // Устанавливаем флаг, чтобы модалка открылась сразу на Шаге 3
+          skipInitialPersonalizationSteps: true,
+          // Сохраняем начальные данные, чтобы BoxingPersonalization мог их восстановить
+          personalizationData: initialPersonalData, 
+      });
   }
 }));

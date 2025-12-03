@@ -7,7 +7,7 @@ export default function TelegramChat() {
   return (
     <div className={styles.telegramChat}>
       <img src={tgChat} alt="Telegram Chat" loading="lazy" />
-      <img src={tgIcon} alt="Telegram Icon" loading="lazy" />
+      <img style={{opacity: '0'}} src={tgIcon} alt="Telegram Icon" loading="lazy" />
     </div>
   );
 }
