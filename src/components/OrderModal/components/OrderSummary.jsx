@@ -14,6 +14,7 @@ export default function OrderSummary({ onOpenPrivacy, onOpenOffer, onSubmit }) {
     applyPromo,
     isProcessing,
     errors,
+    isCheckingPromo,
   } = useOrderStore();
 
   const promoDiscount = promoApplied ? 500 : 0;
@@ -42,9 +43,13 @@ export default function OrderSummary({ onOpenPrivacy, onOpenOffer, onSubmit }) {
             className={`${styles.promoButton} ${
               promoApplied ? styles.promoButtonDisabled : ""
             }`}
-            disabled={promoApplied}
+            disabled={promoApplied || isCheckingPromo}
           >
-            <img src={rightArrow} alt="Apply" />
+            {isCheckingPromo ? (
+              <span style={{ fontSize: "12px" }}>Проверка...</span>
+            ) : (
+              <img src={rightArrow} alt="Apply" />
+            )}
           </button>
         </div>
         {promoMessage && (

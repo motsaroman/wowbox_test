@@ -15,12 +15,55 @@ import texno3 from "../../assets/images/texno2.webp";
 import texno4 from "../../assets/images/texno3.webp";
 import styles from "./OrderModal.module.css";
 
+// --- ХЕЛПЕРЫ ДЛЯ КОНВЕРТАЦИИ ID КВИЗА В НАЗВАНИЯ ---
+const getQuizAnswerTitle = (questionIndex, answerId) => {
+  if (!answerId) return "Не указан";
+
+  if (questionIndex === 0) {
+    const map = {
+      self: "Для себя",
+      partner: "Для партнёра",
+      friend: "Для друга",
+      colleague: "Для коллеги",
+      relative: "Для родственника",
+    };
+    return map[answerId] || "Не указан";
+  }
+
+  if (questionIndex === 1) {
+    const map = { woman: "Женщина", man: "Мужчина", other: "Не важно" };
+    return map[answerId] || "Не указан";
+  }
+
+  if (questionIndex === 2) {
+    const map = {
+      practical: "Гаджеты и техно",
+      emotions: "Уют и комфорт",
+      quality: "Веселье и игры",
+      surprise: "Сладости и вкусняшки",
+    };
+    return map[answerId] || "Не указан";
+  }
+
+  if (questionIndex === 3) {
+    const map = {
+      standard: "Чтобы точно пригодилось",
+      premium: "Чтобы удивило и запомнилось",
+      luxury: "Чтобы выглядело дорого",
+      any: "Чтобы было разнообразно",
+    };
+    return map[answerId] || "Не указан";
+  }
+
+  return answerId;
+};
+// ----------------------------------------------------
+
 export default function OrderModal({
   onPayment,
   onOpenPrivacyPolicy,
   onOpenPublicOffer,
 }) {
-  // Данные формы и логика валидации из OrderStore
   const {
     resetForm,
     validateForm,
@@ -32,7 +75,6 @@ export default function OrderModal({
     promoApplied,
   } = useOrderStore();
 
-  // Данные товара и управление модалкой из BoxStore
   const {
     isOrderModalOpen,
     closeOrderModal,
@@ -43,7 +85,6 @@ export default function OrderModal({
 
   const [isMapOpen, setIsMapOpen] = useState(false);
 
-  // Инициализация при открытии (сброс формы и блокировка скролла)
   useEffect(() => {
     if (isOrderModalOpen) {
       resetForm();
@@ -59,7 +100,6 @@ export default function OrderModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Запускаем валидацию полей в сторе
     if (!validateForm()) {
       console.log("Ошибка валидации формы");
       return;
@@ -68,20 +108,55 @@ export default function OrderModal({
     setProcessing(true);
 
     try {
-      // Расчет итоговой суммы
-      const totalPrice = boxPrice + deliveryPrice - (promoApplied ? 500 : 0);
+      // НОВОЕ: Расчет скидки
+      const promoDiscount = promoApplied ? 500 : 0; // Расчет итоговой суммы
+      const totalPrice = boxPrice + deliveryPrice - promoDiscount; // Формируем данные персонализации (если есть, или берем дефолт)
 
-      // Формируем данные персонализации (если есть, или берем дефолт)
       const fullPersonalData = {
         theme: personalizationData?.theme || selectedTheme,
-        recipient: personalizationData?.recipient || 'не указан',
-        gender: personalizationData?.gender || 'не указан',
-        restrictions: personalizationData?.restrictions || 'нет',
-        wishes: personalizationData?.additionalWishes || 'нет',
-        quizAnswers: personalizationData?.quiz || {}, 
+        recipient: personalizationData?.recipient || "Не указан",
+        gender: personalizationData?.gender || "not-important",
+        restrictions: personalizationData?.restrictions || "Нет",
+        wishes: personalizationData?.additionalWishes || "Нет",
+        quizAnswers: personalizationData?.quiz || {},
       };
 
-      // Формируем полный адрес для курьера (строкой)
+      // --- НОВЫЙ БЛОК: Формирование managerComment (для RetailCRM) ---
+      const q = fullPersonalData.quizAnswers;
+
+      // Конвертируем gender ID в понятное название для менеджера
+      let genderValue = fullPersonalData.gender;
+      if (genderValue === "female") genderValue = "Женский";
+      else if (genderValue === "male") genderValue = "Мужской";
+      else if (genderValue === "not-important") genderValue = "Не важно";
+
+      // Определяем получателя для комментария
+      const recipientComment = formData.isGift
+        ? `${formData.recipientName} (${formData.recipientPhone})`
+        : "Заказчик";
+
+      const managerCommentParts = [
+        `--- Персонализация ---`,
+        `Тема бокса: ${getThemeDisplayName(fullPersonalData.theme)}`,
+        `Получатель: ${fullPersonalData.recipient}`, // (Для себя, Для друга и т.д.)
+        `Пол: ${genderValue}`,
+        `Ограничения: ${fullPersonalData.restrictions}`,
+        `Пожелания: ${fullPersonalData.wishes}`,
+        `--- Ответы Квиза ---`,
+        `Q0 (Для кого): ${getQuizAnswerTitle(0, q[0])}`,
+        `Q1 (Пол): ${getQuizAnswerTitle(1, q[1])}`,
+        `Q2 (Стиль): ${getQuizAnswerTitle(2, q[2])}`,
+        `Q3 (Важность): ${getQuizAnswerTitle(3, q[3])}`,
+        `--- Промокод ---`,
+        `Промокод: ${formData.promoCode || "Нет"}`,
+        `Скидка: ${promoDiscount}₽`,
+        `--- Получатель ---`,
+        `Получатель: ${recipientComment}`,
+      ];
+
+      const managerCommentString = managerCommentParts.join("\n"); // Формируем полный адрес для курьера (строкой)
+      // --- КОНЕЦ НОВОГО БЛОКА ---
+
       let fullCourierAddress = null;
       if (formData.deliveryType === "courier") {
         const parts = [
@@ -92,12 +167,12 @@ export default function OrderModal({
           formData.floor ? `эт. ${formData.floor}` : "",
         ];
         fullCourierAddress = parts.filter(Boolean).join(", ");
-      }
+      } // Основной пейлоад
 
-      // Основной пейлоад
       const payload = {
-        //boxTheme: personalData.theme,
+        boxTheme: fullPersonalData.theme,
         promoCode: formData.promoCode,
+        promoDiscountAmount: promoDiscount, // <-- НОВОЕ: Сумма скидки для CRM
         paymentMethod: formData.paymentMethod,
         contactData: {
           name: formData.name,
@@ -114,6 +189,7 @@ export default function OrderModal({
           user: formData.comment,
           courier: formData.courierComment,
           personalization: fullPersonalData,
+          managerComment: managerCommentString,
         },
         deliveryData: {
           type: formData.deliveryType,
@@ -135,6 +211,7 @@ export default function OrderModal({
           box: boxPrice,
           delivery: deliveryPrice,
           total: totalPrice,
+          discount: promoDiscount,
         },
         utm: {
           source:
@@ -147,20 +224,20 @@ export default function OrderModal({
         },
       };
 
-      // Отправляем на бэкенд
-      const response = await fetch("https://wowbox.market/api/create-payment.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "https://wowbox.market/api/create-payment.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok && data.confirmationUrl) {
-        // Переход на оплату
         window.location.href = data.confirmationUrl;
 
-        // (Опционально) Сообщаем родителю об успехе, если нужно открыть модалку ожидания
         onPayment(formData.paymentMethod);
         closeOrderModal();
       } else {
@@ -174,7 +251,6 @@ export default function OrderModal({
     }
   };
 
-  // Хелперы для отображения
   const getThemeDisplayName = (theme) => {
     const themeMap = {
       techno: "ТЕХНО",
@@ -201,53 +277,67 @@ export default function OrderModal({
       male: "Мужской",
       "not-important": "Не важно",
     }[gender] || "Не указано");
+
   const getPersonalizationDetails = () => {
     if (!personalizationData) return [];
 
     const details = [];
     const quiz = personalizationData.quiz || {};
 
-    // 1. Получатель (из шага 1 персонализации)
-    // Используем optional chaining (?.) и trim() для безопасного извлечения и очистки значения
-    const recipientValue = personalizationData.recipient?.trim() || 'Не указано';
-    details.push({ key: 'recipient', label: 'Для кого', value: recipientValue });
+    const recipientValue =
+      personalizationData.recipient?.trim() || "Не указано";
+    details.push({
+      key: "recipient",
+      label: "Для кого",
+      value: recipientValue,
+    });
 
-    // 2. Пол получателя (из шага 2 персонализации)
     const genderValue = getGenderDisplayName(personalizationData.gender);
-    details.push({ key: 'gender', label: 'Пол', value: genderValue });
-    
-    // --- Ответы Квиза ---
-    // ... (логика квиза остается без изменений)
-    
-    // Пример Q2: Стиль предпочтения (ключ '2' в quizAnswers)
-    if (quiz['2']) {
-        const styleMap = { practical: "Практичность", emotions: "Эмоции/Впечатления", quality: "Качество/Надежность", surprise: "Сюрприз/Вау-эффект" };
-        details.push({ key: 'stylePreference', label: 'Стиль', value: styleMap[quiz['2']] || quiz['2'] });
+    details.push({ key: "gender", label: "Пол", value: genderValue });
+
+    if (quiz["0"]) {
+      details.push({
+        key: "quiz_q0",
+        label: "Q0(Для кого)",
+        value: getQuizAnswerTitle(0, quiz["0"]),
+      });
     }
 
-    // Пример Q3: Бюджет (ключ '3')
-    if (quiz['3']) {
-        const spendingMap = { low: "до 5 000 ₽", medium: "5 000 ₽ - 15 000 ₽", high: "свыше 15 000 ₽" };
-        details.push({ key: 'spendingHabits', label: 'Бюджет', value: spendingMap[quiz['3']] || quiz['3'] });
+    if (quiz["1"]) {
+      details.push({
+        key: "quiz_q1",
+        label: "Q1(Пол)",
+        value: getQuizAnswerTitle(1, quiz["1"]),
+      });
     }
-    
-    // Пример Q4: Возраст (ключ '4')
-    if (quiz['4']) {
-        const ageMap = { teen: "13-17 лет", young_adult: "18-25 лет", adult: "26-40 лет", mature: "40+ лет" };
-        details.push({ key: 'ageGroup', label: 'Возраст', value: ageMap[quiz['4']] || quiz['4'] });
-    }
-    // --- Конец ответов Квиза ---
 
-    // 3. Ограничения (из шага 3 персонализации)
-    details.push({ key: 'restrictions', label: 'Ограничения', value: personalizationData.restrictions || 'Нет' });
-    
-    // 4. Пожелания (из шага 4 персонализации)
-    // Используем optional chaining и trim() для безопасного извлечения
-    const wishesValue = personalizationData.additionalWishes?.trim() || 'Нет';
-    details.push({ key: 'wishes', label: 'Пожелания', value: wishesValue });
-    
+    if (quiz["2"]) {
+      details.push({
+        key: "stylePreference",
+        label: "Стиль",
+        value: getQuizAnswerTitle(2, quiz["2"]),
+      });
+    }
+
+    if (quiz["3"]) {
+      details.push({
+        key: "importance",
+        label: "Важность",
+        value: getQuizAnswerTitle(3, quiz["3"]),
+      });
+    }
+
+    details.push({
+      key: "restrictions",
+      label: "Ограничения",
+      value: personalizationData.restrictions || "Нет",
+    });
+
+    const wishesValue = personalizationData.additionalWishes?.trim() || "Нет";
+    details.push({ key: "wishes", label: "Пожелания", value: wishesValue });
+
     return details;
-  }
+  };
 
   if (!isOrderModalOpen) return null;
 
@@ -264,7 +354,6 @@ export default function OrderModal({
         <div className={styles.leftColumn}>
           <ContactForm />
           <RecipientForm />
-          {/* Передаем открытие карты */}
           <DeliverySection onOpenMap={() => setIsMapOpen(true)} />
           <PaymentSection />
         </div>
@@ -298,11 +387,10 @@ export default function OrderModal({
                     )}
                   </h4>
                   <div className={styles.boxDetails}>
-                    {/* ИЗМЕНЕНИЕ ЗДЕСЬ: Динамический вывод всех деталей */}
-                    {getPersonalizationDetails().map(detail => (
-                        <p key={detail.key}>
-                            {detail.label}: <span>{detail.value}</span>
-                        </p>
+                    {getPersonalizationDetails().map((detail) => (
+                      <p key={detail.key}>
+                        {detail.label}: <span>{detail.value}</span>
+                      </p>
                     ))}
                   </div>
                 </div>
@@ -310,7 +398,6 @@ export default function OrderModal({
             </div>
           </div>
 
-          {/* Компонент с итогами, промокодом и кнопкой отправки */}
           <OrderSummary
             onSubmit={handleSubmit}
             onOpenPrivacy={onOpenPrivacyPolicy}
@@ -323,7 +410,7 @@ export default function OrderModal({
         <DeliveryMapPage
           isOpen={isMapOpen}
           onClose={() => setIsMapOpen(false)}
-          onDeliverySelect={updateDelivery} // Экшен из OrderStore
+          onDeliverySelect={updateDelivery}
           initialMode={
             formData.deliveryType === "courier" ? "courier" : "pickup"
           }

@@ -38,6 +38,7 @@ export const useOrderStore = create((set, get) => ({
   promoApplied: false,
   promoStatus: null, // 'success' | 'error' | null
   promoMessage: "",
+  isCheckingPromo: false,
 
   // --- ACTIONS ---
 
@@ -49,23 +50,24 @@ export const useOrderStore = create((set, get) => ({
     deliveryPrice: 0,
     promoApplied: false,
     promoStatus: null,
-    promoMessage: ""
+    promoMessage: "",
+    isCheckingPromo: false
   }),
 
   // Обновление поля
   setField: (name, value) => set((state) => {
     const newErrors = { ...state.errors };
     delete newErrors[name]; // Сбрасываем ошибку поля при вводе
-
+    
     // Спец. логика для промокода (сброс статуса при редактировании)
     if (name === 'promoCode') {
-      return {
-        formData: { ...state.formData, [name]: value },
-        errors: newErrors,
-        promoStatus: null,
-        promoMessage: "",
-        promoApplied: false
-      };
+        return { 
+            formData: { ...state.formData, [name]: value }, 
+            errors: newErrors,
+            promoStatus: null, 
+            promoMessage: "", 
+            promoApplied: false 
+        };
     }
 
     return {
@@ -121,14 +123,88 @@ export const useOrderStore = create((set, get) => ({
   }),
 
   // Проверка промокода
-  applyPromo: () => {
-    const { formData } = get();
-    if (!formData.promoCode) return;
+  applyPromo: async () => {
+    const { formData, promoApplied } = get();
+    if (promoApplied) return;
+    const promoCode = formData.promoCode.toUpperCase().trim();
 
-    if (formData.promoCode.toUpperCase() === "ПЕРВЫЙ500") {
-      set({ promoApplied: true, promoStatus: 'success', promoMessage: "Промокод успешно применен!" });
-    } else {
-      set({ promoApplied: false, promoStatus: 'error', promoMessage: "Промокод не найден или истек" });
+    if (!promoCode) return;
+    
+    set({ 
+      isCheckingPromo: true, 
+      promoApplied: false, 
+      promoStatus: null, 
+      promoMessage: "" 
+    });
+
+    try {
+      // 1. Проверка на известный промокод (если он единственный)
+      if (promoCode !== "ПЕРВЫЙ500") {
+        set({ 
+          promoStatus: 'error', 
+          promoMessage: "Промокод не найден или истек",
+          isCheckingPromo: false
+        });
+        return;
+      }
+      
+      // 2. Валидация входных данных для CRM-проверки
+      if (!formData.email.trim() && formData.phone.length < 12) {
+           set({ 
+              promoStatus: 'error', 
+              promoMessage: "Для проверки промокода введите Email или Телефон",
+              isCheckingPromo: false
+            });
+          return;
+      }
+
+      // 3. Асинхронный запрос для проверки использования в CRM
+      const response = await fetch(`https://wowbox.market/api/check-promo-usage.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          promoCode: promoCode,
+          email: formData.email.trim(),
+          phone: formData.phone.length > 5 ? formData.phone : null,
+        }),
+      });
+      
+      const data = await response.json();
+
+      if (data.status === 'ok' && data.used === true) {
+        // Промокод уже использован
+        set({ 
+          promoApplied: false, 
+          promoStatus: 'error', 
+          promoMessage: data.message || "Промокод уже был использован данным клиентом",
+          isCheckingPromo: false 
+        });
+      } else if (data.status === 'ok' && data.used === false) {
+        // Промокод не использован и валиден
+        set({ 
+          promoApplied: true, 
+          promoStatus: 'success', 
+          promoMessage: "Промокод успешно применен!",
+          isCheckingPromo: false 
+        });
+      } else {
+        // Ошибка API или непредвиденный ответ
+         set({ 
+          promoApplied: false, 
+          promoStatus: 'error', 
+          promoMessage: "Ошибка сервера при проверке промокода. Попробуйте позже.",
+          isCheckingPromo: false 
+        });
+      }
+
+    } catch (e) {
+      console.error("Promo check failed:", e);
+      set({ 
+        promoApplied: false, 
+        promoStatus: 'error', 
+        promoMessage: "Ошибка сети. Проверьте соединение.",
+        isCheckingPromo: false 
+      });
     }
   },
 
