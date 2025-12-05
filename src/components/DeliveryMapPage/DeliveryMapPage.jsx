@@ -6,7 +6,6 @@ import {
   YMapControls, YMapZoomControl 
 } from "../../lib/ymaps";
 import markerIcon from "../../assets/images/5post-geo.png";
-// import geoIcon from "../../assets/icons/geolocation.svg"; 
 import DeliveryHeader from "./components/DeliveryHeader";
 import CourierPanel from "./components/CourierPanel";
 import styles from "./DeliveryMapPage.module.css";
@@ -16,8 +15,8 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
     deliveryMode, points, polygons, 
     mapLocation, isLoading, courierMarker,
     initStore, handleMapClickAction, selectedCity,
-    checkFreeShipping, 
-    // detectLocationAction 
+    checkFreeShipping,
+    addressError // <--- Достаем ошибку
   } = useDeliveryStore();
 
   const [hoveredPointId, setHoveredPointId] = useState(null);
@@ -32,10 +31,7 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
   }, [isOpen]);
 
   const handlePointClick = async (point) => {
-    // [ИСПРАВЛЕНО] Добавляем выбранный город к адресу проверки
-    // Строка будет: "Москва, ПВЗ 5Post: 38HC - Пятерочка"
     const checkAddress = `${selectedCity.name}, ПВЗ 5Post: ${point.name}`;
-    
     let finalPrice = point.price || selectedCity.price || 350;
 
     const isFree = await checkFreeShipping(checkAddress);
@@ -54,7 +50,7 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
           price: finalPrice 
       },
       cityFias: selectedCity.fias,
-      cityName: selectedCity.name // Важно передать город для сохранения в formData
+      cityName: selectedCity.name 
     });
     onClose();
   };
@@ -95,7 +91,12 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
     <div className={styles.overlay}>
       <div className={styles.modal}>
         
-        <DeliveryHeader onClose={onClose} />
+        {/* Передаем ошибку в хедер */}
+        <DeliveryHeader 
+            onClose={onClose} 
+            onOpenMobilePanel={() => setIsMobilePanelOpen(true)}
+            error={addressError}
+        />
 
         <div className={styles.mapContainer}>
            {isLoading && <div className={styles.loader}>Загрузка...</div>}

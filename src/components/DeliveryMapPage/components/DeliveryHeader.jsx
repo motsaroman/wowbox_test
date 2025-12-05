@@ -3,10 +3,9 @@ import { cities } from '../../../data/cities';
 import styles from '../DeliveryMapPage.module.css';
 import closeIcon from '../../../assets/icons/close.svg';
 
-export default function DeliveryHeader({ onClose }) {
+export default function DeliveryHeader({ onClose, onOpenMobilePanel, error }) {
   const { selectedCity, deliveryMode, setDeliveryMode, setSelectedCity } = useDeliveryStore();
 
-  // Проверяем, есть ли текущий выбранный город в списке
   const isCityInList = cities.some(c => c.fias === selectedCity.fias);
 
   return (
@@ -30,25 +29,31 @@ export default function DeliveryHeader({ onClose }) {
           </button>
         </div>
         
-        <select 
-          className={styles.citySelect}
-          // Используем fias, если есть, иначе name (для автоопределенных городов)
-          value={selectedCity.fias || selectedCity.name || ""} 
-          onChange={(e) => setSelectedCity(e.target.value)}
-        >
-          {cities.map((c, i) => (
-            <option key={c.fias || i} value={c.fias || c.name}>
-              {c.name}
-            </option>
-          ))}
-          
-          {/* Если город определен автоматически и его нет в списке — показываем его */}
-          {!isCityInList && selectedCity.name && (
-             <option key="custom" value={selectedCity.name}>
-               {selectedCity.name}
-             </option>
-          )}
-        </select>
+        {/* Обертка для города и ошибки */}
+        <div className={styles.cityWrapper}>
+            <div className={styles.cityRow}>
+                <select 
+                  className={styles.citySelect}
+                  value={selectedCity.fias || selectedCity.name || ""} 
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                >
+                  {cities.map((c, i) => (
+                    <option key={c.fias || i} value={c.fias || c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                  
+                  {!isCityInList && selectedCity.name && (
+                     <option key="custom" value={selectedCity.name}>
+                       {selectedCity.name}
+                     </option>
+                  )}
+                </select>
+            </div>
+            
+            {/* Сообщение об ошибке */}
+            {error && <div className={styles.headerError} style={{fontSize: "14px", color: 'red', fontFamily: '"SF Pro", sans-serif'}}>{error}</div>}
+        </div>
       </div>
 
       <button className={styles.closeButton} onClick={onClose}>

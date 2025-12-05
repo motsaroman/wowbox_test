@@ -1,7 +1,7 @@
 export const cities = [
   // --- МОСКВА И ОБЛАСТЬ ---
   { name: "Москва", fias: "0c5b2444-70a0-4932-980c-b4dc0d3f02b5", price: 211, filialId: "1" },
-  { name: "Московская область", fias: "29251dcf-00a1-4e34-98d4-5c47484a36d4", price: 232, filialId: "1" },
+  //{ name: "Московская область", fias: "29251dcf-00a1-4e34-98d4-5c47484a36d4", price: 232, filialId: "1" },
 
   // --- САНКТ-ПЕТЕРБУРГ ---
   { name: "Санкт-Петербург", fias: "c2deb16a-0330-4f05-821f-1d09c93331e6", price: 220, filialId: "7157" },
@@ -74,7 +74,7 @@ export const cities = [
   { name: "Ярославль", fias: "6b1bab7d-ee45-4168-a2a6-4ce2880d90d3", price: 233, filialId: "74323" },
 
   // --- ОБЛАСТИ И РЕГИОНЫ ---
-  { name: "Алтайский Край", fias: "8276c6a1-1a86-4f0d-8920-aba34d4cc34a", price: 398 },
+ /* { name: "Алтайский Край", fias: "8276c6a1-1a86-4f0d-8920-aba34d4cc34a", price: 398 },
   { name: "Белгородская область", fias: "639efe9d-3fc8-4438-8e70-ec4f2321f2a7", price: 233 },
   { name: "Брянская область", fias: "f5807226-8be0-4ea8-91fc-39d053aec1e2", price: 233 },
   { name: "Владимирская область", fias: "b8837188-39ee-4ff9-bc91-fcc9ed451bb3", price: 233 },
@@ -135,5 +135,5 @@ export const cities = [
   { name: "Ульяновская область", fias: "fee76045-fe22-43a4-ad58-ad99e903bd58", price: 233 },
   { name: "Челябинская область", fias: "27eb7c10-a234-44da-a59c-8b1f864966de", price: 287 },
   { name: "Чувашская Республика", fias: "878fc621-3708-46c7-a97f-5a13a4176b3e", price: 233 },
-  { name: "Ярославская область", fias: "a84b2ef4-db03-474b-b552-6229e801ae9b", price: 233 },
+  { name: "Ярославская область", fias: "a84b2ef4-db03-474b-b552-6229e801ae9b", price: 233 },*/
 ];

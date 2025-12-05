@@ -1302,7 +1302,9 @@ h3 {
 .mobileHeader {
   display: none;
 }
-
+.headerError {
+  display: none;
+}
 /* =========================================
    АДАПТИВ ДЛЯ МОБИЛЬНЫХ (max-width: 480px)
    ========================================= */
@@ -1425,6 +1427,9 @@ h3 {
   }
 .suggestionsList {
     max-height: 250px;
+  }
+  .headerError {
+    display: block;
   }
   .suggestionItem {
     padding: 14px;

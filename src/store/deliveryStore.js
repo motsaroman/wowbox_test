@@ -153,43 +153,70 @@ export const useDeliveryStore = create((set, get) => ({
 
   loadDataForCity: async () => {
     const { deliveryMode, selectedCity } = get();
-    set({ isLoading: true }); 
+    console.log(`[Store] Загрузка данных. Город: ${selectedCity.name}, Режим: ${deliveryMode}`);
+    
+    // Сбрасываем ошибку перед загрузкой
+    set({ isLoading: true, addressError: '' });
 
     try {
       if (deliveryMode === 'pickup') {
+        // --- ПВЗ ---
         set({ polygons: null });
+        
         if (selectedCity.fias) {
           const url = `https://wowbox.market/api/get-points.php?fias=${selectedCity.fias}`;
           const res = await fetch(url);
           const data = await res.json();
           const points = Array.isArray(data) ? data : [];
           set({ points });
+          
           if (points.length > 0) {
              set({ mapLocation: { center: points[0].coordinates, zoom: 11 } });
+          } else {
+             // Если ПВЗ нет (редкий случай для крупных городов)
+             // set({ addressError: "В этом городе нет пунктов выдачи" });
           }
+        } else {
+            console.warn("[Store] Нет FIAS для загрузки ПВЗ");
         }
       } else {
+        // --- КУРЬЕР (Полигоны) ---
         set({ points: [] });
+        
         let url = 'https://wowbox.market/api/get-polygons.php?';
+        
         if (selectedCity.filialId) {
             url += `filial_id=${selectedCity.filialId}`;
         } else {
             url += `city_name=${encodeURIComponent(selectedCity.name)}`;
         }
 
+        console.log("[Store] Fetch Polygons:", url);
+
         const res = await fetch(url);
         const geoJson = await res.json();
-        set({ polygons: geoJson });
 
-        if (!get().courierMarker && geoJson.features?.length > 0) {
-          const firstPoly = geoJson.features[0].geometry.coordinates[0];
-          if (firstPoly?.[0]) {
-            set({ mapLocation: { center: firstPoly[0], zoom: 10 } });
-          }
+        // [НОВОЕ] Проверяем, пришли ли полигоны
+        if (!geoJson.features || geoJson.features.length === 0) {
+            set({ 
+                polygons: null, 
+                addressError: "В этот город курьерская доставка не осуществляется, выберите другой" 
+            });
+        } else {
+            set({ polygons: geoJson });
+
+            // Если полигоны есть и маркер еще не стоит, центрируем карту по первому полигону
+            if (!get().courierMarker && geoJson.features?.length > 0) {
+              const firstPoly = geoJson.features[0].geometry.coordinates[0];
+              if (firstPoly?.[0]) {
+                set({ mapLocation: { center: firstPoly[0], zoom: 10 } });
+              }
+            }
         }
       }
     } catch (e) {
-      console.error("Error loading city data:", e);
+      console.error("[Store] Ошибка загрузки данных:", e);
+      set({ addressError: "Ошибка загрузки зон доставки" });
     } finally {
       set({ isLoading: false });
     }
