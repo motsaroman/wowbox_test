@@ -1024,6 +1024,7 @@ main {
   align-items: center;
   gap: 0;
   list-style: none;
+  gap: 2px;
 }
 
 .detailsList li {

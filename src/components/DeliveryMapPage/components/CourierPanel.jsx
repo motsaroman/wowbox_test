@@ -1,6 +1,8 @@
-import { useDeliveryStore } from '../../../store/deliveryStore';
-// import locationIcon from '../../../assets/icons/geolocation.svg'; // ВРЕМЕННО: не используется
-import styles from '../DeliveryMapPage.module.css';
+import { useState, useEffect, useRef } from "react";
+import { useDeliveryStore } from "../../../store/deliveryStore";
+
+// import locationIcon from '../../../assets/icons/geolocation.svg';
+import styles from "../DeliveryMapPage.module.css";
 
 export default function CourierPanel({ onConfirm, isOpen, onClose }) {
   const { 
@@ -8,12 +10,54 @@ export default function CourierPanel({ onConfirm, isOpen, onClose }) {
     courierForm, setCourierField,
     addressError,
     searchAddressAction,
-    // detectLocationAction, // ВРЕМЕННО: Отключено
+    // detectLocationAction, 
     isCalculating,
-    courierMarker
+    isLoading,
+    
+    // Новые функции из стора
+    addressSuggestions,
+    fetchSuggestions,
+    selectSuggestion,
+    clearSuggestions
   } = useDeliveryStore();
 
+  const [inputValue, setInputValue] = useState(courierAddress);
+  const suggestionTimeout = useRef(null);
+
+  // Синхронизация локального инпута с глобальным состоянием
+  useEffect(() => {
+    setInputValue(courierAddress);
+  }, [courierAddress]);
+
+  // Обработчик ввода с задержкой (Debounce 500ms)
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setInputValue(val);
+    setCourierAddress(val); // Обновляем в сторе
+
+    if (suggestionTimeout.current) clearTimeout(suggestionTimeout.current);
+
+    suggestionTimeout.current = setTimeout(() => {
+        if (val.length >= 3) {
+            fetchSuggestions(val);
+        } else {
+            clearSuggestions();
+        }
+    }, 500); 
+  };
+
+  const handleSuggestionClick = (item) => {
+      selectSuggestion(item);
+  };
+
   const handleConfirmClick = async () => {
+    // Скрываем подсказки при клике на подтверждение
+    clearSuggestions();
+    
+    await searchAddressAction();
+    const currentError = useDeliveryStore.getState().addressError;
+    if (currentError) return;
+
     const result = await useDeliveryStore.getState().calculateAndConfirm();
     if (result) {
         onConfirm({
@@ -29,42 +73,59 @@ export default function CourierPanel({ onConfirm, isOpen, onClose }) {
       
       <div className={styles.mobileHeader}>
          <button className={styles.mobileBackBtn} onClick={onClose}>
-            Назад к карте
+            ✕ Назад к карте
          </button>
          <h3>Адрес доставки</h3>
       </div>
 
-      <div className={styles.searchRow}>
+      <div className={styles.searchRow} style={{position: 'relative'}}> {/* relative для позиционирования списка */}
           <input 
             type="text" 
             className={styles.addressInput} 
-            placeholder="Введите адрес" 
-            value={courierAddress} 
-            onChange={(e) => setCourierAddress(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && searchAddressAction()}
+            placeholder="Введите адрес (Город, улица...)" 
+            value={inputValue} 
+            onChange={handleInputChange}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                    clearSuggestions();
+                    searchAddressAction();
+                }
+            }}
+            // При потере фокуса скрываем список с небольшой задержкой (чтобы успел пройти клик)
+            onBlur={() => setTimeout(clearSuggestions, 200)}
           />
           
-          {/* ВРЕМЕННО: Кнопка геолокации скрыта */}
-          {/* <button 
-            type="button"
-            className={styles.geoBtn} 
-            onClick={detectLocationAction}
-            title="Мое местоположение"
+          <button 
+            type="button" 
+            className={styles.searchBtn} 
+            onClick={searchAddressAction}
           >
-             <img src={locationIcon} alt="Geo" />
-          </button> */}
-
-          <button className={styles.searchBtn} onClick={searchAddressAction}>
             Найти
           </button>
+
+          {/* ВЫПАДАЮЩИЙ СПИСОК ПОДСКАЗОК */}
+          {addressSuggestions.length > 0 && (
+              <ul className={styles.suggestionsList}>
+                  {addressSuggestions.map((item, index) => (
+                      <li 
+                        key={item.place_id || index} 
+                        className={styles.suggestionItem}
+                        onClick={() => handleSuggestionClick(item)}
+                      >
+                          {item.display_name}
+                      </li>
+                  ))}
+              </ul>
+          )}
       </div>
       
       {addressError && (
-        <div style={{ color: 'red', marginBottom: '10px', fontSize: '14px' }}>
+        <div style={{ color: '#ff3b30', marginBottom: '10px', fontSize: '14px', fontWeight: '500' }}>
           {addressError}
         </div>
       )}
       
+      {/* Остальные поля формы */}
       <div className={styles.inputGrid}>
         <input 
           type="text" 
@@ -98,12 +159,13 @@ export default function CourierPanel({ onConfirm, isOpen, onClose }) {
       />
 
       <button 
+        type="button"
         className={styles.confirmBtn} 
         onClick={handleConfirmClick} 
-        disabled={!!addressError || isCalculating || (!courierMarker && !courierAddress)}
-        style={{ opacity: (!!addressError || isCalculating) ? 0.7 : 1 }}
+        disabled={isCalculating || isLoading || !courierAddress}
+        style={{ opacity: (isCalculating || isLoading || !courierAddress) ? 0.7 : 1 }}
       >
-        {isCalculating ? "Расчет стоимости..." : "Подтвердить и Сохранить"}
+        {isCalculating || isLoading ? "Проверка..." : "Подтвердить и Сохранить"}
       </button>
       
       <p className={styles.diclaimer}>

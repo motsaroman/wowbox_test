@@ -11,39 +11,45 @@ import heroBonusSticker2 from "../../assets/images/стикер2.webp";
 
 export default function Header() {
   const { isMobileMenuOpen, toggleMobileMenu, closeMobileMenu } = useUIStore();
-  
-  // Таймер оставляем здесь, так как это UI-логика конкретного блока
-  const [timeLeft, setTimeLeft] = useState({
-    days: 15,
-    hours: 21,
-    minutes: 21,
-    seconds: 0,
-  });
+
+  // Функция для расчета времени до Нового года
+  const calculateTimeLeft = () => {
+    const now = new Date();
+    // Целевая дата: 1 января следующего года, 00:00:00
+    const currentYear = now.getFullYear();
+    const nextYear = currentYear + 1;
+    const newYearDate = new Date(`January 1, ${nextYear} 00:00:00`);
+
+    const difference = newYearDate - now;
+
+    let timeLeft = {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    };
+
+    if (difference > 0) {
+      timeLeft = {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    }
+
+    return timeLeft;
+  };
+
+  // Инициализируем состояние результатом функции
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        let { days, hours, minutes, seconds } = prevTime;
-        if (seconds > 0) seconds--;
-        else {
-          seconds = 59;
-          if (minutes > 0) minutes--;
-          else {
-            minutes = 59;
-            if (hours > 0) hours--;
-            else {
-              hours = 23;
-              if (days > 0) days--;
-              else {
-                clearInterval(timer);
-                return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-              }
-            }
-          }
-        }
-        return { days, hours, minutes, seconds };
-      });
+      setTimeLeft(calculateTimeLeft());
     }, 1000);
+
+    // Очистка таймера при размонтировании
     return () => clearInterval(timer);
   }, []);
 
@@ -53,7 +59,7 @@ export default function Header() {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
-  
+
   // Вспомогательная функция для прокрутки к каталогу
   const scrollToWowbox = () => scrollToSection(styles.selectYourOwnWowbox);
 
@@ -65,29 +71,37 @@ export default function Header() {
         </a>
         <div className={styles.navbarNavigation}>
           <div className={styles.navbarLinks}>
-             {/* Ссылки десктоп */}
-             {[
-                { label: "Главная", ref: styles.hero },
-                { label: "Каталог", ref: styles.selectYourOwnWowbox },
-                { label: "Подобрать WOWBOX", ref: styles.weFoundYourSuperWowbox },
-                { label: "Как это работает", ref: styles.howToWorkWowBox },
-                { label: "Качество", ref: styles.quality },
-                { label: "Гарантии и доставка", ref: styles.delivery },
-                { label: "Вопросы и ответы", ref: styles.faq },
-             ].map((link, idx) => (
-                <div key={idx} className={styles.navbarLink}>
-                    <a href="#" onClick={(e) => { e.preventDefault(); scrollToSection(link.ref); }}>
-                        {link.label}
-                    </a>
-                    <div></div>
-                </div>
-             ))}
+            {/* Ссылки десктоп */}
+            {[
+              { label: "Главная", ref: styles.hero },
+              { label: "Каталог", ref: styles.selectYourOwnWowbox },
+              { label: "Подобрать WOWBOX", ref: styles.weFoundYourSuperWowbox },
+              { label: "Как это работает", ref: styles.howToWorkWowBox },
+              { label: "Качество", ref: styles.quality },
+              { label: "Гарантии и доставка", ref: styles.delivery },
+              { label: "Вопросы и ответы", ref: styles.faq },
+            ].map((link, idx) => (
+              <div key={idx} className={styles.navbarLink}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection(link.ref);
+                  }}
+                >
+                  {link.label}
+                </a>
+                <div></div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Burger Button */}
         <button
-          className={`${styles.burgerButton} ${isMobileMenuOpen ? styles.active : ""}`}
+          className={`${styles.burgerButton} ${
+            isMobileMenuOpen ? styles.active : ""
+          }`}
           onClick={toggleMobileMenu}
           aria-label="Menu"
         >
@@ -99,31 +113,44 @@ export default function Header() {
 
       {/* Mobile Overlay */}
       <div
-        className={`${styles.mobileOverlay} ${isMobileMenuOpen ? styles.active : ""}`}
+        className={`${styles.mobileOverlay} ${
+          isMobileMenuOpen ? styles.active : ""
+        }`}
         onClick={closeMobileMenu}
       ></div>
 
       {/* Mobile Navigation */}
-      <nav className={`${styles.mobileNav} ${isMobileMenuOpen ? styles.active : ""}`}>
+      <nav
+        className={`${styles.mobileNav} ${
+          isMobileMenuOpen ? styles.active : ""
+        }`}
+      >
         <div className={styles.mobileNavLinks}>
-             {[
-                { label: "Главная", ref: styles.hero },
-                { label: "Каталог", ref: styles.selectYourOwnWowbox },
-                { label: "Подобрать WOWBOX", ref: styles.weFoundYourSuperWowbox },
-                { label: "Как это работает", ref: styles.howToWorkWowBox },
-                { label: "Качество", ref: styles.quality },
-                { label: "Гарантии и доставка", ref: styles.delivery },
-                { label: "Вопросы и ответы", ref: styles.faq },
-             ].map((link, idx) => (
-                <div key={idx}>
-                    <div className={styles.mobileNavLink}>
-                        <a href="#" onClick={(e) => { e.preventDefault(); closeMobileMenu(); scrollToSection(link.ref); }}>
-                            {link.label}
-                        </a>
-                    </div>
-                    {idx < 6 && <div className={styles.mobileNavHr}></div>}
-                </div>
-             ))}
+          {[
+            { label: "Главная", ref: styles.hero },
+            { label: "Каталог", ref: styles.selectYourOwnWowbox },
+            { label: "Подобрать WOWBOX", ref: styles.weFoundYourSuperWowbox },
+            { label: "Как это работает", ref: styles.howToWorkWowBox },
+            { label: "Качество", ref: styles.quality },
+            { label: "Гарантии и доставка", ref: styles.delivery },
+            { label: "Вопросы и ответы", ref: styles.faq },
+          ].map((link, idx) => (
+            <div key={idx}>
+              <div className={styles.mobileNavLink}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    closeMobileMenu();
+                    scrollToSection(link.ref);
+                  }}
+                >
+                  {link.label}
+                </a>
+              </div>
+              {idx < 6 && <div className={styles.mobileNavHr}></div>}
+            </div>
+          ))}
         </div>
       </nav>
 
@@ -134,16 +161,25 @@ export default function Header() {
         </div>
         <div className={styles.discount}>
           <div className={styles.discountOverTime}>
-            <div><span>{timeLeft.days}</span><span>дней</span></div>
-            <div><span>{timeLeft.hours}</span><span>часа</span></div>
-            <div><span>{timeLeft.minutes}</span><span>минута</span></div>
+            <div>
+              <span>{timeLeft.days}</span>
+              <span>дней</span>
+            </div>
+            <div>
+              <span>{timeLeft.hours}</span>
+              <span>часа</span>
+            </div>
+            <div>
+              <span>{timeLeft.minutes}</span>
+              <span>минута</span>
+            </div>
           </div>
           <div className={styles.discountOverTimeButtonWrapper}>
             <button className={styles.discountOverTimeButton}>Играть</button>
             <img src={santahat} alt="Santa Claus Hat" loading="lazy" />
           </div>
         </div>
-        
+
         <div className={styles.heroLogo}>
           <img src={logoBig} alt="Hero Logo" loading="lazy" />
           <p>лучший способ порадовать себя и близких</p>
@@ -151,32 +187,36 @@ export default function Header() {
 
         {/* Stickers Block */}
         <div className={styles.heroBonus}>
-            <div className={styles.heroBonusPlus}>
-                <div className={styles.heroBonusWrapper}>
-                <div className={`${styles.heroBonusItem} ${styles.heroBonusItem}`}>
-                    <p>УНИКАЛЬНАЯ УПАКОВКА</p>
-                </div>
-                </div>
-                <img src={heroBonusSticker1} alt="sticker" loading="lazy" />
-            </div>
+          <div className={styles.heroBonusPlus}>
             <div className={styles.heroBonusWrapper}>
-                <div className={`${styles.heroBonusItem} ${styles.heroBonusItem2}`}>
-                <p>НАПОЛНЕНИЕ ОТ 4900₽</p>
-                </div>
+              <div
+                className={`${styles.heroBonusItem} ${styles.heroBonusItem}`}
+              >
+                <p>УНИКАЛЬНАЯ УПАКОВКА</p>
+              </div>
             </div>
+            <img src={heroBonusSticker1} alt="sticker" loading="lazy" />
+          </div>
+          <div className={styles.heroBonusWrapper}>
+            <div className={`${styles.heroBonusItem} ${styles.heroBonusItem2}`}>
+              <p>НАПОЛНЕНИЕ ОТ 4900₽</p>
+            </div>
+          </div>
+          <div className={styles.heroBonusWrapper}>
+            <div className={`${styles.heroBonusItem} ${styles.heroBonusItem3}`}>
+              <p>ЭФФЕКТ СЮРПРИЗА</p>
+            </div>
+          </div>
+          <div className={styles.heroBonusPlus2}>
             <div className={styles.heroBonusWrapper}>
-                <div className={`${styles.heroBonusItem} ${styles.heroBonusItem3}`}>
-                <p>ЭФФЕКТ СЮРПРИЗА</p>
-                </div>
+              <div
+                className={`${styles.heroBonusItem} ${styles.heroBonusItem4}`}
+              >
+                <p>ТОЛЬКО ОРИГИНАЛ</p>
+              </div>
             </div>
-            <div className={styles.heroBonusPlus2}>
-                <div className={styles.heroBonusWrapper}>
-                <div className={`${styles.heroBonusItem} ${styles.heroBonusItem4}`}>
-                    <p>ТОЛЬКО ОРИГИНАЛ</p>
-                </div>
-                </div>
-                <img src={heroBonusSticker2} alt="sticker" loading="lazy" />
-            </div>
+            <img src={heroBonusSticker2} alt="sticker" loading="lazy" />
+          </div>
         </div>
 
         <div className={styles.heroSelectButtonWrapper}>

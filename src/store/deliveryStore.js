@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { cities } from '../data/cities';
 
+// Функция проверки вхождения точки в полигон
 function isPointInPolygon(point, vs) {
   const x = point[0], y = point[1];
   let inside = false;
@@ -13,11 +14,15 @@ function isPointInPolygon(point, vs) {
   return inside;
 }
 
+// Используем ваш PHP-прокси для запросов к OSM
+const GEOCODER_API_URL = 'https://wowbox.market/api/geocode.php';
+
 export const useDeliveryStore = create((set, get) => ({
   // --- СОСТОЯНИЕ ---
   selectedCity: cities[0],
-  deliveryMode: 'pickup',
-  clientEmail: '', // Email для проверки повторного заказа
+  deliveryMode: 'pickup', // 'pickup' | 'courier'
+  clientEmail: '',
+  clientPhone: '',
 
   points: [],
   polygons: null,
@@ -29,6 +34,9 @@ export const useDeliveryStore = create((set, get) => ({
   courierMarker: null,
   courierAddress: '',
   addressError: '',
+  
+  // Список подсказок для автокомплита
+  addressSuggestions: [],
 
   courierForm: {
     apartment: '',
@@ -45,6 +53,8 @@ export const useDeliveryStore = create((set, get) => ({
       deliveryMode: initialMode,
       clientEmail: currentData.email || '',
       clientPhone: currentData.phone || '',
+      courierAddress: currentData.address || '',
+      addressError: '',
       courierForm: {
         ...courierForm,
         apartment: currentData.apartment || '',
@@ -63,29 +73,94 @@ export const useDeliveryStore = create((set, get) => ({
 
   setSelectedCity: (cityValue) => {
     const city = cities.find(c => c.fias === cityValue || c.name === cityValue);
+    
     if (city) {
-      set({ selectedCity: city });
+      set({ selectedCity: city, addressError: '' });
+      get().loadDataForCity();
     } else {
-      set({ selectedCity: { name: cityValue, price: 350 } }); 
+      set({ addressError: "В этот город доставка не осуществляется, выберите другой" });
     }
-    get().loadDataForCity();
   },
 
   setCourierField: (field, value) => set(state => ({
     courierForm: { ...state.courierForm, [field]: value }
   })),
 
-  setCourierAddress: (address) => set({ courierAddress: address }),
+  setCourierAddress: (address) => set({ courierAddress: address, addressError: '' }),
+
+  // Очистка списка подсказок
+  clearSuggestions: () => set({ addressSuggestions: [] }),
+
+  // Загрузка подсказок (Автокомплит) с фильтром по России
+  fetchSuggestions: async (query) => {
+      if (!query || query.length < 3) {
+          set({ addressSuggestions: [] });
+          return;
+      }
+
+      try {
+          // &countrycodes=ru — Ограничиваем поиск только Россией
+          const url = `${GEOCODER_API_URL}?q=${encodeURIComponent(query)}&accept-language=ru&limit=5&addressdetails=1&countrycodes=ru`;
+          const res = await fetch(url);
+          const data = await res.json();
+          
+          if (Array.isArray(data)) {
+              set({ addressSuggestions: data });
+          }
+      } catch (e) {
+          console.error("Autosuggest error:", e);
+      }
+  },
+
+  // Выбор подсказки из списка
+  selectSuggestion: async (suggestion) => {
+      const coords = [parseFloat(suggestion.lon), parseFloat(suggestion.lat)];
+      
+      set({ 
+          courierAddress: suggestion.display_name, 
+          addressSuggestions: [] 
+      });
+
+      // Обновляем город и карту
+      const addressDetails = suggestion.address;
+      
+      // Проверяем страну (на всякий случай)
+      if (addressDetails.country_code && addressDetails.country_code !== 'ru') {
+          set({ addressError: "Доставка возможна только по территории РФ" });
+          return;
+      }
+
+      get()._maybeUpdateCity(addressDetails);
+
+      set({
+          courierMarker: { coordinates: coords },
+          mapLocation: { center: coords, zoom: 16 },
+          addressError: ''
+      });
+
+      // Проверяем зону доставки (полигоны)
+      const { polygons } = get();
+      if (polygons?.features) {
+           let isInside = false;
+           for (const feature of polygons.features) {
+              if (feature.geometry.type === 'Polygon' && isPointInPolygon(coords, feature.geometry.coordinates[0])) {
+                  isInside = true; break;
+              }
+           }
+           if (!isInside) set({ addressError: "Адрес вне зоны доставки выбранного города." });
+      }
+  },
 
   loadDataForCity: async () => {
     const { deliveryMode, selectedCity } = get();
-    set({ isLoading: true, addressError: '' });
+    set({ isLoading: true }); 
 
     try {
       if (deliveryMode === 'pickup') {
         set({ polygons: null });
         if (selectedCity.fias) {
-          const res = await fetch(`https://wowbox.market/api/get-points.php?fias=${selectedCity.fias}`);
+          const url = `https://wowbox.market/api/get-points.php?fias=${selectedCity.fias}`;
+          const res = await fetch(url);
           const data = await res.json();
           const points = Array.isArray(data) ? data : [];
           set({ points });
@@ -101,6 +176,7 @@ export const useDeliveryStore = create((set, get) => ({
         } else {
             url += `city_name=${encodeURIComponent(selectedCity.name)}`;
         }
+
         const res = await fetch(url);
         const geoJson = await res.json();
         set({ polygons: geoJson });
@@ -113,53 +189,75 @@ export const useDeliveryStore = create((set, get) => ({
         }
       }
     } catch (e) {
-      console.error(e);
+      console.error("Error loading city data:", e);
     } finally {
       set({ isLoading: false });
     }
   },
 
   _maybeUpdateCity: (addrDetails, forceRefresh = false) => {
-      const { selectedCity, setSelectedCity, loadDataForCity } = get();
+      const { selectedCity, setSelectedCity } = get();
+      
+      // Проверка страны при обратном геокодинге
+      if (addrDetails.country_code && addrDetails.country_code !== 'ru') {
+          set({ addressError: "Доставка возможна только по территории РФ" });
+          return false;
+      }
+
       const detectedName = addrDetails.city || addrDetails.town || addrDetails.village || addrDetails.state;
+      console.log("[Store] Город из координат:", detectedName);
 
       if (detectedName) {
           let foundCity = cities.find(c => c.name === detectedName);
           if (!foundCity) {
-             foundCity = cities.find(c => detectedName.includes(c.name) || (c.name && c.name.includes(detectedCityName)));
+             foundCity = cities.find(c => detectedName.includes(c.name) || (c.name && c.name.includes(detectedName)));
           }
-          const cityToSet = foundCity || { name: detectedName, price: 350 };
 
-          if (forceRefresh || cityToSet.name !== selectedCity.name) {
-              if (foundCity) setSelectedCity(foundCity.fias);
-              else setSelectedCity(cityToSet.name);
-              return true; 
+          if (foundCity) {
+              set({ addressError: '' });
+              if (forceRefresh || foundCity.name !== selectedCity.name) {
+                  console.log("[Store] Смена на валидный город:", foundCity.name);
+                  setSelectedCity(foundCity.fias);
+                  return true;
+              }
+          } else {
+              console.warn("[Store] Город не найден в списке доставки:", detectedName);
+              set({ 
+                  addressError: "В этот город доставка не осуществляется, выберите другой" 
+              });
+              return false;
           }
-      } else {
-          if (forceRefresh) loadDataForCity();
-      }
+      } 
       return false;
   },
 
+  // Поиск адреса (по нажатию "Найти") с фильтром РФ
   searchAddressAction: async () => {
     const { courierAddress, polygons, _maybeUpdateCity } = get();
     if (!courierAddress || courierAddress.length < 3) return;
 
     set({ isLoading: true, addressError: '' });
+
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(courierAddress)}&accept-language=ru&limit=1&addressdetails=1`);
+      // &countrycodes=ru
+      const url = `${GEOCODER_API_URL}?q=${encodeURIComponent(courierAddress)}&accept-language=ru&limit=1&addressdetails=1&countrycodes=ru`;
+      
+      const res = await fetch(url);
       const data = await res.json();
 
       if (data?.[0]) {
         const coords = [parseFloat(data[0].lon), parseFloat(data[0].lat)];
-        const cityUpdated = _maybeUpdateCity(data[0].address);
+        const addressDetails = data[0].address;
+
+        const cityUpdated = _maybeUpdateCity(addressDetails);
 
         set({
             courierMarker: { coordinates: coords },
             mapLocation: { center: coords, zoom: 14 }
         });
 
-        if (!cityUpdated && polygons?.features) {
+        const currentError = get().addressError;
+        if (!currentError && polygons?.features) {
              let isInside = false;
              for (const feature of polygons.features) {
                 if (feature.geometry.type === 'Polygon' && isPointInPolygon(coords, feature.geometry.coordinates[0])) {
@@ -168,6 +266,7 @@ export const useDeliveryStore = create((set, get) => ({
              }
              if (!isInside) set({ addressError: "Адрес вне зоны доставки выбранного города." });
         }
+
       } else {
         set({ addressError: "Адрес не найден" });
       }
@@ -178,8 +277,11 @@ export const useDeliveryStore = create((set, get) => ({
     }
   },
 
-  /*detectLocationAction: async () => {
+  // Определение геолокации (с фоллбэком и прокси)
+  detectLocationAction: async () => {
+      console.log("[Store] Запуск геолокации...");
       set({ isLoading: true, addressError: '' });
+      
       if (!navigator.geolocation) {
           set({ addressError: 'Геолокация не поддерживается', isLoading: false });
           return;
@@ -194,9 +296,11 @@ export const useDeliveryStore = create((set, get) => ({
       try {
         let position;
         try {
+            console.log("[Store] Попытка High Accuracy...");
             position = await getPosition({ enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
         } catch (err) {
             if (err.code === 3) { 
+                console.warn("[Store] Тайм-аут GPS. Пробуем Low Accuracy...");
                 position = await getPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
             } else {
                 throw err;
@@ -205,7 +309,12 @@ export const useDeliveryStore = create((set, get) => ({
 
         const { latitude, longitude } = position.coords;
         const coords = [longitude, latitude];
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ru&addressdetails=1`);
+        console.log("[Store] Координаты:", coords);
+
+        // Обратное геокодирование через прокси
+        const url = `${GEOCODER_API_URL}?lat=${latitude}&lon=${longitude}&accept-language=ru&addressdetails=1`;
+        
+        const res = await fetch(url);
         const data = await res.json();
         
         set({ courierAddress: data.display_name || "Мое местоположение" });
@@ -222,14 +331,14 @@ export const useDeliveryStore = create((set, get) => ({
         });
 
       } catch (e) {
+          console.error("[Store] Ошибка геолокации:", e);
           let msg = 'Не удалось определить местоположение';
-          if (e.code === 1) msg = 'Доступ к геолокации запрещен';
-          if (e.code === 3) msg = 'Тайм-аут: сигнал не найден';
+          if (e.code === 1) msg = 'Доступ запрещен пользователем';
           set({ addressError: msg });
       } finally {
           set({ isLoading: false });
       }
-  },*/
+  },
 
   handleMapClickAction: async (coords) => {
     const { deliveryMode, polygons } = get();
@@ -253,67 +362,60 @@ export const useDeliveryStore = create((set, get) => ({
     }
 
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[1]}&lon=${coords[0]}&accept-language=ru&addressdetails=1`);
+      const url = `${GEOCODER_API_URL}?lat=${coords[1]}&lon=${coords[0]}&accept-language=ru&addressdetails=1`;
+      
+      const res = await fetch(url);
       const data = await res.json();
+      
       set({ courierAddress: data.display_name || "Адрес на карте" });
-      if (data.address) get()._maybeUpdateCity(data.address);
+
+      if (data.address) {
+          get()._maybeUpdateCity(data.address);
+      }
     } catch (e) {
       set({ courierAddress: "Адрес на карте" });
     }
   },
 
-  // --- ФУНКЦИЯ ПРОВЕРКИ БЕСПЛАТНОЙ ДОСТАВКИ ---
   checkFreeShipping: async (addressToCheck) => {
-    const { clientEmail, clientPhone } = get(); // Достаем телефон
+      const { clientEmail, clientPhone } = get(); 
+      if ((!clientEmail && !clientPhone) || !addressToCheck) return false;
 
-    // Разрешаем проверку, если есть хотя бы один контакт
-    if ((!clientEmail && !clientPhone) || !addressToCheck) return false;
+      try {
+          const res = await fetch('https://wowbox.market/api/check-free-shipping.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  email: clientEmail,
+                  phone: clientPhone, 
+                  address: addressToCheck,
+                  date: new Date().toISOString().split('T')[0]
+              })
+          });
+          const data = await res.json();
+          if (data.isFree) return true;
+      } catch (e) {
+          console.error("Check free shipping error:", e);
+      }
+      return false;
+  },
 
-    try {
-        console.log("Checking free shipping for:", { email: clientEmail, phone: clientPhone, address: addressToCheck });
-
-        const res = await fetch('https://wowbox.market/api/check-free-shipping.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: clientEmail,
-                phone: clientPhone, // Отправляем телефон
-                address: addressToCheck,
-                date: new Date().toISOString().split('T')[0]
-            })
-        });
-        const data = await res.json();
-        console.log("Free shipping check result:", data); // Лог для отладки
-
-        if (data.isFree) {
-            return true;
-        }
-    } catch (e) {
-        console.error("Check free shipping error:", e);
-    }
-    return false;
-},
-
-  // --- РАСЧЕТ И ПОДТВЕРЖДЕНИЕ ---
   calculateAndConfirm: async () => {
     const { courierAddress, selectedCity, courierMarker, addressError, deliveryMode, checkFreeShipping } = get();
 
     if (deliveryMode === 'courier') {
+      if (addressError) return null; 
       if (!courierMarker && !courierAddress) return null;
-      if (addressError) return null;
 
       set({ isCalculating: true });
       let finalPrice = 0;
 
-      // 1. Проверяем, положена ли бесплатная доставка (проверяем по адресу и email)
       const isFree = await checkFreeShipping(courierAddress);
 
       if (isFree) {
           finalPrice = 0;
-          // Можно добавить уведомление, если нужно
           alert("🎉 Вам доступна бесплатная доставка за повторный заказ!");
       } else {
-          // Если не бесплатно, считаем через Dalli или по умолчанию
           try {
             const res = await fetch(`https://wowbox.market/api/get-delivery-price.php?address=${encodeURIComponent(courierAddress)}`);
             const data = await res.json();
@@ -321,11 +423,10 @@ export const useDeliveryStore = create((set, get) => ({
             if (data.price && data.price > 0) {
               finalPrice = data.price;
             } else {
-              finalPrice = (selectedCity.price)
+              finalPrice = (selectedCity.price || 350) + 180;
             }
           } catch (e) {
-            console.error("Error calc courier", e);
-            finalPrice = (selectedCity.price);
+            finalPrice = (selectedCity.price || 350) + 180;
           }
       }
       
@@ -338,14 +439,9 @@ export const useDeliveryStore = create((set, get) => ({
         cityName: selectedCity.name,
         mode: 'courier'
       };
-    } 
-    
-    // Pickup логика в calculateAndConfirm обычно не используется для клика по точке,
-    // но если вдруг — оставим
-    else if (deliveryMode === 'pickup') {
-      // Здесь цена обычно берется при клике на маркер, но если нужно вернуть дефолт:
+    } else if (deliveryMode === 'pickup') {
       return {
-        price: selectedCity.price,
+        price: selectedCity.price || 350,
         address: "",
         cityFias: selectedCity.fias,
         cityName: selectedCity.name,

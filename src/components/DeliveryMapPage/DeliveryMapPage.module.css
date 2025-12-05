@@ -1384,13 +1384,52 @@ h3 {
     margin-top: 10px;
   }
 }
+.suggestionsList {
+  position: absolute;
+  top: 100%; /* Сразу под инпутом */
+  left: 0;
+  right: 0; /* Растягиваем на всю ширину родителя (.searchRow) */
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  z-index: 5000;
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
 
+.suggestionItem {
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+  font-family: "SF Pro", sans-serif;
+  transition: background 0.2s;
+}
+
+.suggestionItem:last-child {
+  border-bottom: none;
+}
+
+.suggestionItem:hover {
+  background-color: #f9f9f9;
+}
 /* Адаптив для мобильных */
 @media (max-width: 992px) {
   .searchBtn {
     display: none;
   }
-
+.suggestionsList {
+    max-height: 250px;
+  }
+  .suggestionItem {
+    padding: 14px;
+    font-size: 15px;
+  }
   .overlay {
     padding: 0;
     /* Убираем отступы, чтобы было на весь экран */
