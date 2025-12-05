@@ -1161,6 +1161,7 @@ h3 {
 /* Кнопка "Найти" */
 .searchBtn {
   padding: 0 20px;
+  display: none;
   background-color: #000;
   color: white;
   border: none;
@@ -1171,9 +1172,9 @@ h3 {
   transition: all 0.2s;
   height: 44px;
   /* Фиксированная высота для выравнивания */
-  display: flex;
+  /*display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center;*/
   min-width: 60px;
 }
 
