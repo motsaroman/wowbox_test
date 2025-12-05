@@ -6,10 +6,12 @@ import closeIcon from '../../../assets/icons/close.svg';
 export default function DeliveryHeader({ onClose }) {
   const { selectedCity, deliveryMode, setDeliveryMode, setSelectedCity } = useDeliveryStore();
 
+  // Проверяем, есть ли текущий выбранный город в списке
+  const isCityInList = cities.some(c => c.fias === selectedCity.fias);
+
   return (
     <div className={styles.wrapper}>
       
-      {/* ЛЕВАЯ ЧАСТЬ: Все управление */}
       <div className={styles.controls}>
         <h3 className={styles.title}>Способ доставки</h3>
         
@@ -30,16 +32,25 @@ export default function DeliveryHeader({ onClose }) {
         
         <select 
           className={styles.citySelect}
-          value={selectedCity.fias || ""}
+          // Используем fias, если есть, иначе name (для автоопределенных городов)
+          value={selectedCity.fias || selectedCity.name || ""} 
           onChange={(e) => setSelectedCity(e.target.value)}
         >
           {cities.map((c, i) => (
-            <option key={c.fias || i} value={c.fias || ""}>{c.name}</option>
+            <option key={c.fias || i} value={c.fias || c.name}>
+              {c.name}
+            </option>
           ))}
+          
+          {/* Если город определен автоматически и его нет в списке — показываем его */}
+          {!isCityInList && selectedCity.name && (
+             <option key="custom" value={selectedCity.name}>
+               {selectedCity.name}
+             </option>
+          )}
         </select>
       </div>
 
-      {/* ПРАВАЯ ЧАСТЬ: Только кнопка закрытия */}
       <button className={styles.closeButton} onClick={onClose}>
         <img src={closeIcon} alt="Close" />
       </button>

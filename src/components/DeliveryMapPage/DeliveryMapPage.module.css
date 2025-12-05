@@ -562,7 +562,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 10000;
+  /* Высокий z-index для самой модалки */
+  padding: 20px;
 }
 
 .modal {
@@ -611,6 +613,7 @@ h3 {
 
 .mapContainer {
   flex: 1;
+  /* Занимает все оставшееся место */
   width: 100%;
   position: relative;
   background-color: #f0f0f0;
@@ -626,7 +629,10 @@ h3 {
   padding: 10px 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-family: "SF Pro", sans-serif;
 }
+
+/* Панель курьера (Десктоп) */
 
 /* Маркер на карте */
 .marker {
@@ -814,17 +820,16 @@ h3 {
 /* Панель курьера (снизу карты) */
 .courierPanel {
   position: absolute;
-  bottom: 25px;
-  left: 20px;
-  /*transform: translateX(-50%);*/
-  width: 90%;
-  max-width: 400px;
+  bottom: 30px;
+  left: 30px;
+  width: 380px;
   background: white;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   z-index: 2000;
-  text-align: center;
+  max-height: calc(100% - 60px);
+  overflow-y: auto;
 }
 
 .courierAddress {
@@ -861,28 +866,26 @@ h3 {
 
 .searchRow {
   display: flex;
-  font-family: "SF Pro", sans-serif;
-  align-items: stretch;
+  align-items: center;
   gap: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
   width: 100%;
 }
 
 .addressInput {
-  width: 70%;
-  min-width: 0;
-  padding: 12px 15px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 16px;
-  font-family: inherit;
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: "SF Pro", sans-serif;
   outline: none;
-  transition: border-color 0.2s;
   background-color: #f9f9f9;
+  transition: all 0.2s;
 }
 
 .addressInput:focus {
-  border-color: #333;
+  border-color: #000;
   background-color: #fff;
 }
 
@@ -896,21 +899,19 @@ h3 {
   background-color: #000;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 16px;
-  transition: all 0.2s;
-  height: auto;
-  width: 30%;
+  font-size: 15px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity 0.2s;
 }
 
 .searchBtn:hover {
-  background-color: #000;
-  transform: translateY(-1px);
+  opacity: 0.8;
 }
 
 .searchBtn:active {
@@ -1024,66 +1025,56 @@ h3 {
 .wrapper {
   display: flex;
   justify-content: space-between;
-  /* Контролы слева, крестик справа */
   align-items: center;
-  /* Строго по центру вертикально */
-  padding: 12px 20px;
-  /* Немного воздуха внутри */
-  background-color: #f5f5f5;
-  /* Цвет фона как на скрине */
+  padding: 16px 24px;
+  background-color: #fff;
   border-bottom: 1px solid #e0e0e0;
-  /* Легкая граница снизу */
+  z-index: 10;
+  /* Шапка должна быть выше карты */
 }
 
-/* 2. Левая группа: выстраиваем заголовок, табы и селект в ряд */
 .controls {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 24px;
-  /* Хороший отступ между блоками (Заголовок - Табы - Селект) */
+  gap: 20px;
+  width: 100%;
 }
 
 .title {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  white-space: nowrap;
-  /* Чтобы текст не прыгал */
+  color: #333;
 }
 
-/* 3. Табы (переключатель) */
 .tabs {
   display: flex;
-  background-color: #fff;
-  /* Белая подложка под табы */
+  background-color: #f5f5f5;
   padding: 4px;
-  border-radius: 8px;
-  /* Скругление всей группы табов */
-  gap: 4px;
+  border-radius: 10px;
+  gap: 2px;
 }
 
 .tab {
   border: none;
   background: transparent;
-  padding: 6px 16px;
-  border-radius: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
   color: #666;
+  font-family: "SF Pro", sans-serif;
 }
 
 .activeTab {
   background-color: #fff;
-  /* Или серый, в зависимости от дизайна */
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  /* Тень для активного таба */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   color: #000;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* 4. Селект: самое важное исправление */
 .citySelect {
   padding: 8px 12px;
   border-radius: 8px;
@@ -1091,18 +1082,11 @@ h3 {
   background-color: #fff;
   cursor: pointer;
   font-size: 14px;
-  min-width: 150px;
-  /* Минимальная ширина */
-  width: auto;
-  /* Запрещаем ему растягиваться на весь экран */
   outline: none;
+  font-family: "SF Pro", sans-serif;
+  max-width: 200px;
 }
 
-.citySelect:hover {
-  border-color: #bbb;
-}
-
-/* 5. Кнопка закрытия */
 .closeButton {
   display: flex;
   align-items: center;
@@ -1117,4 +1101,429 @@ h3 {
 
 .closeButton:hover {
   opacity: 1;
+}
+
+.geoControlBtn {
+  width: 28px;
+  /* Размеры как у зума в Яндекс.Картах */
+  height: 28px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.geoControlBtn:hover {
+  background: #f5f5f5;
+}
+
+.geoControlBtn img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+}
+
+/* Стили для панели поиска */
+.searchRow {
+  display: flex;
+  font-family: "SF Pro", sans-serif;
+  align-items: center;
+  /* Выравнивание по центру */
+  gap: 10px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.addressInput {
+  flex: 1;
+  /* Занимает все свободное место */
+  min-width: 0;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  background-color: #f9f9f9;
+}
+
+.addressInput:focus {
+  border-color: #333;
+  background-color: #fff;
+}
+
+/* Кнопка "Найти" */
+.searchBtn {
+  padding: 0 20px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s;
+  height: 44px;
+  /* Фиксированная высота для выравнивания */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.searchBtn:hover {
+  background-color: #333;
+}
+
+/* Кнопка геолокации В ПАНЕЛИ (между инпутом и кнопкой Найти) */
+.geoBtn {
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.geoBtn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.inputGrid {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.miniInput {
+  width: 33%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: "SF Pro", sans-serif;
+  background-color: #f9f9f9;
+}
+
+.fullInput {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-family: "SF Pro", sans-serif;
+  background-color: #f9f9f9;
+}
+
+.confirmBtn {
+  width: 100%;
+  padding: 14px;
+  background: #000;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.confirmBtn:active {
+  transform: scale(0.98);
+}
+
+.confirmBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.courierPanel {
+  position: fixed;
+  bottom: 15%;
+  left: 80px;
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  max-height: 80vh;
+  /* Ограничение высоты для мобилок */
+  overflow-y: auto;
+}
+
+.diclaimer {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  margin-top: 12px;
+  font-family: "SF Pro", sans-serif;
+}
+
+.diclaimer a {
+  color: #666;
+  text-decoration: underline;
+}
+
+/* Кнопка геолокации НА КАРТЕ */
+.geoControlBtn {
+  width: 28px;
+  height: 28px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+
+.geoControlBtn:hover {
+  background: #f5f5f5;
+}
+
+.mobileSpecifyBtn,
+.mobileHeader {
+  display: none;
+}
+
+/* =========================================
+   АДАПТИВ ДЛЯ МОБИЛЬНЫХ (max-width: 480px)
+   ========================================= */
+@media (max-width: 480px) {
+
+  /*
+  .mobileSpecifyBtn {
+    display: block;
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    padding: 16px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: "SF Pro", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    z-index: 2001;
+
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .courierPanel {
+    position: fixed;
+    top: 100%;
+
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    z-index: 3000;
+    transition: top 0.3s ease-in-out;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    bottom: auto;
+  }
+
+  .courierPanel.mobileOpen {
+    top: 0;
+  }*/
+
+  /* Шапка внутри мобильной панели */
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .mobileHeader h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .mobileBackBtn {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #007AFF;
+    /* Синий цвет как в iOS */
+    cursor: pointer;
+    padding: 0;
+    font-weight: 500;
+  }
+
+  /* Подгоняем элементы формы для полного экрана */
+  .searchRow {
+    margin-top: 10px;
+  }
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 992px) {
+  .searchBtn {
+    display: none;
+  }
+
+  .overlay {
+    padding: 0;
+    /* Убираем отступы, чтобы было на весь экран */
+    background: white;
+    /* Фон белый, не затемнение */
+  }
+
+  .modal {
+    width: 100%;
+    height: 100%;
+    /* На весь экран */
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .wrapper {
+    padding: 12px 16px;
+    /* Компактная шапка */
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .citySelect {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  /* КНОПКА "УКАЗАТЬ АДРЕС" */
+  .mobileSpecifyBtn {
+    display: block;
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    padding: 16px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: "SF Pro", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    z-index: 1000;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    animation: slideUpFade 0.3s ease-out;
+  }
+
+  /* ПАНЕЛЬ КУРЬЕРА (Full Screen Overlay) */
+  .courierPanel {
+    position: fixed;
+    /* Фиксируем относительно окна браузера */
+    top: 100%;
+    /* Спрятана внизу */
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* На весь экран */
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    z-index: 20000;
+    /* ОЧЕНЬ высокий z-index, чтобы перекрыть .modal и шапку */
+    transition: top 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Плавная анимация iOS-style */
+    padding: 20px 16px;
+    bottom: auto;
+    /* Сбрасываем десктопные стили */
+    right: auto;
+    left: 0;
+    box-shadow: none;
+  }
+
+  /* Класс открытия панели */
+  .courierPanel.mobileOpen {
+    top: 0;
+    /* Выезжает наверх */
+  }
+
+  /* Мобильная шапка внутри панели */
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .mobileHeader h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: "SF Pro", sans-serif;
+  }
+
+  .mobileBackBtn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #007AFF;
+    /* Цвет системных кнопок iOS */
+    cursor: pointer;
+    padding: 0;
+    font-weight: 500;
+    font-family: "SF Pro", sans-serif;
+  }
+
+  /* Корректировки формы для мобилки */
+  .searchRow {
+    flex-wrap: wrap;
+    /* Кнопки могут переноситься если тесно */
+    gap: 8px;
+  }
+
+  .geoBtn {
+    display: none;
+    /* Можно скрыть кнопку гео внутри панели, если места мало */
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }

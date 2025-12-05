@@ -3,37 +3,58 @@ import { useDeliveryStore } from "../../store/deliveryStore";
 import {
   YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer,
   YMapMarker, YMapClusterer, clusterByGrid, YMapListener, YMapFeature,
-  YMapControls, YMapZoomControl, YMapGeolocationControl // Импортируем новые компоненты
+  YMapControls, YMapZoomControl 
 } from "../../lib/ymaps";
 import markerIcon from "../../assets/images/5post-geo.png";
+// import geoIcon from "../../assets/icons/geolocation.svg"; 
 import DeliveryHeader from "./components/DeliveryHeader";
 import CourierPanel from "./components/CourierPanel";
 import styles from "./DeliveryMapPage.module.css";
 
 export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, initialMode = "pickup", currentData = {} }) {
-  // Достаем состояние из стора
   const { 
     deliveryMode, points, polygons, 
     mapLocation, isLoading, courierMarker,
-    initStore, handleMapClickAction, selectedCity
+    initStore, handleMapClickAction, selectedCity,
+    checkFreeShipping, 
+    // detectLocationAction 
   } = useDeliveryStore();
 
   const [hoveredPointId, setHoveredPointId] = useState(null);
+  const [isMobilePanelOpen, setIsMobilePanelOpen] = useState(false);
+
   const gridSizedMethod = useMemo(() => clusterByGrid({ gridSize: 64 }), []);
 
-  // Инициализация при открытии
   useEffect(() => {
     if (isOpen) {
       initStore(initialMode, currentData);
     }
   }, [isOpen]);
 
-  // Хендлер клика по ПВЗ
-  const handlePointClick = (point) => {
+  const handlePointClick = async (point) => {
+    // [ИСПРАВЛЕНО] Добавляем выбранный город к адресу проверки
+    // Строка будет: "Москва, ПВЗ 5Post: 38HC - Пятерочка"
+    const checkAddress = `${selectedCity.name}, ПВЗ 5Post: ${point.name}`;
+    
+    let finalPrice = point.price || selectedCity.price || 350;
+
+    const isFree = await checkFreeShipping(checkAddress);
+    
+    if (isFree) {
+        finalPrice = 0;
+        alert("🎉 Вам доступна бесплатная доставка за повторный заказ!");
+    }
+
     onDeliverySelect({
       mode: "pickup",
-      point: { id: point.id, name: point.name, address: point.address, price: selectedCity.price },
-      cityFias: selectedCity.fias
+      point: { 
+          id: point.id, 
+          name: point.name, 
+          address: point.address, 
+          price: finalPrice 
+      },
+      cityFias: selectedCity.fias,
+      cityName: selectedCity.name // Важно передать город для сохранения в formData
     });
     onClose();
   };
@@ -74,7 +95,6 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
     <div className={styles.overlay}>
       <div className={styles.modal}>
         
-        {/* Шапка с табами */}
         <DeliveryHeader onClose={onClose} />
 
         <div className={styles.mapContainer}>
@@ -85,30 +105,39 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
               <YMapDefaultFeaturesLayer />
               <YMapListener onClick={(_, e) => handleMapClickAction(e.coordinates)} />
 
-              {/* Элементы управления: Зум и Геолокация */}
               <YMapControls position="right">
                 <YMapZoomControl />
-                <YMapGeolocationControl />
               </YMapControls>
 
-              {/* Полигоны */}
               {deliveryMode === 'courier' && polygons?.features?.map((feature, idx) => (
                   <YMapFeature key={idx} geometry={feature.geometry} style={{ fill: 'rgba(0, 200, 83, 0.4)', stroke: [{ color: '#00C853', width: 2 }] }} />
               ))}
 
-              {/* Маркер курьера */}
               {deliveryMode === 'courier' && courierMarker && (
                   <YMapMarker coordinates={courierMarker.coordinates}>
-                      <div style={{fontSize: '34px', transform: 'translate(-50%, -100%)', filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.3))'}}>🏠</div>
+                      <div className={styles.courierPin}>🏠</div>
                   </YMapMarker>
               )}
 
-              {/* ПВЗ Кластеры */}
               {deliveryMode === 'pickup' && <YMapClusterer marker={renderMarker} cluster={renderCluster} method={gridSizedMethod} features={features} />}
            </YMap>
 
-           {/* Панель ввода для курьера */}
-           {deliveryMode === 'courier' && <CourierPanel onConfirm={(data) => { onDeliverySelect(data); onClose(); }} />}
+           {deliveryMode === 'courier' && !isMobilePanelOpen && (
+             <button 
+                className={styles.mobileSpecifyBtn} 
+                onClick={() => setIsMobilePanelOpen(true)}
+             >
+                Указать адрес
+             </button>
+           )}
+
+           {deliveryMode === 'courier' && (
+             <CourierPanel 
+                isOpen={isMobilePanelOpen} 
+                onClose={() => setIsMobilePanelOpen(false)}
+                onConfirm={(data) => { onDeliverySelect(data); onClose(); }} 
+             />
+           )}
         </div>
       </div>
     </div>

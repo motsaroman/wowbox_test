@@ -34,95 +34,168 @@ export const useOrderStore = create((set, get) => ({
 
   // Цены и Промокод
   deliveryPrice: 0,
+  baseDeliveryPrice: 0,
   boxPrice: 4900,
   promoApplied: false,
-  promoStatus: null, // 'success' | 'error' | null
+  promoStatus: null,
   promoMessage: "",
   isCheckingPromo: false,
+  
+  freeShippingMessage: "", 
 
   // --- ACTIONS ---
 
-  // Сброс формы
   resetForm: () => set({
     formData: { ...initialFormData },
     errors: {},
     isProcessing: false,
     deliveryPrice: 0,
+    baseDeliveryPrice: 0,
     promoApplied: false,
     promoStatus: null,
     promoMessage: "",
-    isCheckingPromo: false
+    isCheckingPromo: false,
+    freeShippingMessage: "" 
   }),
 
-  // Обновление поля
-  setField: (name, value) => set((state) => {
-    const newErrors = { ...state.errors };
-    delete newErrors[name]; // Сбрасываем ошибку поля при вводе
-    
-    // Спец. логика для промокода (сброс статуса при редактировании)
-    if (name === 'promoCode') {
-        return { 
-            formData: { ...state.formData, [name]: value }, 
-            errors: newErrors,
-            promoStatus: null, 
-            promoMessage: "", 
-            promoApplied: false 
-        };
+  setField: (name, value) => {
+    set((state) => {
+      const newErrors = { ...state.errors };
+      delete newErrors[name]; 
+      
+      if (name === 'promoCode') {
+          return { 
+              formData: { ...state.formData, [name]: value }, 
+              errors: newErrors,
+              promoStatus: null, 
+              promoMessage: "", 
+              promoApplied: false 
+          };
+      }
+
+      return {
+        formData: { ...state.formData, [name]: value },
+        errors: newErrors
+      };
+    });
+
+    if (name === 'email' || name === 'phone') {
+        get().checkFreeShipping();
     }
+  },
 
-    return {
-      formData: { ...state.formData, [name]: value },
-      errors: newErrors
-    };
-  }),
-
-  // Маска телефона
   setPhone: (name, value) => {
     let formatted = value;
     if (!formatted.startsWith("+7 ")) formatted = "+7 ";
     get().setField(name, formatted);
   },
 
-  setDeliveryPrice: (price) => set({ deliveryPrice: price }),
+  setDeliveryPrice: (price) => set({ deliveryPrice: price, baseDeliveryPrice: price }),
 
+  updateDelivery: (data) => {
+    set((state) => {
+      const isPickup = data.mode === "pickup";
 
-  updateDelivery: (data) => set((state) => {
-    const isPickup = data.mode === "pickup";
+      let newPrice = 0;
+      if (isPickup) {
+        const base = data.point?.price || 0;
+        newPrice = base > 0 ? base + 0 : 0;
+      } else {
+        const base = data.price || 0;
+        newPrice = base > 0 ? base + 180 : 0;
+      }
 
-    // 1. РАСЧЕТ ЦЕНЫ С НАЦЕНКАМИ
-    let newPrice = 0;
-    if (isPickup) {
-      const base = data.point?.price || 0;
-      newPrice = base > 0 ? base + 0 : 0;
+      return {
+        deliveryPrice: newPrice,
+        baseDeliveryPrice: newPrice,
+        formData: {
+          ...state.formData,
+          deliveryType: isPickup ? "5post" : "courier",
+          cityFias: data.cityFias,
+          city: data.cityName || state.formData.city,
+
+          deliveryPoint: isPickup ? `${data.point.address} (${data.point.name})` : "",
+          pvzCode: isPickup ? data.point.id : "",
+
+          deliveryAddress: !isPickup ? data.address : "",
+          apartment: !isPickup ? (data.apartment || "") : "",
+          entrance: !isPickup ? (data.entrance || "") : "",
+          floor: !isPickup ? (data.floor || "") : "",
+          courierComment: !isPickup ? (data.comment || "") : "",
+        },
+        errors: { ...state.errors, delivery: null } 
+      };
+    });
+
+    get().checkFreeShipping();
+  },
+
+  // --- ИСПРАВЛЕННАЯ ФУНКЦИЯ ПРОВЕРКИ ---
+  checkFreeShipping: async () => {
+    const { formData, baseDeliveryPrice } = get();
+
+    let addressToCheck = "";
+    
+    if (formData.deliveryType === '5post') {
+        // Достаем название точки
+        const pointName = formData.deliveryPoint.split('(')[1]?.replace(')', '') || '';
+        
+        // [ВАЖНО] Добавляем город (formData.city) к строке проверки
+        // Формат: "Город, ПВЗ 5Post: Название"
+        // Это позволит PHP скрипту найти совпадение по частичному вхождению
+        if (pointName) {
+            addressToCheck = `${formData.city}, ПВЗ 5Post: ${pointName}`;
+        }
     } else {
-      const base = data.price || 0;
-      newPrice = base > 0 ? base + 180 : 0;
+        addressToCheck = formData.deliveryAddress;
     }
 
-    return {
-      deliveryPrice: newPrice,
-      formData: {
-        ...state.formData,
-        deliveryType: isPickup ? "5post" : "courier",
-        cityFias: data.cityFias,
-        city: data.cityName || state.formData.city,
+    const hasEmail = formData.email && formData.email.includes('@');
+    const hasPhone = formData.phone && formData.phone.length >= 12;
 
-        // Если ПВЗ
-        deliveryPoint: isPickup ? `${data.point.address} (${data.point.name})` : "",
-        pvzCode: isPickup ? data.point.id : "",
+    if (!addressToCheck || addressToCheck.trim() === 'ПВЗ 5Post:' || (!hasEmail && !hasPhone)) {
+        if (get().deliveryPrice !== baseDeliveryPrice) {
+            set({ 
+                deliveryPrice: baseDeliveryPrice,
+                freeShippingMessage: ""
+            });
+        }
+        return;
+    }
 
-        // Если Курьер
-        deliveryAddress: !isPickup ? data.address : "",
-        apartment: !isPickup ? (data.apartment || "") : "",
-        entrance: !isPickup ? (data.entrance || "") : "",
-        floor: !isPickup ? (data.floor || "") : "",
-        courierComment: !isPickup ? (data.comment || "") : "",
-      },
-      errors: { ...state.errors, delivery: null } // Сбрасываем ошибку доставки
-    };
-  }),
+    try {
+        const res = await fetch('https://wowbox.market/api/check-free-shipping.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: formData.email,
+                phone: formData.phone,
+                address: addressToCheck, 
+                date: new Date().toISOString().split('T')[0]
+            })
+        });
+        const data = await res.json();
 
-  // Проверка промокода
+        if (data.isFree) {
+            set({ 
+                deliveryPrice: 0,
+                freeShippingMessage: data.message || "Бесплатная доставка за повторный заказ!"
+            });
+        } else {
+            set({ 
+                deliveryPrice: baseDeliveryPrice,
+                freeShippingMessage: ""
+            });
+        }
+    } catch (e) {
+        console.error("Check free shipping error:", e);
+        set({ 
+            deliveryPrice: baseDeliveryPrice,
+            freeShippingMessage: "" 
+        });
+    }
+  },
+
   applyPromo: async () => {
     const { formData, promoApplied } = get();
     if (promoApplied) return;
@@ -138,7 +211,6 @@ export const useOrderStore = create((set, get) => ({
     });
 
     try {
-      // 1. Проверка на известный промокод (если он единственный)
       if (promoCode !== "ПЕРВЫЙ500") {
         set({ 
           promoStatus: 'error', 
@@ -148,7 +220,6 @@ export const useOrderStore = create((set, get) => ({
         return;
       }
       
-      // 2. Валидация входных данных для CRM-проверки
       if (!formData.email.trim() && formData.phone.length < 12) {
            set({ 
               promoStatus: 'error', 
@@ -158,7 +229,6 @@ export const useOrderStore = create((set, get) => ({
           return;
       }
 
-      // 3. Асинхронный запрос для проверки использования в CRM
       const response = await fetch(`https://wowbox.market/api/check-promo-usage.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -172,7 +242,6 @@ export const useOrderStore = create((set, get) => ({
       const data = await response.json();
 
       if (data.status === 'ok' && data.used === true) {
-        // Промокод уже использован
         set({ 
           promoApplied: false, 
           promoStatus: 'error', 
@@ -180,7 +249,6 @@ export const useOrderStore = create((set, get) => ({
           isCheckingPromo: false 
         });
       } else if (data.status === 'ok' && data.used === false) {
-        // Промокод не использован и валиден
         set({ 
           promoApplied: true, 
           promoStatus: 'success', 
@@ -188,7 +256,6 @@ export const useOrderStore = create((set, get) => ({
           isCheckingPromo: false 
         });
       } else {
-        // Ошибка API или непредвиденный ответ
          set({ 
           promoApplied: false, 
           promoStatus: 'error', 
@@ -208,7 +275,6 @@ export const useOrderStore = create((set, get) => ({
     }
   },
 
-  // Валидация
   validateForm: () => {
     const { formData } = get();
     const newErrors = {};

@@ -15,6 +15,7 @@ export default function OrderSummary({ onOpenPrivacy, onOpenOffer, onSubmit }) {
     isProcessing,
     errors,
     isCheckingPromo,
+    freeShippingMessage, // Достаем сообщение
   } = useOrderStore();
 
   const promoDiscount = promoApplied ? 500 : 0;
@@ -71,10 +72,20 @@ export default function OrderSummary({ onOpenPrivacy, onOpenOffer, onSubmit }) {
           <span>Бокс</span>
           <span>{boxPrice}₽</span>
         </div>
+        
+        {/* БЛОК СТОИМОСТИ ДОСТАВКИ И СООБЩЕНИЕМ */}
         <div className={styles.priceRow}>
           <span>Доставка</span>
           <span>{deliveryPrice}₽</span>
         </div>
+        
+        {/* Если есть сообщение о бесплатной доставке - показываем его */}
+        {freeShippingMessage && (
+          <div className={styles.freeShippingMsg}>
+            {freeShippingMessage}
+          </div>
+        )}
+
         {promoApplied && (
           <div className={`${styles.priceRow} ${styles.discount}`}>
             <span>Скидка</span>

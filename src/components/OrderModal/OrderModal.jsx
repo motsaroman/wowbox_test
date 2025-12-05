@@ -415,6 +415,8 @@ export default function OrderModal({
             formData.deliveryType === "courier" ? "courier" : "pickup"
           }
           currentData={{
+            email: formData.email, 
+            phone: formData.phone,
             address: formData.deliveryAddress,
             apartment: formData.apartment,
             entrance: formData.entrance,
