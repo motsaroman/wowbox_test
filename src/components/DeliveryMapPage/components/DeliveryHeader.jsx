@@ -4,21 +4,15 @@ import styles from '../DeliveryMapPage.module.css';
 import closeIcon from '../../../assets/icons/close.svg';
 
 export default function DeliveryHeader({ onClose }) {
-  const { 
-    selectedCity, 
-    deliveryMode, 
-    setDeliveryMode, 
-    setSelectedCity 
-  } = useDeliveryStore();
+  const { selectedCity, deliveryMode, setDeliveryMode, setSelectedCity } = useDeliveryStore();
 
   return (
-    <>
-      <button className={styles.closeButton} onClick={onClose}>
-        <img src={closeIcon} alt="Close" />
-      </button>
-
-      <div className={styles.header}>
-        <h3>Способ доставки</h3>
+    <div className={styles.wrapper}>
+      
+      {/* ЛЕВАЯ ЧАСТЬ: Все управление */}
+      <div className={styles.controls}>
+        <h3 className={styles.title}>Способ доставки</h3>
+        
         <div className={styles.tabs}>
           <button 
             className={`${styles.tab} ${deliveryMode === 'pickup' ? styles.activeTab : ''}`}
@@ -44,6 +38,12 @@ export default function DeliveryHeader({ onClose }) {
           ))}
         </select>
       </div>
-    </>
+
+      {/* ПРАВАЯ ЧАСТЬ: Только кнопка закрытия */}
+      <button className={styles.closeButton} onClick={onClose}>
+        <img src={closeIcon} alt="Close" />
+      </button>
+
+    </div>
   );
 }

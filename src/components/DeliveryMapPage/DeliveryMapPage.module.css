@@ -30,19 +30,20 @@
   }
 }
 
+.wrapper {
+  display: flex;
+  align-items: center;
+  /* Центрируем всё по вертикали */
+  gap: 16px;
+  /* Отступ между кнопкой закрытия и остальным контентом */
+  width: 100%;
+  padding: 10px;
+  /* Опционально: отступы вокруг */
+}
+
 /* Header */
 .headerContainer {
   padding: 3.1rem 10rem 1rem 10rem;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  font-family: "SF Pro", sans-serif;
-  gap: 10px;
-
 }
 
 .backBtn,
@@ -83,14 +84,14 @@
   font-size: 1.6rem;
   font-weight: 700;
   color: rgba(51, 51, 51, 1);
+  font-family: "SF Pro", sans-serif;
 }
 
 /* Tabs */
 .tabs {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  gap: 8px;
+  /* Расстояние между кнопками табов */
 }
 
 .tabBtn {
@@ -599,7 +600,7 @@ h3 {
 }
 
 .citySelect {
-  margin-top: 10px;
+  font-family: "SF Pro", sans-serif;
   width: 100%;
   padding: 10px;
   border-radius: 10px;
@@ -778,7 +779,6 @@ h3 {
 .tabs {
   display: flex;
   gap: 10px;
-  margin-bottom: 15px;
   background: #f0f0f0;
   padding: 4px;
   border-radius: 12px;
@@ -815,8 +815,8 @@ h3 {
 .courierPanel {
   position: absolute;
   bottom: 25px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 20px;
+  /*transform: translateX(-50%);*/
   width: 90%;
   max-width: 400px;
   background: white;
@@ -885,10 +885,12 @@ h3 {
   border-color: #333;
   background-color: #fff;
 }
+
 .courierPrice {
   font-size: 16px;
   font-family: "SF Pro", sans-serif;
 }
+
 .searchBtn {
   padding: 0 20px;
   background-color: #000;
@@ -925,9 +927,11 @@ h3 {
   gap: 8px;
   margin-bottom: 8px;
 }
+
 .inputGrid * {
   font-family: "SF Pro", sans-serif;
 }
+
 .miniInput {
   width: 33%;
   padding: 8px;
@@ -1015,4 +1019,102 @@ h3 {
   .courierAddress {
     font-size: 1.6rem;
   }
+}
+
+.wrapper {
+  display: flex;
+  justify-content: space-between;
+  /* Контролы слева, крестик справа */
+  align-items: center;
+  /* Строго по центру вертикально */
+  padding: 12px 20px;
+  /* Немного воздуха внутри */
+  background-color: #f5f5f5;
+  /* Цвет фона как на скрине */
+  border-bottom: 1px solid #e0e0e0;
+  /* Легкая граница снизу */
+}
+
+/* 2. Левая группа: выстраиваем заголовок, табы и селект в ряд */
+.controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  /* Хороший отступ между блоками (Заголовок - Табы - Селект) */
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  /* Чтобы текст не прыгал */
+}
+
+/* 3. Табы (переключатель) */
+.tabs {
+  display: flex;
+  background-color: #fff;
+  /* Белая подложка под табы */
+  padding: 4px;
+  border-radius: 8px;
+  /* Скругление всей группы табов */
+  gap: 4px;
+}
+
+.tab {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  color: #666;
+}
+
+.activeTab {
+  background-color: #fff;
+  /* Или серый, в зависимости от дизайна */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  /* Тень для активного таба */
+  color: #000;
+  font-weight: 500;
+}
+
+/* 4. Селект: самое важное исправление */
+.citySelect {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  min-width: 150px;
+  /* Минимальная ширина */
+  width: auto;
+  /* Запрещаем ему растягиваться на весь экран */
+  outline: none;
+}
+
+.citySelect:hover {
+  border-color: #bbb;
+}
+
+/* 5. Кнопка закрытия */
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.closeButton:hover {
+  opacity: 1;
 }
