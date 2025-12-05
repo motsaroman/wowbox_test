@@ -454,10 +454,10 @@ export const useDeliveryStore = create((set, get) => ({
             if (data.price && data.price > 0) {
               finalPrice = data.price;
             } else {
-              finalPrice = (selectedCity.price || 350) + 180;
+              finalPrice = selectedCity.price;
             }
           } catch (e) {
-            finalPrice = (selectedCity.price || 350) + 180;
+            finalPrice = selectedCity.price
           }
       }
       
@@ -472,7 +472,7 @@ export const useDeliveryStore = create((set, get) => ({
       };
     } else if (deliveryMode === 'pickup') {
       return {
-        price: selectedCity.price || 350,
+        price: selectedCity.price,
         address: "",
         cityFias: selectedCity.fias,
         cityName: selectedCity.name,
