@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useOrderStore } from "../../store/orderStore";
 import { useBoxStore } from "../../store/boxStore";
 import DeliveryMapPage from "../DeliveryMapPage/DeliveryMapPage";
@@ -7,6 +7,7 @@ import RecipientForm from "./components/RecipientForm";
 import DeliverySection from "./components/DeliverySection";
 import PaymentSection from "./components/PaymentSection";
 import OrderSummary from "./components/OrderSummary";
+import DeliveryModal from "../DeliveryModal/DeliveryModal";
 
 import editIcon from "../../assets/icons/edit.svg";
 import texno1 from "../../assets/images/texno1.webp";
@@ -69,6 +70,7 @@ export default function OrderModal({
     validateForm,
     formData,
     setProcessing,
+    isProcessing,
     updateDelivery,
     deliveryPrice,
     boxPrice,
@@ -84,10 +86,19 @@ export default function OrderModal({
   } = useBoxStore();
 
   const [isMapOpen, setIsMapOpen] = useState(false);
+  
+  // Состояние видимости модального окна
+  const [isDeliveryWarningOpen, setIsDeliveryWarningOpen] = useState(false);
+  
+  // ИСПОЛЬЗУЕМ REF для мгновенного хранения статуса согласия
+  // Это предотвратит повторное открытие даже при быстрых кликах
+  const hasAcceptedRef = useRef(false);
 
   useEffect(() => {
     if (isOrderModalOpen) {
       resetForm();
+      // Сбрасываем реф при открытии нового заказа
+      hasAcceptedRef.current = false;
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -97,20 +108,16 @@ export default function OrderModal({
     };
   }, [isOrderModalOpen, resetForm]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      console.log("Ошибка валидации формы");
-      return;
-    }
-
+  // --- ЕДИНАЯ ФУНКЦИЯ ОПЛАТЫ ---
+  const processOrderPayment = async () => {
+    // Если уже идет обработка - выходим, чтобы не дублировать запросы
+    if (isProcessing) return;
+    
     setProcessing(true);
 
     try {
-      // НОВОЕ: Расчет скидки
-      const promoDiscount = promoApplied ? 500 : 0; // Расчет итоговой суммы
-      const totalPrice = boxPrice + deliveryPrice - promoDiscount; // Формируем данные персонализации (если есть, или берем дефолт)
+      const promoDiscount = promoApplied ? 500 : 0;
+      const totalPrice = boxPrice + deliveryPrice - promoDiscount;
 
       const fullPersonalData = {
         theme: personalizationData?.theme || selectedTheme,
@@ -121,16 +128,13 @@ export default function OrderModal({
         quizAnswers: personalizationData?.quiz || {},
       };
 
-      // --- НОВЫЙ БЛОК: Формирование managerComment (для RetailCRM) ---
       const q = fullPersonalData.quizAnswers;
 
-      // Конвертируем gender ID в понятное название для менеджера
       let genderValue = fullPersonalData.gender;
       if (genderValue === "female") genderValue = "Женский";
       else if (genderValue === "male") genderValue = "Мужской";
       else if (genderValue === "not-important") genderValue = "Не важно";
 
-      // Определяем получателя для комментария
       const recipientComment = formData.isGift
         ? `${formData.recipientName} (${formData.recipientPhone})`
         : "Заказчик";
@@ -138,7 +142,7 @@ export default function OrderModal({
       const managerCommentParts = [
         `--- Персонализация ---`,
         `Тема бокса: ${getThemeDisplayName(fullPersonalData.theme)}`,
-        `Получатель: ${fullPersonalData.recipient}`, // (Для себя, Для друга и т.д.)
+        `Получатель: ${fullPersonalData.recipient}`,
         `Пол: ${genderValue}`,
         `Ограничения: ${fullPersonalData.restrictions}`,
         `Пожелания: ${fullPersonalData.wishes}`,
@@ -152,10 +156,11 @@ export default function OrderModal({
         `Скидка: ${promoDiscount}₽`,
         `--- Получатель ---`,
         `Получатель: ${recipientComment}`,
+        `--- Доставка ---`,
+        `Пользователь уведомлен о задержке и согласился на презент.`
       ];
 
-      const managerCommentString = managerCommentParts.join("\n"); // Формируем полный адрес для курьера (строкой)
-      // --- КОНЕЦ НОВОГО БЛОКА ---
+      const managerCommentString = managerCommentParts.join("\n");
 
       let fullCourierAddress = null;
       if (formData.deliveryType === "courier") {
@@ -167,12 +172,12 @@ export default function OrderModal({
           formData.floor ? `эт. ${formData.floor}` : "",
         ];
         fullCourierAddress = parts.filter(Boolean).join(", ");
-      } // Основной пейлоад
+      }
 
       const payload = {
         boxTheme: fullPersonalData.theme,
         promoCode: formData.promoCode,
-        promoDiscountAmount: promoDiscount, // <-- НОВОЕ: Сумма скидки для CRM
+        promoDiscountAmount: promoDiscount,
         paymentMethod: formData.paymentMethod,
         contactData: {
           name: formData.name,
@@ -236,8 +241,9 @@ export default function OrderModal({
       const data = await response.json();
 
       if (response.ok && data.confirmationUrl) {
+        // Успех
         window.location.href = data.confirmationUrl;
-
+        
         onPayment(formData.paymentMethod);
         closeOrderModal();
       } else {
@@ -247,8 +253,43 @@ export default function OrderModal({
       console.error(error);
       alert("Ошибка сети. Проверьте соединение.");
     } finally {
+      // Сбрасываем флаг только если не ушли на редирект (в случае ошибки)
+      // Если редирект произошел, компоненту все равно
       setProcessing(false);
     }
+  };
+
+  // --- ОБРАБОТЧИК САБМИТА ФОРМЫ (КНОПКА ОПЛАТИТЬ) ---
+  const handleFormSubmit = (e) => {
+    // Если событие есть, предотвращаем перезагрузку
+    if (e) e.preventDefault();
+    
+    // Блокируем, если уже идет процесс
+    if (isProcessing) return;
+
+    if (!validateForm()) {
+      console.log("Ошибка валидации формы");
+      return;
+    }
+
+    // Проверяем через REF - это значение всегда актуально
+    if (hasAcceptedRef.current) {
+      processOrderPayment();
+    } else {
+      setIsDeliveryWarningOpen(true);
+    }
+  };
+
+  // --- ОБРАБОТЧИК КНОПКИ "ПОЛУЧИТЬ ПРЕЗЕНТ И ОПЛАТИТЬ" ---
+  const handleDeliveryAccept = () => {
+    // 1. Мгновенно обновляем реф
+    hasAcceptedRef.current = true;
+    
+    // 2. Закрываем модалку
+    setIsDeliveryWarningOpen(false); 
+    
+    // 3. Запускаем оплату
+    processOrderPayment();           
   };
 
   const getThemeDisplayName = (theme) => {
@@ -350,7 +391,7 @@ export default function OrderModal({
         </button>
       </div>
 
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      <form className={styles.form} onSubmit={handleFormSubmit} noValidate>
         <div className={styles.leftColumn}>
           <ContactForm />
           <RecipientForm />
@@ -399,7 +440,9 @@ export default function OrderModal({
           </div>
 
           <OrderSummary
-            onSubmit={handleSubmit}
+            // ВАЖНО: передаем пустую функцию, чтобы кнопка в OrderSummary 
+            // просто сабмитила форму, а не вызывала логику дважды (через onClick и onSubmit)
+            onSubmit={() => {}} 
             onOpenPrivacy={onOpenPrivacyPolicy}
             onOpenOffer={onOpenPublicOffer}
           />
@@ -415,7 +458,7 @@ export default function OrderModal({
             formData.deliveryType === "courier" ? "courier" : "pickup"
           }
           currentData={{
-            email: formData.email, 
+            email: formData.email,
             phone: formData.phone,
             address: formData.deliveryAddress,
             apartment: formData.apartment,
@@ -425,6 +468,12 @@ export default function OrderModal({
           }}
         />
       )}
+
+      <DeliveryModal
+        isOpen={isDeliveryWarningOpen}
+        onClose={() => setIsDeliveryWarningOpen(false)}
+        onAccept={handleDeliveryAccept}
+      />
     </div>
   );
 }

@@ -38,7 +38,7 @@ const DeliveryModal = ({ isOpen, onClose, onAccept }) => {
             <button className={styles.declineButton} onClick={onClose}>
               Отказаться
             </button>
-            <button className={styles.acceptButton} onClick={onAccept}>
+            <button type="button" className={styles.acceptButton} onClick={onAccept}>
               Получить презент и оплатить
             </button>
           </div>
