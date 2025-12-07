@@ -175,7 +175,14 @@ export default function Header() {
             </div>
           </div>
           <div className={styles.discountOverTimeButtonWrapper}>
-            <button className={styles.discountOverTimeButton}>Играть</button>
+            <button
+              className={styles.discountOverTimeButton}
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent("eg-open-widget"))
+              }
+            >
+              Играть
+            </button>
             <img src={santahat} alt="Santa Claus Hat" loading="lazy" />
           </div>
         </div>
