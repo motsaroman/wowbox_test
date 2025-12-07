@@ -86,10 +86,10 @@ export default function OrderModal({
   } = useBoxStore();
 
   const [isMapOpen, setIsMapOpen] = useState(false);
-  
+
   // Состояние видимости модального окна
   const [isDeliveryWarningOpen, setIsDeliveryWarningOpen] = useState(false);
-  
+
   // ИСПОЛЬЗУЕМ REF для мгновенного хранения статуса согласия
   // Это предотвратит повторное открытие даже при быстрых кликах
   const hasAcceptedRef = useRef(false);
@@ -112,7 +112,7 @@ export default function OrderModal({
   const processOrderPayment = async () => {
     // Если уже идет обработка - выходим, чтобы не дублировать запросы
     if (isProcessing) return;
-    
+
     setProcessing(true);
 
     try {
@@ -156,8 +156,11 @@ export default function OrderModal({
         `Скидка: ${promoDiscount}₽`,
         `--- Получатель ---`,
         `Получатель: ${recipientComment}`,
+        formData.telegramNotify && formData.telegramUsername
+          ? `Telegram: @${formData.telegramUsername.replace("@", "")}`
+          : null,
         `--- Доставка ---`,
-        `Пользователь уведомлен о задержке и согласился на презент.`
+        `Пользователь уведомлен о задержке и согласился на презент.`,
       ];
 
       const managerCommentString = managerCommentParts.join("\n");
@@ -243,7 +246,7 @@ export default function OrderModal({
       if (response.ok && data.confirmationUrl) {
         // Успех
         window.location.href = data.confirmationUrl;
-        
+
         onPayment(formData.paymentMethod);
         closeOrderModal();
       } else {
@@ -263,7 +266,7 @@ export default function OrderModal({
   const handleFormSubmit = (e) => {
     // Если событие есть, предотвращаем перезагрузку
     if (e) e.preventDefault();
-    
+
     // Блокируем, если уже идет процесс
     if (isProcessing) return;
 
@@ -284,12 +287,12 @@ export default function OrderModal({
   const handleDeliveryAccept = () => {
     // 1. Мгновенно обновляем реф
     hasAcceptedRef.current = true;
-    
+
     // 2. Закрываем модалку
-    setIsDeliveryWarningOpen(false); 
-    
+    setIsDeliveryWarningOpen(false);
+
     // 3. Запускаем оплату
-    processOrderPayment();           
+    processOrderPayment();
   };
 
   const getThemeDisplayName = (theme) => {
@@ -440,9 +443,9 @@ export default function OrderModal({
           </div>
 
           <OrderSummary
-            // ВАЖНО: передаем пустую функцию, чтобы кнопка в OrderSummary 
+            // ВАЖНО: передаем пустую функцию, чтобы кнопка в OrderSummary
             // просто сабмитила форму, а не вызывала логику дважды (через onClick и onSubmit)
-            onSubmit={() => {}} 
+            onSubmit={() => {}}
             onOpenPrivacy={onOpenPrivacyPolicy}
             onOpenOffer={onOpenPublicOffer}
           />

@@ -202,7 +202,7 @@ export const useDeliveryStore = create((set, get) => ({
         if (!geoJson.features || geoJson.features.length === 0) {
             set({ 
                 polygons: null, 
-                addressError: "В этот город курьерская доставка не осуществляется, выберите другой" 
+                addressError: "В этот регион курьерская доставка не осуществляется, выберите другой способ доставки" 
             });
             return { polygons: null };
         } else {
