@@ -3,7 +3,23 @@ import styles from "../OrderModal.module.css";
 
 export default function ContactForm() {
   const { formData, errors, setField, setPhone } = useOrderStore();
+  const handleTelegramChange = (e) => {
+    let val = e.target.value;
 
+    // 1. Убираем "собачку", если пользователь пытается её ввести сам (она есть в UI)
+    val = val.replace("@", "");
+
+    // 2. Убираем русские буквы, пробелы и спецсимволы (оставляем латиницу, цифры, underscore)
+    // Регулярка [^a-zA-Z0-9_] найдет все запрещенные символы
+    val = val.replace(/[^a-zA-Z0-9_]/g, "");
+
+    // 3. Ограничиваем длину 20 символами
+    if (val.length > 20) {
+      val = val.slice(0, 20);
+    }
+
+    setField("telegramUsername", val);
+  };
   return (
     <section className={styles.section}>
       <h3 className={styles.sectionTitle}>Контактные данные</h3>
@@ -31,6 +47,7 @@ export default function ContactForm() {
         <input
           type="tel"
           value={formData.phone}
+          // Здесь используется обновленный setPhone из стора
           onChange={(e) => setPhone("phone", e.target.value)}
           placeholder="+7 (000) 000-00-00"
           className={`${styles.input} ${errors.phone ? styles.inputError : ""}`}
@@ -77,7 +94,8 @@ export default function ContactForm() {
             <input
               type="text"
               value={formData.telegramUsername}
-              onChange={(e) => setField("telegramUsername", e.target.value)}
+              // Используем наш валидатор
+              onChange={handleTelegramChange}
               placeholder="username"
               className={`${styles.input} ${
                 errors.telegramUsername ? styles.inputError : ""

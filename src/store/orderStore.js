@@ -40,8 +40,8 @@ export const useOrderStore = create((set, get) => ({
   promoStatus: null,
   promoMessage: "",
   isCheckingPromo: false,
-  
-  freeShippingMessage: "", 
+
+  freeShippingMessage: "",
 
   // --- ACTIONS ---
 
@@ -55,22 +55,22 @@ export const useOrderStore = create((set, get) => ({
     promoStatus: null,
     promoMessage: "",
     isCheckingPromo: false,
-    freeShippingMessage: "" 
+    freeShippingMessage: ""
   }),
 
   setField: (name, value) => {
     set((state) => {
       const newErrors = { ...state.errors };
-      delete newErrors[name]; 
-      
+      delete newErrors[name];
+
       if (name === 'promoCode') {
-          return { 
-              formData: { ...state.formData, [name]: value }, 
-              errors: newErrors,
-              promoStatus: null, 
-              promoMessage: "", 
-              promoApplied: false 
-          };
+        return {
+          formData: { ...state.formData, [name]: value },
+          errors: newErrors,
+          promoStatus: null,
+          promoMessage: "",
+          promoApplied: false
+        };
       }
 
       return {
@@ -80,13 +80,29 @@ export const useOrderStore = create((set, get) => ({
     });
 
     if (name === 'email' || name === 'phone') {
-        get().checkFreeShipping();
+      get().checkFreeShipping();
     }
   },
 
   setPhone: (name, value) => {
-    let formatted = value;
-    if (!formatted.startsWith("+7 ")) formatted = "+7 ";
+    // 1. Оставляем только цифры
+    let raw = value.replace(/\D/g, "");
+
+    // 2. Обработка начала номера (если начали с 8 или пусто)
+    if (raw.startsWith('8')) {
+      raw = '7' + raw.slice(1);
+    }
+
+    if (!raw.startsWith('7')) {
+      raw = '7' + raw;
+    }
+    if (raw.length > 11) {
+      raw = raw.slice(0, 11);
+    }
+
+    const numbersAfter7 = raw.slice(1);
+    const formatted = "+7 " + numbersAfter7;
+
     get().setField(name, formatted);
   },
 
@@ -123,7 +139,7 @@ export const useOrderStore = create((set, get) => ({
           floor: !isPickup ? (data.floor || "") : "",
           courierComment: !isPickup ? (data.comment || "") : "",
         },
-        errors: { ...state.errors, delivery: null } 
+        errors: { ...state.errors, delivery: null }
       };
     });
 
@@ -135,64 +151,64 @@ export const useOrderStore = create((set, get) => ({
     const { formData, baseDeliveryPrice } = get();
 
     let addressToCheck = "";
-    
+
     if (formData.deliveryType === '5post') {
-        // Достаем название точки
-        const pointName = formData.deliveryPoint.split('(')[1]?.replace(')', '') || '';
-        
-        // [ВАЖНО] Добавляем город (formData.city) к строке проверки
-        // Формат: "Город, ПВЗ 5Post: Название"
-        // Это позволит PHP скрипту найти совпадение по частичному вхождению
-        if (pointName) {
-            addressToCheck = `${formData.city}, ПВЗ 5Post: ${pointName}`;
-        }
+      // Достаем название точки
+      const pointName = formData.deliveryPoint.split('(')[1]?.replace(')', '') || '';
+
+      // [ВАЖНО] Добавляем город (formData.city) к строке проверки
+      // Формат: "Город, ПВЗ 5Post: Название"
+      // Это позволит PHP скрипту найти совпадение по частичному вхождению
+      if (pointName) {
+        addressToCheck = `${formData.city}, ПВЗ 5Post: ${pointName}`;
+      }
     } else {
-        addressToCheck = formData.deliveryAddress;
+      addressToCheck = formData.deliveryAddress;
     }
 
     const hasEmail = formData.email && formData.email.includes('@');
     const hasPhone = formData.phone && formData.phone.length >= 12;
 
     if (!addressToCheck || addressToCheck.trim() === 'ПВЗ 5Post:' || (!hasEmail && !hasPhone)) {
-        if (get().deliveryPrice !== baseDeliveryPrice) {
-            set({ 
-                deliveryPrice: baseDeliveryPrice,
-                freeShippingMessage: ""
-            });
-        }
-        return;
+      if (get().deliveryPrice !== baseDeliveryPrice) {
+        set({
+          deliveryPrice: baseDeliveryPrice,
+          freeShippingMessage: ""
+        });
+      }
+      return;
     }
 
     try {
-        const res = await fetch('https://wowbox.market/api/check-free-shipping.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: formData.email,
-                phone: formData.phone,
-                address: addressToCheck, 
-                date: new Date().toISOString().split('T')[0]
-            })
-        });
-        const data = await res.json();
+      const res = await fetch('https://wowbox.market/api/check-free-shipping.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          phone: formData.phone,
+          address: addressToCheck,
+          date: new Date().toISOString().split('T')[0]
+        })
+      });
+      const data = await res.json();
 
-        if (data.isFree) {
-            set({ 
-                deliveryPrice: 0,
-                freeShippingMessage: data.message || "Бесплатная доставка за повторный заказ!"
-            });
-        } else {
-            set({ 
-                deliveryPrice: baseDeliveryPrice,
-                freeShippingMessage: ""
-            });
-        }
-    } catch (e) {
-        console.error("Check free shipping error:", e);
-        set({ 
-            deliveryPrice: baseDeliveryPrice,
-            freeShippingMessage: "" 
+      if (data.isFree) {
+        set({
+          deliveryPrice: 0,
+          freeShippingMessage: data.message || "Бесплатная доставка за повторный заказ!"
         });
+      } else {
+        set({
+          deliveryPrice: baseDeliveryPrice,
+          freeShippingMessage: ""
+        });
+      }
+    } catch (e) {
+      console.error("Check free shipping error:", e);
+      set({
+        deliveryPrice: baseDeliveryPrice,
+        freeShippingMessage: ""
+      });
     }
   },
 
@@ -202,31 +218,31 @@ export const useOrderStore = create((set, get) => ({
     const promoCode = formData.promoCode.toUpperCase().trim();
 
     if (!promoCode) return;
-    
-    set({ 
-      isCheckingPromo: true, 
-      promoApplied: false, 
-      promoStatus: null, 
-      promoMessage: "" 
+
+    set({
+      isCheckingPromo: true,
+      promoApplied: false,
+      promoStatus: null,
+      promoMessage: ""
     });
 
     try {
       if (promoCode !== "ПЕРВЫЙ500") {
-        set({ 
-          promoStatus: 'error', 
+        set({
+          promoStatus: 'error',
           promoMessage: "Промокод не найден или истек",
           isCheckingPromo: false
         });
         return;
       }
-      
+
       if (!formData.email.trim() && formData.phone.length < 12) {
-           set({ 
-              promoStatus: 'error', 
-              promoMessage: "Для проверки промокода введите Email или Телефон",
-              isCheckingPromo: false
-            });
-          return;
+        set({
+          promoStatus: 'error',
+          promoMessage: "Для проверки промокода введите Email или Телефон",
+          isCheckingPromo: false
+        });
+        return;
       }
 
       const response = await fetch(`https://wowbox.market/api/check-promo-usage.php`, {
@@ -238,39 +254,39 @@ export const useOrderStore = create((set, get) => ({
           phone: formData.phone.length > 5 ? formData.phone : null,
         }),
       });
-      
+
       const data = await response.json();
 
       if (data.status === 'ok' && data.used === true) {
-        set({ 
-          promoApplied: false, 
-          promoStatus: 'error', 
+        set({
+          promoApplied: false,
+          promoStatus: 'error',
           promoMessage: data.message || "Промокод уже был использован данным клиентом",
-          isCheckingPromo: false 
+          isCheckingPromo: false
         });
       } else if (data.status === 'ok' && data.used === false) {
-        set({ 
-          promoApplied: true, 
-          promoStatus: 'success', 
+        set({
+          promoApplied: true,
+          promoStatus: 'success',
           promoMessage: "Промокод успешно применен!",
-          isCheckingPromo: false 
+          isCheckingPromo: false
         });
       } else {
-         set({ 
-          promoApplied: false, 
-          promoStatus: 'error', 
+        set({
+          promoApplied: false,
+          promoStatus: 'error',
           promoMessage: "Ошибка сервера при проверке промокода. Попробуйте позже.",
-          isCheckingPromo: false 
+          isCheckingPromo: false
         });
       }
 
     } catch (e) {
       console.error("Promo check failed:", e);
-      set({ 
-        promoApplied: false, 
-        promoStatus: 'error', 
+      set({
+        promoApplied: false,
+        promoStatus: 'error',
         promoMessage: "Ошибка сети. Проверьте соединение.",
-        isCheckingPromo: false 
+        isCheckingPromo: false
       });
     }
   },
@@ -281,12 +297,31 @@ export const useOrderStore = create((set, get) => ({
     let isValid = true;
 
     if (!formData.name.trim()) { newErrors.name = "Введите ваше имя"; isValid = false; }
-    if (!formData.phone || formData.phone.length < 12) { newErrors.phone = "Введите корректный телефон"; isValid = false; }
-    if (!formData.email.trim() || !formData.email.includes('@')) { newErrors.email = "Введите корректный email"; isValid = false; }
-    if (formData.telegramNotify && !formData.telegramUsername.trim()) {
-      newErrors.telegramUsername = "Укажите ваш никнейм";
+
+    // Валидация телефона (длина должна быть строго 13 символов: "+7 " + 10 цифр)
+    // Либо проверяем только цифры: 7 + 10 = 11 цифр
+    const cleanPhone = formData.phone.replace(/\D/g, "");
+    if (cleanPhone.length !== 11) {
+      newErrors.phone = "Введите 10 цифр номера";
       isValid = false;
     }
+
+    if (!formData.email.trim() || !formData.email.includes('@')) { newErrors.email = "Введите корректный email"; isValid = false; }
+
+    // Валидация Telegram
+    if (formData.telegramNotify) {
+      if (!formData.telegramUsername.trim()) {
+        newErrors.telegramUsername = "Укажите ваш никнейм";
+        isValid = false;
+      } else {
+        const tgRegex = /^[a-zA-Z0-9_]{1,20}$/;
+        if (!tgRegex.test(formData.telegramUsername.replace('@', ''))) {
+          newErrors.telegramUsername = "Только латиница, цифры и _, макс 20 символов";
+          isValid = false;
+        }
+      }
+    }
+
     if (formData.deliveryType === '5post' && !formData.pvzCode) {
       newErrors.delivery = "Выберите пункт выдачи на карте"; isValid = false;
     }
@@ -296,7 +331,13 @@ export const useOrderStore = create((set, get) => ({
 
     if (formData.isGift) {
       if (!formData.recipientName.trim()) { newErrors.recipientName = "Укажите имя получателя"; isValid = false; }
-      if (!formData.recipientPhone || formData.recipientPhone.length < 12) { newErrors.recipientPhone = "Укажите телефон получателя"; isValid = false; }
+
+      // Валидация телефона получателя
+      const cleanRecipientPhone = formData.recipientPhone.replace(/\D/g, "");
+      if (cleanRecipientPhone.length !== 11) {
+        newErrors.recipientPhone = "Введите 10 цифр номера";
+        isValid = false;
+      }
     }
 
     if (!formData.acceptTerms) { newErrors.terms = "Необходимо согласие"; isValid = false; }

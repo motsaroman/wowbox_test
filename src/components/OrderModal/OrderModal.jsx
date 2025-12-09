@@ -159,6 +159,7 @@ export default function OrderModal({
         formData.telegramNotify && formData.telegramUsername
           ? `Telegram: @${formData.telegramUsername.replace("@", "")}`
           : null,
+          formData.courierComment ? `Комментарий для курьера: ${formData.courierComment}` : null,
         `--- Доставка ---`,
         `Пользователь уведомлен о задержке и согласился на презент.`,
       ];
@@ -186,6 +187,7 @@ export default function OrderModal({
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
+          telegram: formData.telegramNotify ? formData.telegramUsername : null
         },
         recipientData: formData.isGift
           ? {

@@ -18,7 +18,7 @@ export const BOXES_DATA = [
     details: {
       items: ["<strong>3-4</strong> полезных гаджета", "<strong>4-5</strong> приятных техно-сюрпризов", "<strong>2-3</strong> новогодняя атмосфера"],
       total: "9-12 товаров",
-      value: "от 4,900₽ до 100,000₽",
+      value: "от 4,900₽ до 120,000₽",
     },
   },
   {
@@ -31,7 +31,7 @@ export const BOXES_DATA = [
     details: {
       items: ["<strong>3-4</strong> предмета для атмосферы", "<strong>4-5</strong> товара создающих уют и комфорт", "<strong>2-3</strong> элемента домашнего декора"],
       total: "9-12 товаров",
-      value: "от 4,900₽ до 100,000₽",
+      value: "от 4,900₽ до 120,000₽",
     },
   },
   {
@@ -44,7 +44,7 @@ export const BOXES_DATA = [
     details: {
       items: ["<strong>2-3</strong> развлечения и игры", "<strong>4-5</strong> для крутого пати", "<strong>3-4</strong> для новогодней тусовки"],
       total: "9-12 товаров",
-      value: "от 4,900₽ до 100,000₽",
+      value: "от 4,900₽ до 120,000₽",
     },
   },
   {
@@ -57,7 +57,7 @@ export const BOXES_DATA = [
     details: {
       items: ["<strong>5-6</strong> уникальных сладких радостей", "<strong>2-3</strong> новогодние вкусняшки", "<strong>2-3</strong> предмета чтобы не слиплось"],
       total: "9-12 товаров",
-      value: "от 4,900₽ до 100,000₽",
+      value: "от 4,900₽ до 120,000₽",
     },
   },
 ];
