@@ -4,7 +4,7 @@ import styles from "../../App.module.css";
 // Иконки
 import footerLogo from "../../assets/icons/footerLogo.svg";
 import whatsup from "../../assets/icons/whatsapp.svg";
-import telegram from "../../assets/icons/tgFooter.svg";
+import telegram from "../../assets/icons/tg-logo.svg";
 
 export default function Footer() {
   const navigate = useNavigate();
