@@ -62,6 +62,7 @@ export default function Header() {
 
   // Вспомогательная функция для прокрутки к каталогу
   const scrollToWowbox = () => scrollToSection(styles.selectYourOwnWowbox);
+  const scrollToQuiz = () => scrollToSection(styles.quizContainer);
 
   return (
     <header>
@@ -189,7 +190,7 @@ export default function Header() {
 
         <div className={styles.heroLogo}>
           <img src={logoBig} alt="Hero Logo" loading="lazy" />
-          <p>лучший способ порадовать себя и близких</p>
+          <p>Проанализируем интересы и увлечения, чтобы собрать подарок, который человек действительно хочет</p>
         </div>
 
         {/* Stickers Block */}
@@ -199,19 +200,19 @@ export default function Header() {
               <div
                 className={`${styles.heroBonusItem} ${styles.heroBonusItem}`}
               >
-                <p>УНИКАЛЬНАЯ УПАКОВКА</p>
+                <p>ПОДБЕРЕМ И СОБЕРЕМ ПОДАРОК</p>
               </div>
             </div>
             <img src={heroBonusSticker1} alt="sticker" loading="lazy" />
           </div>
           <div className={styles.heroBonusWrapper}>
             <div className={`${styles.heroBonusItem} ${styles.heroBonusItem2}`}>
-              <p>НАПОЛНЕНИЕ ОТ 4900₽</p>
+              <p>ПОД ЛЮБОЙ БЮДЖЕТ</p>
             </div>
           </div>
           <div className={styles.heroBonusWrapper}>
             <div className={`${styles.heroBonusItem} ${styles.heroBonusItem3}`}>
-              <p>ЭФФЕКТ СЮРПРИЗА</p>
+              <p>БЕЗ ПОТЕРИ ВРЕМЕНИ НА ПОИСКИ</p>
             </div>
           </div>
           <div className={styles.heroBonusPlus2}>
@@ -219,7 +220,7 @@ export default function Header() {
               <div
                 className={`${styles.heroBonusItem} ${styles.heroBonusItem4}`}
               >
-                <p>ТОЛЬКО ОРИГИНАЛ</p>
+                <p>WOW-ЭФФЕКТ ОТ ПОДАРКА</p>
               </div>
             </div>
             <img src={heroBonusSticker2} alt="sticker" loading="lazy" />
@@ -228,7 +229,10 @@ export default function Header() {
 
         <div className={styles.heroSelectButtonWrapper}>
           <button className={styles.heroSelectButton} onClick={scrollToWowbox}>
-            Выбрать бокс за 4900₽
+            Купить в 1 клик
+          </button>
+          <button className={styles.heroSelectButton} onClick={scrollToQuiz}>
+            Собрать подарок от 3000₽
           </button>
         </div>
       </div>

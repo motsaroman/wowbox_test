@@ -285,7 +285,7 @@ export default function App() {
                       </div>
                       {openFaqIndex === index && faq.answer && (
                         <div className={styles.faqItemContent}>
-                          <p>{faq.answer}</p>
+                          <div className={styles.textContainer} dangerouslySetInnerHTML={{ __html: faq.answer }} />
                         </div>
                       )}
                     </div>
