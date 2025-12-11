@@ -16,7 +16,7 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
     mapLocation, isLoading, courierMarker,
     initStore, handleMapClickAction, selectedCity,
     checkFreeShipping,
-    addressError // <--- Достаем ошибку
+    addressError 
   } = useDeliveryStore();
 
   const [hoveredPointId, setHoveredPointId] = useState(null);
@@ -31,7 +31,11 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
   }, [isOpen]);
 
   const handlePointClick = async (point) => {
-    const checkAddress = `${selectedCity.name}, ПВЗ 5Post: ${point.name}`;
+    // Используем fullAddress (из нового PHP), если он есть, иначе старый address
+    const pointAddress = point.fullAddress || point.address;
+    
+    // Для проверки бесплатной доставки можно использовать полный адрес
+    const checkAddress = `${selectedCity.name}, ${pointAddress}`; 
     let finalPrice = point.price || selectedCity.price || 350;
 
     const isFree = await checkFreeShipping(checkAddress);
@@ -45,7 +49,8 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
       mode: "pickup",
       point: { 
           id: point.id, 
-          name: point.name, 
+          name: point.name, // Название точки (Пятерочка и т.д.)
+          // ВАЖНО: передаем понятный адрес
           address: point.address, 
           price: finalPrice 
       },
@@ -68,8 +73,9 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
             <img src={markerIcon} alt={pt.name} className={styles.imageMarker} onClick={() => handlePointClick(pt)}/>
             {isHovered && (
               <div className={styles.tooltip}>
+                {/* Отображаем ID и название для ясности при наведении */}
                 <div className={styles.tooltipTitle}>{pt.name}</div>
-                <div className={styles.tooltipAddress}>{pt.address}</div>
+                <div className={styles.tooltipAddress}>{pt.fullAddress || pt.address}</div>
                 {pt.workSchedule && <div className={styles.tooltipSchedule}>🕒 {pt.workSchedule}</div>}
                 <div className={styles.tooltipArrow}></div>
               </div>
@@ -79,6 +85,7 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
       );
   }, [hoveredPointId, selectedCity]);
 
+  // ... (Остальной код без изменений) ...
   const renderCluster = useCallback((coordinates, features) => (
     <YMapMarker key={`${coordinates.join('-')}`} coordinates={coordinates}>
         <div className={styles.cluster}><div className={styles.clusterContent}><span className={styles.clusterText}>{features.length}</span></div></div>
@@ -91,7 +98,6 @@ export default function DeliveryMapPage({ isOpen, onClose, onDeliverySelect, ini
     <div className={styles.overlay}>
       <div className={styles.modal}>
         
-        {/* Передаем ошибку в хедер */}
         <DeliveryHeader 
             onClose={onClose} 
             onOpenMobilePanel={() => setIsMobilePanelOpen(true)}

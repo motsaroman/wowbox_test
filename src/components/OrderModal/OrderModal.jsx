@@ -166,8 +166,11 @@ export default function OrderModal({
 
       const managerCommentString = managerCommentParts.join("\n");
 
-      let fullCourierAddress = null;
+      // --- ИСПРАВЛЕНИЕ: Формирование адреса для API ---
+      let finalAddress = null;
+
       if (formData.deliveryType === "courier") {
+        // Логика для курьера (сборка строки)
         const parts = [
           formData.city,
           formData.deliveryAddress,
@@ -175,8 +178,16 @@ export default function OrderModal({
           formData.entrance ? `под. ${formData.entrance}` : "",
           formData.floor ? `эт. ${formData.floor}` : "",
         ];
-        fullCourierAddress = parts.filter(Boolean).join(", ");
+        finalAddress = parts.filter(Boolean).join(", ");
+      } else if (formData.deliveryType === "5post") {
+        // Логика для 5Post: достаем адрес из строки "Адрес (Название точки)"
+        // В store/orderStore мы сохраняем строку как `${data.point.address} (${data.point.name})`
+        // Нам нужно вытащить часть ДО первой открывающей скобки " ("
+        finalAddress = formData.deliveryPoint
+          ? formData.deliveryPoint.split(" (")[0]
+          : null;
       }
+      // ------------------------------------------------
 
       const payload = {
         boxTheme: fullPersonalData.theme,
@@ -207,7 +218,7 @@ export default function OrderModal({
           pointName: formData.deliveryPoint
             ? formData.deliveryPoint.split(" (")[1]?.replace(")", "")
             : null,
-          address: fullCourierAddress,
+          address: finalAddress, // <--- Теперь здесь правильный адрес для обоих типов доставки
           details: {
             city: formData.city,
             cityFias: formData.cityFias,

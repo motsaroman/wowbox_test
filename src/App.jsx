@@ -1,7 +1,8 @@
+import { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { useBoxStore } from "./store/boxStore";
 import { useUIStore } from "./store/uiStore";
-
+import { useOrderStore } from "./store/orderStore";
 // Компоненты
 import Header from "./components/Header/Header.jsx";
 import Footer from "./components/Footer/Footer.jsx";
@@ -39,6 +40,10 @@ export default function App() {
     resetQuiz,
     getRecommendedBox,
     applyRecommendation,
+    priceSteps,
+    fetchPricing,
+    selectedPrice,
+    setSelectedPrice,
   } = useBoxStore();
 
   const {
@@ -60,6 +65,25 @@ export default function App() {
     setSelectedPaymentMethod,
   } = useUIStore();
 
+  const setOrderBoxPrice = useOrderStore((state) => state.setBoxPrice);
+
+  useEffect(() => {
+    fetchPricing();
+  }, [fetchPricing]);
+
+  const foundIndex = priceSteps.indexOf(selectedPrice);
+  const priceIndex = foundIndex !== -1 ? foundIndex : 1;
+
+  // 3. Расчеты для отображения
+  const currentPrice = priceSteps[priceIndex] || 5000;
+  const maxTotalValue = currentPrice + 3000;
+  const savings = Math.round(currentPrice * 0.4);
+  const max = Math.max(0, priceSteps.length - 1);
+  const percentage = (priceIndex / max) * 100;
+
+  const sliderStyle = {
+    background: `linear-gradient(to right, #93d3e1 0%, #93d3e1 ${percentage}%, #e2e1df ${percentage}%, #e2e1df 100%)`,
+  };
   const scrollToWowbox = () => {
     const element = document.querySelector(`.${styles.selectYourOwnWowbox}`);
     if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -68,6 +92,18 @@ export default function App() {
   const handleQuizAnswer = (answerId) => {
     setQuizAnswer(currentQuestionIndex, answerId);
     setTimeout(nextQuestion, 300);
+  };
+
+  const handleSliderChange = (e) => {
+    const newIndex = Number(e.target.value);
+    const newPrice = priceSteps[newIndex];
+
+    // Обновляем оба стора сразу при движении
+    setSelectedPrice(newPrice);
+    setOrderBoxPrice(newPrice);
+  };
+  const handleQuizOrder = () => {
+    applyRecommendation();
   };
 
   const recommendedBox = getRecommendedBox();
@@ -203,9 +239,54 @@ export default function App() {
                             <h2 className={styles.boxTitle}>
                               {recommendedBox.title}
                             </h2>
-                            <p className={styles.boxPrice}>
-                              {recommendedBox.price}
-                            </p>
+
+                            {/* --- ЗАМЕНА СТАТИЧНОЙ ЦЕНЫ НА ПОЛЗУНОК --- */}
+                            <div className={styles.budgetSection}>
+                              <p className={styles.budgetTitle}>
+                                Ваш бюджет на подарок:
+                              </p>
+
+                              <div className={styles.sliderContainer}>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max={max}
+                                  step="1"
+                                  value={priceIndex} // Используем вычисленный индекс
+                                  onChange={handleSliderChange} // Используем новый обработчик
+                                  className={styles.budgetSlider}
+                                  style={sliderStyle}
+                                />
+                                <div className={styles.sliderLabels}>
+                                  {priceSteps.map((step, idx) => (
+                                    <div
+                                      key={step}
+                                      className={styles.sliderLabelWrapper}
+                                    >
+                                      <span
+                                        className={`${styles.sliderLabelText} ${
+                                          idx === priceIndex
+                                            ? styles.activeLabel
+                                            : ""
+                                        }`}
+                                      >
+                                        {step}₽
+                                      </span>
+                                      {idx === 0 && (
+                                        <span className={styles.specialLabel}>
+                                          min
+                                        </span>
+                                      )}
+                                      {idx === 1 && (
+                                        <span className={styles.specialLabel}>
+                                          popular
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
                             <div className={styles.boxDetails}>
                               <h4 className={styles.detailsTitle}>
                                 Что будет внутри:
@@ -222,16 +303,21 @@ export default function App() {
                                   )
                                 )}
                               </ul>
-                              <div className={styles.boxSummary}>
-                                <p>
-                                  <strong>Всего:</strong>{" "}
-                                  {recommendedBox.details.total}
+                              {/* Динамические данные в boxSummary */}
+
+                              <div className={styles.budgetInfoResult}>
+                                <p className={styles.infoTitle}>
+                                  Внутри бокса за {currentPrice}₽
                                 </p>
-                                <p>
-                                  <strong>Розничная стоимость:</strong>{" "}
-                                  {recommendedBox.details.value}
-                                </p>
+                                <ul className={styles.infoList}>
+                                  <li>
+                                    Суммарная стоимость:<br />~{currentPrice}-
+                                    {maxTotalValue}₽
+                                  </li>
+                                  <li>Вы экономите:<br />~{savings}₽ на персональном подборе</li>
+                                </ul>
                               </div>
+                              {/* ----------------------------------------- */}
                             </div>
                           </div>
                         </div>
@@ -245,7 +331,7 @@ export default function App() {
                             </button>
                             <button
                               className={styles.quizOrderButton}
-                              onClick={applyRecommendation}
+                              onClick={handleQuizOrder}
                             >
                               Заказать
                             </button>
@@ -285,7 +371,10 @@ export default function App() {
                       </div>
                       {openFaqIndex === index && faq.answer && (
                         <div className={styles.faqItemContent}>
-                          <div className={styles.textContainer} dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                          <div
+                            className={styles.textContainer}
+                            dangerouslySetInnerHTML={{ __html: faq.answer }}
+                          />
                         </div>
                       )}
                     </div>
@@ -305,7 +394,7 @@ export default function App() {
                     className={styles.readyForSurpriseButton}
                     onClick={scrollToWowbox}
                   >
-                    Выбрать бокс за 4900₽
+                    Собрать подарок от 3000₽
                   </button>
                 </div>
               </div>

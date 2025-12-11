@@ -351,6 +351,193 @@
   cursor: pointer;
 }
 
+.boxesCarouselCardDetails {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.detailItem {
+  width: max-content;
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.5rem;
+  line-height: 130%;
+  text-align: center;
+  padding: 0.6rem 0.8rem;
+  color: rgba(51, 51, 51, 1);
+  background: linear-gradient(
+    96.09deg,
+    rgba(203, 221, 249, 0.4) 1.01%,
+    rgba(242, 247, 235, 0.4) 23.7%,
+    rgba(235, 216, 249, 0.4) 43.8%,
+    rgba(210, 222, 251, 0.4) 58.56%,
+    rgba(251, 253, 254, 0.4) 70.48%,
+    rgba(211, 237, 236, 0.4) 80.41%,
+    rgba(176, 155, 235, 0.4) 100%
+  );
+  border-radius: 1.2rem;
+}
+
+.detailItem strong {
+  font-size: 1.6rem;
+  font-weight: 650;
+  color: rgba(51, 51, 51, 1);
+}
+
+/* --- Стили для секции Бюджета --- */
+
+.budgetSection {
+  width: 100%;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.budgetTitle {
+  font-family: "SF Pro";
+  font-weight: 700;
+  font-size: 1.6rem !important;
+  color: #333;
+  margin-bottom: 1.2rem;
+  width: 100%;
+  text-align: left;
+}
+
+.sliderContainer {
+  width: 100%;
+  position: relative;
+  margin-bottom: 2rem;
+  padding: 0 0.5rem;
+}
+
+.budgetSlider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 5px;
+  outline: none;
+  margin-bottom: 1rem;
+}
+
+/* Slider Thumb (Chrome/Safari/Edge) */
+.budgetSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #333;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+/* Slider Thumb (Firefox) */
+.budgetSlider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #333;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+
+.sliderLabels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.sliderLabelWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 20px; /* Чтобы центрировать относительно точки */
+}
+
+.sliderLabelText {
+  font-family: "SF Pro";
+  font-size: 1.1rem;
+  color: #888;
+  white-space: nowrap;
+  transition: color 0.3s;
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  left: 50%;
+}
+
+.activeLabel {
+  color: #333;
+  font-weight: 700;
+}
+
+.specialLabel {
+  font-family: "SF Pro";
+  font-size: 1rem;
+  color: #666;
+  margin-top: 1.6rem; /* Отступ вниз от цены */
+  position: absolute;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  left: 50%;
+}
+
+/*
+.specialLabel::before {
+  content: "↑";
+  display: block;
+  text-align: center;
+  font-size: 1.2rem;
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}*/
+
+.budgetInfoResult {
+  width: 100%;
+  background: rgba(245, 245, 245, 0.5);
+  border-radius: 1.2rem;
+  padding: 1.2rem;
+  text-align: left;
+  margin-top: 0.8rem;
+}
+
+.infoTitle {
+  font-family: "SF Pro";
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: #333;
+  margin-bottom: 0.8rem;
+  text-align: center;
+}
+
+.infoList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+      grid-template-columns: 1fr 1fr;
+    gap: 5px;
+}
+
+.infoList li {
+  font-family: "SF Pro";
+  font-weight: 510;
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 0.4rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
 @media only screen and (max-width: 1024px) {
   .boxesCarouselCards {
     margin-top: -5rem;

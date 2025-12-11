@@ -44,7 +44,7 @@ export const useOrderStore = create((set, get) => ({
   freeShippingMessage: "",
 
   // --- ACTIONS ---
-
+  setBoxPrice: (price) => set({ boxPrice: price }),
   resetForm: () => set({
     formData: { ...initialFormData },
     errors: {},

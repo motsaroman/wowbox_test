@@ -1,23 +1,59 @@
-import { useState } from "react";
-import { useBoxStore, BOXES_DATA } from "../../store/boxStore"; // Импортируем стор и данные
+import { useState, useEffect } from "react";
+import { useBoxStore, BOXES_DATA } from "../../store/boxStore";
+import { useOrderStore } from "../../store/orderStore";
 import selectYourOwnWowboxCardArrow from "../../assets/icons/selectYourOwnWowboxCardArrow.svg";
 import close from "../../assets/icons/close.svg";
 import styles from "./BoxesCarousel.module.css";
 
-export default function BoxesCarousel() { // Убрали пропс onOrderClick
-  // Локальный UI стейт карусели оставляем здесь
+const PRICE_STEPS = [3000, 5000, 8000, 15000, 120000];
+
+export default function BoxesCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [displayedCard, setDisplayedCard] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Подключаем экшены из стора
+ // const [priceIndex, setPriceIndex] = useState(1);
+
   const selectTheme = useBoxStore((state) => state.selectTheme);
+  const setSelectedPrice = useBoxStore((state) => state.setSelectedPrice);
   const openPersonalization = useBoxStore((state) => state.openPersonalization);
 
-  const carouselData = BOXES_DATA; // Используем данные из стора (или импортируем их)
+ const { 
+    fetchPricing, 
+    priceSteps, 
+    selectedPrice, // Глобальная цена
+
+  } = useBoxStore();
+
+  const setOrderBoxPrice = useOrderStore((state) => state.setBoxPrice);
+
+  const carouselData = BOXES_DATA;
+
+ useEffect(() => {
+    fetchPricing(); 
+  }, [fetchPricing]);
+
+  // --- СИНХРОНИЗАЦИЯ ---
+  // Вычисляем индекс на основе глобальной цены
+  const foundIndex = priceSteps.indexOf(selectedPrice);
+  const priceIndex = foundIndex !== -1 ? foundIndex : 1; 
+
+  const currentPrice = priceSteps[priceIndex] || 5000;
+  const maxTotalValue = currentPrice + 3000;
+  const savings = Math.round(currentPrice * 0.4);
+
+  // Обработчик движения ползунка
+  const handleSliderChange = (e) => {
+    const newIndex = Number(e.target.value);
+    const newPrice = priceSteps[newIndex];
+    
+    setSelectedPrice(newPrice); // Обновляем глобальный стор
+    setOrderBoxPrice(newPrice); // Синхронизируем с заказом
+  };
 
   const handleOrderClick = (themeId) => {
+    // Цену устанавливать не нужно, она уже в сторе благодаря handleSliderChange
     selectTheme(themeId);
     openPersonalization();
   };
@@ -58,48 +94,138 @@ export default function BoxesCarousel() { // Убрали пропс onOrderClic
   const visibleImages = getVisibleImages();
   const currentCard = carouselData[displayedCard];
 
+  const max = Math.max(0, priceSteps.length - 1);
+  const percentage = (priceIndex / max) * 100;
+  
+  const sliderStyle = {
+    background: `linear-gradient(to right, #93d3e1 0%, #93d3e1 ${percentage}%, #e2e1df ${percentage}%, #e2e1df 100%)`
+  };
   return (
     <div className={styles.boxesCarousel}>
       <div className={styles.boxesCarouselImagesWrapper}>
         <div className={styles.boxesCarouselImages}>
-          <img src={visibleImages[0]} className={styles.leftImage} loading="lazy" />
-          <img src={visibleImages[1]} className={styles.centerImage} loading="lazy" />
-          <img src={visibleImages[2]} className={styles.rightImage} loading="lazy" />
-          <img src={visibleImages[3]} className={styles.hiddenImage} loading="lazy" />
+          <img
+            src={visibleImages[0]}
+            className={styles.leftImage}
+            loading="lazy"
+            alt=""
+          />
+          <img
+            src={visibleImages[1]}
+            className={styles.centerImage}
+            loading="lazy"
+            alt=""
+          />
+          <img
+            src={visibleImages[2]}
+            className={styles.rightImage}
+            loading="lazy"
+            alt=""
+          />
+          <img
+            src={visibleImages[3]}
+            className={styles.hiddenImage}
+            loading="lazy"
+            alt=""
+          />
         </div>
         <div className={styles.boxesCarouselNavigation}>
-          <button onClick={handlePrevious} disabled={isAnimating}><img src={selectYourOwnWowboxCardArrow} alt="Prev" /></button>
-          <button onClick={handleNext} disabled={isAnimating}><img src={selectYourOwnWowboxCardArrow} alt="Next" /></button>
+          <button onClick={handlePrevious} disabled={isAnimating}>
+            <img src={selectYourOwnWowboxCardArrow} alt="Prev" />
+          </button>
+          <button onClick={handleNext} disabled={isAnimating}>
+            <img src={selectYourOwnWowboxCardArrow} alt="Next" />
+          </button>
         </div>
       </div>
       <div className={styles.boxesCarouselCards}>
-        <div className={`${styles.boxesCarouselCard} ${isAnimating ? styles.cardAnimating : styles.cardVisible}`} key={displayedCard}>
+        <div
+          className={`${styles.boxesCarouselCard} ${
+            isAnimating ? styles.cardAnimating : styles.cardVisible
+          }`}
+          key={displayedCard}
+        >
           <div className={styles.boxesCarouselCardTitle}>
             <p>{currentCard.title}</p>
-            <p>{currentCard.price}</p>
+
+            <div className={styles.budgetSection}>
+              <p className={styles.budgetTitle}>Ваш бюджет на подарок:</p>
+
+              <div className={styles.sliderContainer}>
+                <input
+                  type="range"
+                  min="0"
+                  max={max}
+                  step="1"
+                  value={priceIndex}
+                  onChange={handleSliderChange}
+                  className={styles.budgetSlider}
+                  style={sliderStyle}
+                />
+                <div className={styles.sliderLabels}>
+                  {priceSteps.map((step, idx) => (
+                    <div key={step} className={styles.sliderLabelWrapper}>
+                      <span
+                        className={`${styles.sliderLabelText} ${
+                          idx === priceIndex ? styles.activeLabel : ""
+                        }`}
+                      >
+                        {step}₽
+                      </span>
+                      {idx === 0 && <span className={styles.specialLabel}>min</span>}
+                      {idx === 1 && <span className={styles.specialLabel}>popular</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
           <div className={styles.boxesCarouselCardBody}>
             {!isExpanded ? (
               <>
-                <p className={styles.boxesCarouselCardBodyDesc}>{currentCard.description}</p>
-                <p onClick={toggleExpanded} className={styles.boxesCarouselCardBodyExpandButton}>Что будет внутри?</p>
+                <p className={styles.boxesCarouselCardBodyDesc}>
+                  {currentCard.description}
+                </p>
+                <p
+                  onClick={toggleExpanded}
+                  className={styles.boxesCarouselCardBodyExpandButton}
+                >
+                  Что будет внутри?
+                </p>
               </>
             ) : (
               <>
                 <div className={styles.boxesCarouselCardDetails}>
                   {currentCard.details.items.map((item, index) => (
-                    <p key={index} className={styles.detailItem} dangerouslySetInnerHTML={{ __html: item }} />
+                    <p
+                      key={index}
+                      className={styles.detailItem}
+                      dangerouslySetInnerHTML={{ __html: item }}
+                    />
                   ))}
-                  <div className={styles.detailTotals}>
-                    <p className={styles.detailTotal}><strong>Всего:</strong> <br /> {currentCard.details.total}</p>
-                    <p className={styles.detailValue}><strong>Розничная стоимость:</strong> <br /> {currentCard.details.value}</p>
-                  </div>
                 </div>
-                <p onClick={toggleExpanded} className={styles.closeButton}><img src={close} alt="Close" /></p>
+                <div className={styles.budgetInfoResult}>
+                  <p className={styles.infoTitle}>
+                    Внутри бокса за {currentPrice}₽
+                  </p>
+                  <ul className={styles.infoList}>
+                    <li>
+                      Суммарная стоимость:
+                      <br /> ~{currentPrice}-{maxTotalValue}₽
+                    </li>
+                    <li>Вы экономите:<br /> ~{savings}₽ на персональном подборе</li>
+                  </ul>
+                </div>
+                <p onClick={toggleExpanded} className={styles.closeButton}>
+                  <img src={close} alt="Close" />
+                </p>
               </>
             )}
             <div className={styles.boxesCarouselCardWrapper}>
-              <button className={styles.boxesCarouselCardButton} onClick={() => handleOrderClick(currentCard.id)}>
+              <button
+                className={styles.boxesCarouselCardButton}
+                onClick={() => handleOrderClick(currentCard.id)}
+              >
                 Заказать
               </button>
             </div>
