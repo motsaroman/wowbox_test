@@ -2515,13 +2515,13 @@ main {
   left: 50%;
 }
 .specialLabel {
-  margin-left: 5px !important;
+  margin-left: 0.8rem !important;
 }
 .popularPrice {
-   margin-left: 5px !important;
+   margin-left: 0.8rem !important;
 }
 .minPrice {
-  left: 15%;
+  left: -0.5rem !important;
 }
 /* Инфо-блок под ползунком */
 .budgetInfoResult {

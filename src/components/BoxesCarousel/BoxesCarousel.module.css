@@ -473,13 +473,13 @@
 }
 
 .specialLabel {
-  margin-left: 5px !important;
+  margin-left: 0.8rem !important;
 }
 .popularPrice {
-   margin-left: 5px !important;
+   margin-left: 0.8rem !important;
 }
 .minPrice {
-  left: 15%;
+  left: -0.5rem !important;
 }
 .activeLabel {
   color: #333;
