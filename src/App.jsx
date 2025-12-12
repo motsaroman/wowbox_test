@@ -29,6 +29,8 @@ import QualitySection from "./components/QualitySection/QualitySection.jsx";
 import DeliverySection from "./components/DeliverySection/DeliverySection.jsx";
 import HowItWorksSection from "./components/HowItWorksSection/HowItWorksSection.jsx";
 
+const LABELS_TO_SHOW = [3000, 5000, 20000, 50000, 120000];
+
 export default function App() {
   const navigate = useNavigate();
 
@@ -245,45 +247,55 @@ export default function App() {
                               <p className={styles.budgetTitle}>
                                 Ваш бюджет на подарок:
                               </p>
-
+                              <p className={styles.budgetTitle}>
+                                {currentPrice}₽
+                              </p>
                               <div className={styles.sliderContainer}>
                                 <input
                                   type="range"
                                   min="0"
                                   max={max}
                                   step="1"
-                                  value={priceIndex} // Используем вычисленный индекс
-                                  onChange={handleSliderChange} // Используем новый обработчик
+                                  value={priceIndex}
+                                  onChange={handleSliderChange}
                                   className={styles.budgetSlider}
                                   style={sliderStyle}
                                 />
                                 <div className={styles.sliderLabels}>
-                                  {priceSteps.map((step, idx) => (
-                                    <div
-                                      key={step}
-                                      className={styles.sliderLabelWrapper}
-                                    >
-                                      <span
-                                        className={`${styles.sliderLabelText} ${
-                                          idx === priceIndex
-                                            ? styles.activeLabel
-                                            : ""
-                                        }`}
+                                  {priceSteps.map((step, idx) => {
+                                    const isVisible =
+                                      LABELS_TO_SHOW.includes(step);
+                                    return (
+                                      <div
+                                        key={step}
+                                        className={styles.sliderLabelWrapper}
                                       >
-                                        {step}₽
-                                      </span>
-                                      {idx === 0 && (
-                                        <span className={styles.specialLabel}>
-                                          min
+                                        <span
+                                          className={`${
+                                            styles.sliderLabelText
+                                          } ${
+                                            step === 5000
+                                              ? styles.popularPrice
+                                              : ""
+                                          } ${
+                                            step === 3000 ? styles.minPrice : ""
+                                          } ${
+                                            idx === priceIndex
+                                              ? styles.activeLabel
+                                              : ""
+                                          }`}
+                                          style={{ opacity: isVisible ? 1 : 0 }}
+                                        >
+                                          {step}₽
                                         </span>
-                                      )}
-                                      {idx === 1 && (
-                                        <span className={styles.specialLabel}>
-                                          popular
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
+                                        {step === 5000 && (
+                                          <span className={styles.specialLabel}>
+                                            <b>Популярный</b>
+                                          </span>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             </div>
@@ -311,10 +323,13 @@ export default function App() {
                                 </p>
                                 <ul className={styles.infoList}>
                                   <li>
-                                    Суммарная стоимость:<br />~{currentPrice}-
-                                    {maxTotalValue}₽
+                                    Суммарная стоимость:
+                                    <br />~{currentPrice}-{maxTotalValue}₽
                                   </li>
-                                  <li>Вы экономите:<br />~{savings}₽ на персональном подборе</li>
+                                  <li>
+                                    Вы экономите: ~{savings}₽
+                                    <br /> на персональном подборе
+                                  </li>
                                 </ul>
                               </div>
                               {/* ----------------------------------------- */}

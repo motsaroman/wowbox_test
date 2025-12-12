@@ -5,7 +5,7 @@ import selectYourOwnWowboxCardArrow from "../../assets/icons/selectYourOwnWowbox
 import close from "../../assets/icons/close.svg";
 import styles from "./BoxesCarousel.module.css";
 
-const PRICE_STEPS = [3000, 5000, 8000, 15000, 120000];
+const LABELS_TO_SHOW = [3000, 5000, 20000, 50000, 120000];
 
 export default function BoxesCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -13,31 +13,30 @@ export default function BoxesCarousel() {
   const [displayedCard, setDisplayedCard] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
 
- // const [priceIndex, setPriceIndex] = useState(1);
+  // const [priceIndex, setPriceIndex] = useState(1);
 
   const selectTheme = useBoxStore((state) => state.selectTheme);
   const setSelectedPrice = useBoxStore((state) => state.setSelectedPrice);
   const openPersonalization = useBoxStore((state) => state.openPersonalization);
 
- const { 
-    fetchPricing, 
-    priceSteps, 
+  const {
+    fetchPricing,
+    priceSteps,
     selectedPrice, // Глобальная цена
-
   } = useBoxStore();
 
   const setOrderBoxPrice = useOrderStore((state) => state.setBoxPrice);
 
   const carouselData = BOXES_DATA;
 
- useEffect(() => {
-    fetchPricing(); 
+  useEffect(() => {
+    fetchPricing();
   }, [fetchPricing]);
 
   // --- СИНХРОНИЗАЦИЯ ---
   // Вычисляем индекс на основе глобальной цены
   const foundIndex = priceSteps.indexOf(selectedPrice);
-  const priceIndex = foundIndex !== -1 ? foundIndex : 1; 
+  const priceIndex = foundIndex !== -1 ? foundIndex : 1;
 
   const currentPrice = priceSteps[priceIndex] || 5000;
   const maxTotalValue = currentPrice + 3000;
@@ -47,7 +46,7 @@ export default function BoxesCarousel() {
   const handleSliderChange = (e) => {
     const newIndex = Number(e.target.value);
     const newPrice = priceSteps[newIndex];
-    
+
     setSelectedPrice(newPrice); // Обновляем глобальный стор
     setOrderBoxPrice(newPrice); // Синхронизируем с заказом
   };
@@ -62,9 +61,13 @@ export default function BoxesCarousel() {
     if (isAnimating) return;
     setIsAnimating(true);
     setIsExpanded(false);
-    setCurrentIndex((prev) => prev === 0 ? carouselData.length - 1 : prev - 1);
+    setCurrentIndex((prev) =>
+      prev === 0 ? carouselData.length - 1 : prev - 1
+    );
     setTimeout(() => {
-      setDisplayedCard((prev) => prev === 0 ? carouselData.length - 1 : prev - 1);
+      setDisplayedCard((prev) =>
+        prev === 0 ? carouselData.length - 1 : prev - 1
+      );
       setIsAnimating(false);
     }, 300);
   };
@@ -73,9 +76,13 @@ export default function BoxesCarousel() {
     if (isAnimating) return;
     setIsAnimating(true);
     setIsExpanded(false);
-    setCurrentIndex((prev) => prev === carouselData.length - 1 ? 0 : prev + 1);
+    setCurrentIndex((prev) =>
+      prev === carouselData.length - 1 ? 0 : prev + 1
+    );
     setTimeout(() => {
-      setDisplayedCard((prev) => prev === carouselData.length - 1 ? 0 : prev + 1);
+      setDisplayedCard((prev) =>
+        prev === carouselData.length - 1 ? 0 : prev + 1
+      );
       setIsAnimating(false);
     }, 300);
   };
@@ -85,7 +92,8 @@ export default function BoxesCarousel() {
   const getVisibleImages = () => {
     const images = [];
     for (let i = -1; i <= 2; i++) {
-      const index = (currentIndex + i + carouselData.length) % carouselData.length;
+      const index =
+        (currentIndex + i + carouselData.length) % carouselData.length;
       images.push(carouselData[index].image);
     }
     return images;
@@ -96,9 +104,9 @@ export default function BoxesCarousel() {
 
   const max = Math.max(0, priceSteps.length - 1);
   const percentage = (priceIndex / max) * 100;
-  
+
   const sliderStyle = {
-    background: `linear-gradient(to right, #93d3e1 0%, #93d3e1 ${percentage}%, #e2e1df ${percentage}%, #e2e1df 100%)`
+    background: `linear-gradient(to right, #93d3e1 0%, #93d3e1 ${percentage}%, #e2e1df ${percentage}%, #e2e1df 100%)`,
   };
   return (
     <div className={styles.boxesCarousel}>
@@ -150,7 +158,7 @@ export default function BoxesCarousel() {
 
             <div className={styles.budgetSection}>
               <p className={styles.budgetTitle}>Ваш бюджет на подарок:</p>
-
+              <p className={styles.budgetTitle}>{currentPrice}₽</p>
               <div className={styles.sliderContainer}>
                 <input
                   type="range"
@@ -163,19 +171,24 @@ export default function BoxesCarousel() {
                   style={sliderStyle}
                 />
                 <div className={styles.sliderLabels}>
-                  {priceSteps.map((step, idx) => (
-                    <div key={step} className={styles.sliderLabelWrapper}>
-                      <span
-                        className={`${styles.sliderLabelText} ${
-                          idx === priceIndex ? styles.activeLabel : ""
-                        }`}
-                      >
-                        {step}₽
-                      </span>
-                      {idx === 0 && <span className={styles.specialLabel}>min</span>}
-                      {idx === 1 && <span className={styles.specialLabel}>popular</span>}
-                    </div>
-                  ))}
+                  {priceSteps.map((step, idx) => {
+                    const isVisible = LABELS_TO_SHOW.includes(step);
+                    return (
+                      <div key={step} className={styles.sliderLabelWrapper}>
+                        <span
+                          className={`${styles.sliderLabelText} ${step === 5000 ? styles.popularPrice : ""} ${step === 3000 ? styles.minPrice : ""} ${
+                            idx === priceIndex ? styles.activeLabel : ""
+                          }`}
+                          style={{ opacity: isVisible ? 1 : 0 }}
+                        >
+                          {step}₽
+                        </span>
+                        {step === 5000 && (
+                          <span className={styles.specialLabel}><b>Популярный</b></span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -213,7 +226,10 @@ export default function BoxesCarousel() {
                       Суммарная стоимость:
                       <br /> ~{currentPrice}-{maxTotalValue}₽
                     </li>
-                    <li>Вы экономите:<br /> ~{savings}₽ на персональном подборе</li>
+                    <li>
+                      Вы экономите:  ~{savings}₽
+                      <br /> на персональном подборе
+                    </li>
                   </ul>
                 </div>
                 <p onClick={toggleExpanded} className={styles.closeButton}>
