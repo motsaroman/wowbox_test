@@ -1,33 +1,34 @@
-import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
-import { useBoxStore } from "./store/boxStore";
-import { useUIStore } from "./store/uiStore";
-import { useOrderStore } from "./store/orderStore";
+import { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useBoxStore } from './store/boxStore';
+import { useUIStore } from './store/uiStore';
+import { useOrderStore } from './store/orderStore';
 // Компоненты
-import Header from "./components/Header/Header.jsx";
-import Footer from "./components/Footer/Footer.jsx";
-import BoxesCarousel from "./components/BoxesCarousel/BoxesCarousel.jsx";
-import PromoPopup from "./components/PromoPopup/PromoPopup.jsx";
-import TelegramChat from "./components/TelegramChat/TelegramChat.jsx";
-import BoxingPersonalization from "./components/BoxPersonalization/BoxingPersonalization.jsx";
-import PrivacyPolicy from "./components/PrivacyPolicy/PrivacyPolicy.jsx";
-import PublicOffer from "./components/PublicOffer/PublicOffer.jsx";
+import Header from './components/Header/Header.jsx';
+import Footer from './components/Footer/Footer.jsx';
+import BoxesCarousel from './components/BoxesCarousel/BoxesCarousel.jsx';
+import PromoPopup from './components/PromoPopup/PromoPopup.jsx';
+import TelegramChat from './components/TelegramChat/TelegramChat.jsx';
+import BoxingPersonalization from './components/BoxPersonalization/BoxingPersonalization.jsx';
+import PrivacyPolicy from './components/PrivacyPolicy/PrivacyPolicy.jsx';
+import PublicOffer from './components/PublicOffer/PublicOffer.jsx';
+import PainAndSolution from './components/PainAndSolution/PainAndSolution.jsx';
 
 // Модалки
-import OrderModal from "./components/OrderModal/OrderModal.jsx";
-import DeliveryModal from "./components/DeliveryModal/DeliveryModal.jsx";
-import SmsModal from "./components/SmsModal/SmsModal.jsx";
-import PaymentResultModal from "./components/PaymentResultModal/PaymentResultModal.jsx";
-import BankSelectionModal from "./components/BankSelectionModal/BankSelectionModal.jsx";
-import PaymentWaitingModal from "./components/PaymentWaitingModal/PaymentWaitingModal.jsx";
-import toRight from "./assets/icons/toRight.svg";
-import { quizData } from "./data/quizData.js";
-import { faqData } from "./data/faqData.js";
+import OrderModal from './components/OrderModal/OrderModal.jsx';
+import DeliveryModal from './components/DeliveryModal/DeliveryModal.jsx';
+import SmsModal from './components/SmsModal/SmsModal.jsx';
+import PaymentResultModal from './components/PaymentResultModal/PaymentResultModal.jsx';
+import BankSelectionModal from './components/BankSelectionModal/BankSelectionModal.jsx';
+import PaymentWaitingModal from './components/PaymentWaitingModal/PaymentWaitingModal.jsx';
+import toRight from './assets/icons/toRight.svg';
+import { quizData } from './data/quizData.js';
+import { faqData } from './data/faqData.js';
 
-import styles from "./App.module.css";
-import QualitySection from "./components/QualitySection/QualitySection.jsx";
-import DeliverySection from "./components/DeliverySection/DeliverySection.jsx";
-import HowItWorksSection from "./components/HowItWorksSection/HowItWorksSection.jsx";
+import styles from './App.module.css';
+import QualitySection from './components/QualitySection/QualitySection.jsx';
+import DeliverySection from './components/DeliverySection/DeliverySection.jsx';
+import HowItWorksSection from './components/HowItWorksSection/HowItWorksSection.jsx';
 
 const LABELS_TO_SHOW = [3000, 5000, 20000, 50000, 120000];
 
@@ -88,7 +89,7 @@ export default function App() {
   };
   const scrollToWowbox = () => {
     const element = document.querySelector(`.${styles.selectYourOwnWowbox}`);
-    if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleQuizAnswer = (answerId) => {
@@ -114,11 +115,11 @@ export default function App() {
     <Routes>
       <Route
         path="/privacy"
-        element={<PrivacyPolicy isOpen={true} onClose={() => navigate("/")} />}
+        element={<PrivacyPolicy isOpen={true} onClose={() => navigate('/')} />}
       />
       <Route
         path="/public-offer"
-        element={<PublicOffer isOpen={true} onClose={() => navigate("/")} />}
+        element={<PublicOffer isOpen={true} onClose={() => navigate('/')} />}
       />
       <Route
         path="/"
@@ -129,6 +130,9 @@ export default function App() {
             <Header />
 
             <main>
+              {/*Секция Боль и Решение*/}
+              <PainAndSolution />
+
               {/* Секция выбора бокса (Карусель) */}
               <div className={styles.selectYourOwnWowbox}>
                 <h1>Выберите свой WOWBOX</h1>
@@ -136,7 +140,7 @@ export default function App() {
               </div>
 
               {/* Секция Квиза */}
-              <div className={styles.weFoundYourSuperWowbox}>
+              <div id="quiz" className={styles.weFoundYourSuperWowbox}>
                 <div className={styles.quizContainer}>
                   <h2>
                     Найдём ваш идеальный
@@ -160,7 +164,7 @@ export default function App() {
                               className={
                                 currentQuestionIndex === index
                                   ? styles.active
-                                  : ""
+                                  : ''
                               }
                             ></span>
                           ))}
@@ -276,13 +280,13 @@ export default function App() {
                                           } ${
                                             step === 5000
                                               ? styles.popularPrice
-                                              : ""
+                                              : ''
                                           } ${
-                                            step === 3000 ? styles.minPrice : ""
+                                            step === 3000 ? styles.minPrice : ''
                                           } ${
                                             idx === priceIndex
                                               ? styles.activeLabel
-                                              : ""
+                                              : ''
                                           }`}
                                           style={{ opacity: isVisible ? 1 : 0 }}
                                         >
@@ -372,7 +376,7 @@ export default function App() {
                     <div
                       key={index}
                       className={`${styles.faqItem} ${
-                        openFaqIndex === index ? styles.faqItemOpen : ""
+                        openFaqIndex === index ? styles.faqItemOpen : ''
                       }`}
                     >
                       <div
@@ -381,7 +385,7 @@ export default function App() {
                       >
                         <h3>{faq.question}</h3>
                         <button className={styles.faqToggle}>
-                          {openFaqIndex === index ? "×" : "+"}
+                          {openFaqIndex === index ? '×' : '+'}
                         </button>
                       </div>
                       {openFaqIndex === index && faq.answer && (
@@ -424,27 +428,27 @@ export default function App() {
                 setSelectedPaymentMethod(paymentMethod);
                 setDeliveryModalOpen(true);
               }}
-              onOpenPrivacyPolicy={() => navigate("/privacy")}
-              onOpenPublicOffer={() => navigate("/public-offer")}
+              onOpenPrivacyPolicy={() => navigate('/privacy')}
+              onOpenPublicOffer={() => navigate('/public-offer')}
             />
 
-            <DeliveryModal
+            {/*<DeliveryModal
               isOpen={isDeliveryModalOpen}
               onClose={() => setDeliveryModalOpen(false)}
               onAccept={() => {
                 setDeliveryModalOpen(false);
-                if (selectedPaymentMethod === "sbp") {
+                if (selectedPaymentMethod === 'sbp') {
                   setBankSelectionModalOpen(true);
                 } else {
                   setSmsModalOpen(true);
                 }
               }}
-            />
+            />*/}
             <BankSelectionModal
               isOpen={isBankSelectionModalOpen}
               onClose={() => setBankSelectionModalOpen(false)}
               onSelectBank={(bank) => {
-                console.log("Selected bank:", bank);
+                console.log('Selected bank:', bank);
                 setBankSelectionModalOpen(false);
                 setPaymentWaitingModalOpen(true);
                 setTimeout(() => {
@@ -461,7 +465,7 @@ export default function App() {
               isOpen={isSmsModalOpen}
               onClose={() => setSmsModalOpen(false)}
               onVerify={(code) => {
-                console.log("SMS code verified:", code);
+                console.log('SMS code verified:', code);
                 setSmsModalOpen(false);
                 setPaymentResultModalOpen(true);
               }}

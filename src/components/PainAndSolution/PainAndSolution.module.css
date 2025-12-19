@@ -1,0 +1,423 @@
+.painAndSolution {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 8rem;
+  margin-bottom: 4rem;
+}
+
+.topContainer {
+  max-width: 124rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  margin-bottom: 4rem;
+}
+
+.videoOuter {
+  width: 100%;
+  padding: 0 1.6rem;
+}
+
+.videoWrapper {
+  width: 100%;
+  max-width: 61.2rem;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 2.4rem;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.textPain {
+  display: flex;
+  flex-direction: column;
+}
+
+.titlePain {
+  font-family: 'SF Pro';
+  font-size: 3.2rem;
+  font-weight: 900;
+  line-height: 110%;
+  text-align: left;
+  margin-bottom: 1.6rem;
+  color: rgba(51, 51, 51, 1);
+  max-width: 46rem;
+}
+
+.descPain {
+  font-family: 'SF Pro';
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 110%;
+  text-align: left;
+  margin-bottom: 4rem;
+  color: rgba(51, 51, 51, 0.8);
+  max-width: 55rem;
+}
+
+.buttonSolution {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 49.2rem;
+  height: 5rem;
+
+  font-family: 'SF Pro';
+  font-size: 1.6rem;
+  font-weight: 600;
+
+  padding: 1.6rem 2.4rem;
+  border-radius: 1.2rem;
+  transition: all 0.3s ease;
+
+  background: rgba(29, 29, 29, 1);
+  backdrop-filter: blur(40px);
+  box-shadow: 0px 1px 4px 0px var(--surface10);
+  border: none;
+  cursor: pointer;
+}
+
+.buttonSolution:hover {
+  transform: scale(1.02);
+}
+
+.buttonSolution span {
+  background: linear-gradient(
+    96.09deg,
+    rgba(232, 242, 255, 1),
+    rgba(246, 255, 242, 1),
+    rgba(249, 241, 255, 1),
+    rgba(237, 243, 255, 1),
+    rgba(254, 254, 255, 1),
+    rgba(236, 252, 255, 1),
+    rgba(238, 233, 255, 1)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+.buttonSolution::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 3px;
+  border-radius: inherit;
+  background: linear-gradient(
+    96.09deg,
+    rgba(108, 160, 227, 1),
+    rgba(172, 163, 222, 1),
+    rgba(179, 169, 215, 1),
+    rgba(133, 228, 178, 1),
+    rgba(112, 214, 221, 1),
+    rgba(151, 172, 241, 1),
+    rgba(217, 185, 225, 1),
+    rgba(231, 221, 213, 1),
+    rgba(229, 203, 217, 1),
+    rgba(228, 183, 223, 1),
+    rgba(184, 182, 233, 1),
+    rgba(141, 182, 242, 1),
+    rgba(178, 169, 240, 1),
+    rgba(227, 178, 232, 1),
+    rgba(233, 221, 218, 1),
+    rgba(129, 245, 247, 1),
+    rgba(123, 163, 244, 1)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.bottomContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1440 / 815;
+  background-image: url(../../assets/images/background.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center bottom;
+  margin-bottom: 8rem;
+}
+
+.solutionMan {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 53.9rem;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.cloudsWrapper {
+  position: relative;
+  width: 97.3rem;
+  height: 55.5rem;
+  margin: 0 auto;
+}
+
+.cloud1 {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-image: url(../../assets/images/cloud1.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 42.6rem;
+  height: 25.5rem;
+  padding-top: 5.7rem;
+  top: 4.5rem;
+  left: 0;
+}
+
+.cloud2 {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-image: url(../../assets/images/cloud2.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 42.6rem;
+  height: 25.5rem;
+  padding-top: 7rem;
+  top: 0;
+  right: 13rem;
+}
+
+.cloud3 {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-image: url(../../assets/images/cloud3.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 42.6rem;
+  height: 25.5rem;
+  padding-top: 7rem;
+  padding-left: 3rem;
+  bottom: 0;
+  left: 5rem;
+}
+
+.cloud4 {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-image: url(../../assets/images/cloud4.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  width: 42.6rem;
+  height: 30rem;
+  padding-top: 7rem;
+  padding-left: 5rem;
+  bottom: 0;
+  right: 7rem;
+}
+
+.cloudTitle {
+  font-family: SF Pro;
+  font-weight: 700;
+
+  font-size: 2rem;
+
+  line-height: 110%;
+  letter-spacing: 0%;
+  text-align: center;
+  text-transform: uppercase;
+  width: 23rem;
+  margin-bottom: 1.6rem;
+  color: rgba(29, 29, 29, 1);
+}
+
+.descBlack {
+  font-family: SF Pro;
+  font-weight: 800;
+  font-style: Italic;
+  font-size: 1.4rem;
+
+  line-height: 110%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+  color: rgba(51, 51, 51, 1);
+}
+
+.descBlack::before {
+  content: url(../../assets/icons/cross.svg);
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.6rem;
+}
+
+.descRed {
+  font-family: SF Pro;
+  font-weight: 800;
+  font-style: Italic;
+  font-size: 1.4rem;
+
+  line-height: 110%;
+  letter-spacing: 0%;
+  text-align: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+  color: rgba(230, 0, 0, 1);
+}
+
+@media only screen and (max-width: 1024px) {
+  .topContainer {
+    gap: 16px;
+    padding: 6rem;
+  }
+
+  .videoWrapper,
+  .video {
+    width: 52rem;
+  }
+
+  .textPain {
+    width: 36.7rem;
+  }
+
+  .bottomContainer {
+    min-height: 81.5rem;
+  }
+
+  .buttonSolution {
+    width: 36.7rem;
+    height: 6.8rem;
+  }
+}
+
+@media only screen and (max-width: 640px) {
+  .topContainer {
+    max-width: none; /* 🔥 КЛЮЧ */
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch; /* 🔥 КЛЮЧ */
+    padding: 0;
+  }
+
+  .solutionMan {
+    width: min(100%, 28rem);
+  }
+
+  .videoWrapper {
+    max-width: none;
+    width: 100%;
+  }
+
+  .video {
+    max-width: none;
+    width: 100%;
+    display: block;
+  }
+
+  .descPain {
+    text-align: center;
+    width: 100%;
+  }
+
+  .textPain {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    padding: 0 1.6rem;
+  }
+
+  .titlePain {
+    max-width: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .buttonSolution {
+    width: 100%;
+  }
+
+  .bottomContainer {
+    min-height: 81rem;
+  }
+}
+
+@media (max-width: 414px) {
+  .bottomContainer {
+    min-height: 102rem;
+  }
+
+  .cloudsWrapper {
+    position: static;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0 16px;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cloud1,
+  .cloud2,
+  .cloud3,
+  .cloud4 {
+    position: static;
+    width: 100%;
+    width: 31.5rem;
+    height: 18.9rem;
+    align-items: center;
+    background-size: cover;
+    padding: 0;
+  }
+
+  .cloud4 {
+    width: 31.5rem;
+    height: 22.2rem;
+    padding-bottom: 5rem; /* вверх */
+    padding-left: 2rem; /* вправо */
+  }
+
+  .cloud1,
+  .cloud3 {
+    align-self: flex-start;
+  }
+
+  .cloud2,
+  .cloud4 {
+    align-self: flex-end;
+  }
+
+  .cloudTitle {
+    font-size: 1.5rem;
+  }
+
+  .descBlack,
+  .descRed {
+    font-size: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .descBlack::before {
+    width: 0.6rem;
+    height: 0.6rem;
+  }
+}
