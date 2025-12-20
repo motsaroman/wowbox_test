@@ -227,11 +227,11 @@ export default function Header() {
           </div>
         </div>
 
-        <div className={styles.heroSelectButtonWrapper}>
-          <button className={styles.heroSelectButton} onClick={scrollToWowbox}>
+        <div className={`${styles.heroSelectButtonWrapper}`}>
+          <button className={`${styles.heroSelectButton} button-one-click`} onClick={scrollToWowbox}>
             Купить в 1 клик
           </button>
-          <button className={styles.heroSelectButton} onClick={scrollToQuiz}>
+          <button className={`${styles.heroSelectButton} button-happy`} onClick={scrollToQuiz}>
             Собрать подарок от 3000₽
           </button>
         </div>

@@ -404,7 +404,7 @@
 }
 
 .sliderContainer {
-  width: 85%;
+  width: 30rem;
   position: relative;
   margin-bottom: 2rem;
   margin-inline: auto;
@@ -554,7 +554,7 @@
 
 @media only screen and (max-width: 1024px) {
   .boxesCarouselCards {
-    margin-top: -5rem;
+    margin-top: 3rem;
   }
 
   .boxesCarousel {
@@ -590,14 +590,14 @@
   }
 
   .boxesCarouselCards {
-    margin-top: -1rem;
+    margin-top: 1rem;
     display: flex;
     align-items: flex-start;
     gap: 2rem;
   }
 
   .boxesCarouselCard {
-    width: 28rem;
+    width: 35rem;
     border-radius: 2.4rem;
     padding: 5rem 1.6rem 1.6rem 1.6rem;
     gap: 2.4rem;

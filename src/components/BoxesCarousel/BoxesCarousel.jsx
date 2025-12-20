@@ -5,6 +5,12 @@ import selectYourOwnWowboxCardArrow from "../../assets/icons/selectYourOwnWowbox
 import close from "../../assets/icons/close.svg";
 import styles from "./BoxesCarousel.module.css";
 
+const YM_ID = 105562569;
+const reachGoal = (goal) => {
+  if (window.ym) {
+    window.ym(YM_ID, 'reachGoal', goal);
+  }
+};
 const LABELS_TO_SHOW = [3000, 5000, 20000, 50000, 120000];
 
 export default function BoxesCarousel() {
@@ -52,7 +58,9 @@ export default function BoxesCarousel() {
   };
 
   const handleOrderClick = (themeId) => {
-    // Цену устанавливать не нужно, она уже в сторе благодаря handleSliderChange
+    // Цель: Клик "Купить" после выбора бокса
+    reachGoal('buy_after_selection');
+    
     selectTheme(themeId);
     openPersonalization();
   };

@@ -29,6 +29,15 @@ import QualitySection from "./components/QualitySection/QualitySection.jsx";
 import DeliverySection from "./components/DeliverySection/DeliverySection.jsx";
 import HowItWorksSection from "./components/HowItWorksSection/HowItWorksSection.jsx";
 
+const YM_ID = 105562569;
+
+const reachGoal = (goal) => {
+  if (window.ym) {
+    window.ym(YM_ID, "reachGoal", goal);
+    console.log(`Goal reached: ${goal}`);
+  }
+};
+
 const LABELS_TO_SHOW = [3000, 5000, 20000, 50000, 120000];
 
 export default function App() {
@@ -38,8 +47,8 @@ export default function App() {
     currentQuestionIndex,
     setQuizAnswer,
     nextQuestion,
-    prevQuestion,
-    resetQuiz,
+    prevQuestion: prevQuestionAction,
+    resetQuiz: resetQuizAction,
     getRecommendedBox,
     applyRecommendation,
     priceSteps,
@@ -50,7 +59,7 @@ export default function App() {
 
   const {
     openFaqIndex,
-    toggleFaq,
+    toggleFaq: toggleFaqAction,
 
     // Состояния для модальных окон
     isDeliveryModalOpen,
@@ -92,8 +101,28 @@ export default function App() {
   };
 
   const handleQuizAnswer = (answerId) => {
+    // Отправляем цель в зависимости от номера вопроса (index + 1)
+    const goalMap = {
+      0: "quiz_q1_completed",
+      1: "quiz_q2_completed",
+      2: "quiz_q3_completed",
+      3: "quiz_q4_completed",
+    };
+    if (goalMap[currentQuestionIndex]) {
+      reachGoal(goalMap[currentQuestionIndex]);
+    }
+
     setQuizAnswer(currentQuestionIndex, answerId);
     setTimeout(nextQuestion, 300);
+  };
+
+  const prevQuestion = () => {
+    reachGoal("quiz_back");
+    prevQuestionAction();
+  };
+  const resetQuiz = () => {
+    reachGoal("quiz_restart");
+    resetQuizAction();
   };
 
   const handleSliderChange = (e) => {
@@ -105,7 +134,16 @@ export default function App() {
     setOrderBoxPrice(newPrice);
   };
   const handleQuizOrder = () => {
+    reachGoal("buy_after_quiz");
     applyRecommendation();
+  };
+
+  const toggleFaq = (index) => {
+    // Если мы открываем (а не закрываем), шлем цель
+    if (openFaqIndex !== index) {
+      reachGoal("faq_opened");
+    }
+    toggleFaqAction(index);
   };
 
   const recommendedBox = getRecommendedBox();

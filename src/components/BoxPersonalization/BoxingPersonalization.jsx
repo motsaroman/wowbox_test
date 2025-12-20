@@ -21,6 +21,13 @@ import toRight from "../../assets/icons/toRight.svg";
 
 import styles from "./BoxingPersonalization.module.css";
 
+const YM_ID = 99597223;
+const reachGoal = (goal) => {
+  if (window.ym) {
+    window.ym(YM_ID, 'reachGoal', goal);
+  }
+};
+
 const BoxPersonalization = () => {
   // Получаем состояние и методы из глобального стора
   const isOpen = useBoxStore((state) => state.isPersonalizationOpen);
@@ -115,9 +122,18 @@ const BoxPersonalization = () => {
 
 
   const handleNext = () => {
-    // Добавлена проверка, чтобы нельзя было перейти без выбора пола
     if (currentStep === 2 && !formData.gender) return; 
     
+    // Метрика при переходе
+    if (currentStep === 2) {
+       // Переход с шага 2 на 3 - значит шаг 2 (Пол) завершен
+       reachGoal('pers_q2_completed');
+    }
+    if (currentStep === 3) {
+       // Переход с шага 3 на 4 - значит шаг 3 (Ограничения) завершен
+       reachGoal('pers_q3_completed');
+    }
+
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
@@ -131,6 +147,7 @@ const BoxPersonalization = () => {
 
   const handleRecipientSelect = (recipient) => {
     setFormData({ ...formData, recipient });
+    reachGoal('pers_q1_completed');
     handleNext();
   };
 
@@ -150,6 +167,7 @@ const BoxPersonalization = () => {
   };
 
   const handleSave = () => {
+    reachGoal('pers_q4_completed');
     const restrictions = [];
     if (checkboxes.noParfume) restrictions.push("Без ароматов (свечи, парфюм)");
     if (checkboxes.noCosmetics) restrictions.push("Без косметики");
@@ -169,7 +187,7 @@ const BoxPersonalization = () => {
   };
 
   const handleSkip = () => {
-    // При полном пропуске (с шага 1) сохраняем только тему и дефолты
+    reachGoal('pers_skipped');
     savePersonalization({ 
         theme: selectedTheme,
         recipient: "Для себя", 

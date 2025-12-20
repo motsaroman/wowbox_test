@@ -16,7 +16,12 @@ import texno3 from "../../assets/images/texno2.webp";
 import texno4 from "../../assets/images/texno3.webp";
 import styles from "./OrderModal.module.css";
 
-// --- ХЕЛПЕРЫ ДЛЯ КОНВЕРТАЦИИ ID КВИЗА В НАЗВАНИЯ ---
+const YM_ID = 105562569;
+const reachGoal = (goal) => {
+  if (window.ym) {
+    window.ym(YM_ID, "reachGoal", goal);
+  }
+};
 const getQuizAnswerTitle = (questionIndex, answerId) => {
   if (!answerId) return "Не указан";
 
@@ -100,6 +105,7 @@ export default function OrderModal({
       // Сбрасываем реф при открытии нового заказа
       hasAcceptedRef.current = false;
       document.body.style.overflow = "hidden";
+      reachGoal("checkout_opened");
     } else {
       document.body.style.overflow = "unset";
     }
@@ -107,6 +113,12 @@ export default function OrderModal({
       document.body.style.overflow = "unset";
     };
   }, [isOrderModalOpen, resetForm]);
+
+  useEffect(() => {
+    if (isOrderModalOpen && formData.paymentMethod) {
+      reachGoal("payment_method_selected");
+    }
+  }, [formData.paymentMethod, isOrderModalOpen]);
 
   // --- ЕДИНАЯ ФУНКЦИЯ ОПЛАТЫ ---
   const processOrderPayment = async () => {
@@ -159,7 +171,9 @@ export default function OrderModal({
         formData.telegramNotify && formData.telegramUsername
           ? `Telegram: @${formData.telegramUsername.replace("@", "")}`
           : null,
-          formData.courierComment ? `Комментарий для курьера: ${formData.courierComment}` : null,
+        formData.courierComment
+          ? `Комментарий для курьера: ${formData.courierComment}`
+          : null,
         `--- Доставка ---`,
         `Пользователь уведомлен о задержке и согласился на презент.`,
       ];
@@ -198,7 +212,7 @@ export default function OrderModal({
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
-          telegram: formData.telegramNotify ? formData.telegramUsername : null
+          telegram: formData.telegramNotify ? formData.telegramUsername : null,
         },
         recipientData: formData.isGift
           ? {
@@ -257,6 +271,12 @@ export default function OrderModal({
       const data = await response.json();
 
       if (response.ok && data.confirmationUrl) {
+        const hasQuizAnswers = fullPersonalData.quizAnswers && Object.keys(fullPersonalData.quizAnswers).length > 0;
+        if (hasQuizAnswers) {
+            reachGoal('buy_quiz_goal');
+        } else {
+            reachGoal('buy_quick_goal');
+        }
         // Успех
         window.location.href = data.confirmationUrl;
 
