@@ -1,34 +1,34 @@
-import { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
-import { useBoxStore } from './store/boxStore';
-import { useUIStore } from './store/uiStore';
-import { useOrderStore } from './store/orderStore';
+import { useState, useEffect } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
+import { useBoxStore, BOXES_DATA } from "./store/boxStore";
+import { useUIStore } from "./store/uiStore";
+import { useOrderStore } from "./store/orderStore";
 // Компоненты
-import Header from './components/Header/Header.jsx';
-import Footer from './components/Footer/Footer.jsx';
-import BoxesCarousel from './components/BoxesCarousel/BoxesCarousel.jsx';
-import PromoPopup from './components/PromoPopup/PromoPopup.jsx';
-import TelegramChat from './components/TelegramChat/TelegramChat.jsx';
-import BoxingPersonalization from './components/BoxPersonalization/BoxingPersonalization.jsx';
-import PrivacyPolicy from './components/PrivacyPolicy/PrivacyPolicy.jsx';
-import PublicOffer from './components/PublicOffer/PublicOffer.jsx';
-import PainAndSolution from './components/PainAndSolution/PainAndSolution.jsx';
-
+import Header from "./components/Header/Header.jsx";
+import Footer from "./components/Footer/Footer.jsx";
+import BoxesCarousel from "./components/BoxesCarousel/BoxesCarousel.jsx";
+import PromoPopup from "./components/PromoPopup/PromoPopup.jsx";
+import TelegramChat from "./components/TelegramChat/TelegramChat.jsx";
+import BoxingPersonalization from "./components/BoxPersonalization/BoxingPersonalization.jsx";
+import PrivacyPolicy from "./components/PrivacyPolicy/PrivacyPolicy.jsx";
+import PublicOffer from "./components/PublicOffer/PublicOffer.jsx";
+import PainAndSolution from "./components/PainAndSolution/PainAndSolution.jsx";
+import ImageContainerBlock from "./components/ImageContainerBlock/ImageContainerBlock.jsx";
 // Модалки
-import OrderModal from './components/OrderModal/OrderModal.jsx';
-import DeliveryModal from './components/DeliveryModal/DeliveryModal.jsx';
-import SmsModal from './components/SmsModal/SmsModal.jsx';
-import PaymentResultModal from './components/PaymentResultModal/PaymentResultModal.jsx';
-import BankSelectionModal from './components/BankSelectionModal/BankSelectionModal.jsx';
-import PaymentWaitingModal from './components/PaymentWaitingModal/PaymentWaitingModal.jsx';
-import toRight from './assets/icons/toRight.svg';
-import { quizData } from './data/quizData.js';
-import { faqData } from './data/faqData.js';
+import OrderModal from "./components/OrderModal/OrderModal.jsx";
+import DeliveryModal from "./components/DeliveryModal/DeliveryModal.jsx";
+import SmsModal from "./components/SmsModal/SmsModal.jsx";
+import PaymentResultModal from "./components/PaymentResultModal/PaymentResultModal.jsx";
+import BankSelectionModal from "./components/BankSelectionModal/BankSelectionModal.jsx";
+import PaymentWaitingModal from "./components/PaymentWaitingModal/PaymentWaitingModal.jsx";
+import toRight from "./assets/icons/toRight.svg";
+import { quizData } from "./data/quizData.js";
+import { faqData } from "./data/faqData.js";
 
-import styles from './App.module.css';
-import QualitySection from './components/QualitySection/QualitySection.jsx';
-import DeliverySection from './components/DeliverySection/DeliverySection.jsx';
-import HowItWorksSection from './components/HowItWorksSection/HowItWorksSection.jsx';
+import styles from "./App.module.css";
+import QualitySection from "./components/QualitySection/QualitySection.jsx";
+import DeliverySection from "./components/DeliverySection/DeliverySection.jsx";
+import HowItWorksSection from "./components/HowItWorksSection/HowItWorksSection.jsx";
 
 const YM_ID = 105562569;
 
@@ -98,7 +98,7 @@ export default function App() {
   };
   const scrollToWowbox = () => {
     const element = document.querySelector(`.${styles.selectYourOwnWowbox}`);
-    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const handleQuizAnswer = (answerId) => {
@@ -136,6 +136,27 @@ export default function App() {
   };
   const handleQuizOrder = () => {
     reachGoal("buy_after_quiz");
+    const box = BOXES_DATA.find((b) => b.title === recommendedBox.title);
+    if (window.dataLayer && box) {
+      window.dataLayer.push({
+        ecommerce: {
+          currencyCode: "RUB",
+          add: {
+            products: [
+              {
+                id: box.id,
+                name: box.title,
+                price: selectedPrice,
+                brand: "WOWBOX",
+                category: "Подарочные боксы",
+                quantity: 1,
+                list: "Результаты квиза",
+              },
+            ],
+          },
+        },
+      });
+    }
     applyRecommendation();
   };
 
@@ -148,16 +169,40 @@ export default function App() {
   };
 
   const recommendedBox = getRecommendedBox();
+  useEffect(() => {
+    if (currentQuestionIndex >= quizData.length && window.dataLayer) {
+      const box = BOXES_DATA.find((b) => b.title === recommendedBox.title); // Находим бокс по title, т.к. recommendedBox это объект
+      if (box) {
+        window.dataLayer.push({
+          ecommerce: {
+            currencyCode: "RUB",
+            detail: {
+              products: [
+                {
+                  id: box.id,
+                  name: box.title,
+                  price: selectedPrice, // Цена из ползунка
+                  brand: "WOWBOX",
+                  category: "Подарочные боксы",
+                  list: "Результаты квиза",
+                },
+              ],
+            },
+          },
+        });
+      }
+    }
+  }, [currentQuestionIndex, selectedPrice]);
 
   return (
     <Routes>
       <Route
         path="/privacy"
-        element={<PrivacyPolicy isOpen={true} onClose={() => navigate('/')} />}
+        element={<PrivacyPolicy isOpen={true} onClose={() => navigate("/")} />}
       />
       <Route
         path="/public-offer"
-        element={<PublicOffer isOpen={true} onClose={() => navigate('/')} />}
+        element={<PublicOffer isOpen={true} onClose={() => navigate("/")} />}
       />
       <Route
         path="/"
@@ -170,7 +215,7 @@ export default function App() {
             <main>
               {/*Секция Боль и Решение*/}
               <PainAndSolution />
-
+              <ImageContainerBlock />
               {/* Секция выбора бокса (Карусель) */}
               <div className={styles.selectYourOwnWowbox}>
                 <h1>Выберите свой WOWBOX</h1>
@@ -202,7 +247,7 @@ export default function App() {
                               className={
                                 currentQuestionIndex === index
                                   ? styles.active
-                                  : ''
+                                  : ""
                               }
                             ></span>
                           ))}
@@ -318,13 +363,13 @@ export default function App() {
                                           } ${
                                             step === 5000
                                               ? styles.popularPrice
-                                              : ''
+                                              : ""
                                           } ${
-                                            step === 3000 ? styles.minPrice : ''
+                                            step === 3000 ? styles.minPrice : ""
                                           } ${
                                             idx === priceIndex
                                               ? styles.activeLabel
-                                              : ''
+                                              : ""
                                           }`}
                                           style={{ opacity: isVisible ? 1 : 0 }}
                                         >
@@ -414,7 +459,7 @@ export default function App() {
                     <div
                       key={index}
                       className={`${styles.faqItem} ${
-                        openFaqIndex === index ? styles.faqItemOpen : ''
+                        openFaqIndex === index ? styles.faqItemOpen : ""
                       }`}
                     >
                       <div
@@ -423,7 +468,7 @@ export default function App() {
                       >
                         <h3>{faq.question}</h3>
                         <button className={styles.faqToggle}>
-                          {openFaqIndex === index ? '×' : '+'}
+                          {openFaqIndex === index ? "×" : "+"}
                         </button>
                       </div>
                       {openFaqIndex === index && faq.answer && (
@@ -466,8 +511,8 @@ export default function App() {
                 setSelectedPaymentMethod(paymentMethod);
                 setDeliveryModalOpen(true);
               }}
-              onOpenPrivacyPolicy={() => navigate('/privacy')}
-              onOpenPublicOffer={() => navigate('/public-offer')}
+              onOpenPrivacyPolicy={() => navigate("/privacy")}
+              onOpenPublicOffer={() => navigate("/public-offer")}
             />
 
             {/*<DeliveryModal
@@ -486,7 +531,7 @@ export default function App() {
               isOpen={isBankSelectionModalOpen}
               onClose={() => setBankSelectionModalOpen(false)}
               onSelectBank={(bank) => {
-                console.log('Selected bank:', bank);
+                console.log("Selected bank:", bank);
                 setBankSelectionModalOpen(false);
                 setPaymentWaitingModalOpen(true);
                 setTimeout(() => {
@@ -503,7 +548,7 @@ export default function App() {
               isOpen={isSmsModalOpen}
               onClose={() => setSmsModalOpen(false)}
               onVerify={(code) => {
-                console.log('SMS code verified:', code);
+                console.log("SMS code verified:", code);
                 setSmsModalOpen(false);
                 setPaymentResultModalOpen(true);
               }}

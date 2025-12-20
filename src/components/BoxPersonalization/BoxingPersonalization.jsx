@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useBoxStore } from "../../store/boxStore";
+import { useBoxStore, BOXES_DATA } from "../../store/boxStore";
 
 import texno1 from "../../assets/images/texno1.webp";
 import texno2 from "../../assets/images/texno2.webp";
@@ -24,7 +24,7 @@ import styles from "./BoxingPersonalization.module.css";
 const YM_ID = 99597223;
 const reachGoal = (goal) => {
   if (window.ym) {
-    window.ym(YM_ID, 'reachGoal', goal);
+    window.ym(YM_ID, "reachGoal", goal);
   }
 };
 
@@ -34,17 +34,18 @@ const BoxPersonalization = () => {
   const onClose = useBoxStore((state) => state.closePersonalization);
   const savePersonalization = useBoxStore((state) => state.savePersonalization);
   const globalSelectedTheme = useBoxStore((state) => state.selectedTheme);
+  const selectedPrice = useBoxStore((state) => state.selectedPrice);
   const savedData = useBoxStore((state) => state.personalizationData);
-  
+
   // Получаем флаг пропуска
   const skipInitialSteps = useBoxStore(
     (state) => state.skipInitialPersonalizationSteps
   );
   const setSkipInitialPersonalization = useBoxStore(
     (state) => state.setSkipInitialPersonalization
-  ); 
+  );
   // quizAnswers больше не нужен здесь, так как данные уже в savedData
-  // const quizAnswers = useBoxStore((state) => state.quizAnswers); 
+  // const quizAnswers = useBoxStore((state) => state.quizAnswers);
 
   // Локальное состояние формы (пока пользователь не нажмет "Сохранить")
   const [currentStep, setCurrentStep] = useState(1);
@@ -65,6 +66,32 @@ const BoxPersonalization = () => {
     noCandy: false,
   });
 
+  useEffect(() => {
+    if (isOpen && window.dataLayer) {
+      const box = BOXES_DATA.find(
+        (b) => b.id === (globalSelectedTheme || "techno")
+      );
+      if (box) {
+        window.dataLayer.push({
+          ecommerce: {
+            currencyCode: "RUB",
+            detail: {
+              products: [
+                {
+                  id: box.id,
+                  name: box.title,
+                  price: selectedPrice,
+                  brand: "WOWBOX",
+                  category: "Подарочные боксы",
+                },
+              ],
+            },
+          },
+        });
+      }
+    }
+  }, [isOpen, globalSelectedTheme]);
+
   // Синхронизация при открытии модального окна
   useEffect(() => {
     if (!isOpen) return;
@@ -72,14 +99,18 @@ const BoxPersonalization = () => {
     // --- 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ ---
     setSelectedTheme(globalSelectedTheme || "techno");
 
-    let startStep = 1; 
+    let startStep = 1;
     let newFormData = {
       recipient: "",
       gender: "",
       restrictions: [],
       additionalWishes: "",
     };
-    let newCheckboxes = { noParfume: false, noCosmetics: false, noCandy: false };
+    let newCheckboxes = {
+      noParfume: false,
+      noCosmetics: false,
+      noCandy: false,
+    };
 
     // 2. ЛОГИКА ПРОПУСКА ИЗ КВИЗА: ПРИОРИТЕТ
     if (skipInitialSteps) {
@@ -88,19 +119,22 @@ const BoxPersonalization = () => {
 
       // Данные уже предзаполнены в savedData методом applyRecommendation
       if (savedData) {
-          newFormData.recipient = savedData.recipient || "Для себя"; 
-          newFormData.gender = savedData.gender || "not-important";
-          newFormData.additionalWishes = savedData.additionalWishes === "Нет" ? "" : savedData.additionalWishes;
+        newFormData.recipient = savedData.recipient || "Для себя";
+        newFormData.gender = savedData.gender || "not-important";
+        newFormData.additionalWishes =
+          savedData.additionalWishes === "Нет"
+            ? ""
+            : savedData.additionalWishes;
       }
-      
     } else if (savedData) {
       // 3. ЛОГИКА ВОССТАНОВЛЕНИЯ (Редактирование или обычный повторный вход)
       startStep = currentStep; // Сохраняем текущий шаг (если редактируем)
-      
+
       newFormData.recipient = savedData.recipient || "";
       newFormData.gender = savedData.gender || "";
-      newFormData.additionalWishes = savedData.additionalWishes === "Нет" ? "" : savedData.additionalWishes;
-      
+      newFormData.additionalWishes =
+        savedData.additionalWishes === "Нет" ? "" : savedData.additionalWishes;
+
       const restrictionsStr = savedData.restrictions || "";
       newCheckboxes = {
         noParfume: restrictionsStr.includes("Без ароматов"),
@@ -108,30 +142,39 @@ const BoxPersonalization = () => {
         noCandy: restrictionsStr.includes("Без сладкого"),
       };
     } else {
-        // 4. Полный сброс для обычного старта с Шага 1
-        newFormData = { recipient: "", gender: "", restrictions: [], additionalWishes: "" };
-        newCheckboxes = { noParfume: false, noCosmetics: false, noCandy: false };
-    } 
+      // 4. Полный сброс для обычного старта с Шага 1
+      newFormData = {
+        recipient: "",
+        gender: "",
+        restrictions: [],
+        additionalWishes: "",
+      };
+      newCheckboxes = { noParfume: false, noCosmetics: false, noCandy: false };
+    }
 
     // 5. Установка финального состояния
     setCurrentStep(startStep);
     setFormData(newFormData);
     setCheckboxes(newCheckboxes);
-    
-  }, [isOpen, globalSelectedTheme, savedData, skipInitialSteps, setSkipInitialPersonalization]);
-
+  }, [
+    isOpen,
+    globalSelectedTheme,
+    savedData,
+    skipInitialSteps,
+    setSkipInitialPersonalization,
+  ]);
 
   const handleNext = () => {
-    if (currentStep === 2 && !formData.gender) return; 
-    
+    if (currentStep === 2 && !formData.gender) return;
+
     // Метрика при переходе
     if (currentStep === 2) {
-       // Переход с шага 2 на 3 - значит шаг 2 (Пол) завершен
-       reachGoal('pers_q2_completed');
+      // Переход с шага 2 на 3 - значит шаг 2 (Пол) завершен
+      reachGoal("pers_q2_completed");
     }
     if (currentStep === 3) {
-       // Переход с шага 3 на 4 - значит шаг 3 (Ограничения) завершен
-       reachGoal('pers_q3_completed');
+      // Переход с шага 3 на 4 - значит шаг 3 (Ограничения) завершен
+      reachGoal("pers_q3_completed");
     }
 
     if (currentStep < 4) {
@@ -147,7 +190,7 @@ const BoxPersonalization = () => {
 
   const handleRecipientSelect = (recipient) => {
     setFormData({ ...formData, recipient });
-    reachGoal('pers_q1_completed');
+    reachGoal("pers_q1_completed");
     handleNext();
   };
 
@@ -166,8 +209,32 @@ const BoxPersonalization = () => {
     }));
   };
 
+  const pushAddEcommerce = (theme) => {
+    const box = BOXES_DATA.find(b => b.id === theme);
+    if (window.dataLayer && box) {
+        window.dataLayer.push({
+            "ecommerce": {
+                "currencyCode": "RUB",
+                "add": {
+                    "products": [
+                        {
+                            "id": box.id,
+                            "name": box.title,
+                            "price": selectedPrice,
+                            "brand": "WOWBOX",
+                            "category": "Подарочные боксы",
+                            "quantity": 1
+                        }
+                    ]
+                }
+            }
+        });
+    }
+  };
+
   const handleSave = () => {
-    reachGoal('pers_q4_completed');
+    reachGoal("pers_q4_completed");
+    pushAddEcommerce(selectedTheme);
     const restrictions = [];
     if (checkboxes.noParfume) restrictions.push("Без ароматов (свечи, парфюм)");
     if (checkboxes.noCosmetics) restrictions.push("Без косметики");
@@ -187,13 +254,13 @@ const BoxPersonalization = () => {
   };
 
   const handleSkip = () => {
-    reachGoal('pers_skipped');
-    savePersonalization({ 
-        theme: selectedTheme,
-        recipient: "Для себя", 
-        gender: "not-important", 
-        restrictions: "Нет",
-        additionalWishes: "Нет",
+    reachGoal("pers_skipped");
+    savePersonalization({
+      theme: selectedTheme,
+      recipient: "Для себя",
+      gender: "not-important",
+      restrictions: "Нет",
+      additionalWishes: "Нет",
     });
   };
 
@@ -266,8 +333,6 @@ const BoxPersonalization = () => {
               />
               <div className={styles.themeLabel}>УЮТНЫЙ</div>
             </div>
-
-            
           </div>
         </div>
 
@@ -281,7 +346,9 @@ const BoxPersonalization = () => {
                 {/* Если поле уже заполнено ответом из квиза, выделяем его */}
                 <button
                   className={`${styles.optionButton} ${
-                    formData.recipient === "Для себя" ? styles.optionButtonActive : ""
+                    formData.recipient === "Для себя"
+                      ? styles.optionButtonActive
+                      : ""
                   }`}
                   onClick={() => handleRecipientSelect("Для себя")}
                 >
@@ -296,7 +363,9 @@ const BoxPersonalization = () => {
                 </button>
                 <button
                   className={`${styles.optionButton} ${
-                    formData.recipient === "Для другого человека" ? styles.optionButtonActive : ""
+                    formData.recipient === "Для другого человека"
+                      ? styles.optionButtonActive
+                      : ""
                   }`}
                   onClick={() => handleRecipientSelect("Для другого человека")}
                 >
@@ -469,10 +538,10 @@ const BoxPersonalization = () => {
                 />
                 <span>Назад</span>
               </button>
-              <button 
-                  className={styles.nextButton} 
-                  onClick={handleNext}
-                  disabled={currentStep === 2 && !formData.gender}
+              <button
+                className={styles.nextButton}
+                onClick={handleNext}
+                disabled={currentStep === 2 && !formData.gender}
               >
                 Далее
               </button>

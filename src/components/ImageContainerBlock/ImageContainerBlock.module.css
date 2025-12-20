@@ -1,0 +1,315 @@
+.section {
+    width: 100%;
+    padding: 6rem 0;
+    background-color: #fff;
+}
+
+.container {
+    width: 100%;
+    max-width: 70rem;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title {
+    font-family: "SF Pro";
+    font-weight: 870;
+    font-size: 4rem;
+    line-height: 110%;
+    letter-spacing: 0%;
+    text-align: center;
+    vertical-align: middle;
+    color: rgba(51, 51, 51, 1);
+    margin-bottom: 4rem;
+}
+
+.subtitle {
+    font-family: "SF Pro", sans-serif;
+    font-weight: 400;
+    font-size: 1.8rem;
+    text-align: center;
+    color: #333333CC;
+    margin-bottom: 1rem;
+    max-width: 700px;
+}
+
+/* Сетка для карточек */
+.cardsRow {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    box-shadow: 0 0.5rem 1rem #1D1D1D0F;
+    border: 1px solid #1D1D1D0F;
+    border-radius: 16px;
+
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    padding-bottom: 0;
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+}
+
+.cardWrap {
+    padding: 0 1rem;
+}
+
+.imageContainerRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    padding: 0 5rem;
+    position: relative;
+    z-index: 2;
+    column-gap: 15rem;
+}
+
+.imageContainerRow img {
+    max-width: 8rem;
+    position: relative;
+    top: 1.8rem;
+}
+
+.imageContainerRow .placeholder:nth-child(2) img {
+    max-width: 9rem;
+}
+
+.imageContainerRow .placeholder {
+    align-items: center;
+}
+
+.placeholder p {
+    text-align: center;
+    background: linear-gradient(to right, #E8F2FF, #EEE9FF);
+    padding: 0.5rem;
+    border-radius: 12px;
+    max-width: 25rem;
+    padding-top: 1rem;
+    color: #333333;
+}
+
+.derevo {
+    height: 70%;
+    position: absolute;
+    bottom: 0;
+}
+
+.cardWrap:nth-child(1),
+.cardWrap:nth-child(2) {
+    width: 50%;
+}
+
+.cardWrap2 {
+    padding: 0 1rem;
+    min-height: 52rem;
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+.cardWrap2 .card,
+.cardWrap3 .card {
+    width: 100%;
+    align-items: center;
+}
+
+.cardWrap3 {
+    padding: 0 1rem;
+    min-height: 38rem;
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+.cardWrap .imageContainer {
+    height: 100%;
+}
+
+.cardWrap3 .imageContainer {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.card:nth-child(3) {
+    width: 100%;
+    align-items: center;
+
+    margin-top: 2rem;
+}
+
+.card:nth-child(4) {
+    align-items: center;
+
+    width: 100%;
+}
+
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Текст внутри карточки */
+.cardTitle {
+    font-family: "SF Pro", sans-serif;
+    font-weight: 600;
+    font-size: 3rem;
+    color: #A8CE45;
+    margin: 0;
+}
+
+.cardText {
+    font-family: "SF Pro", sans-serif;
+    font-weight: 400;
+    font-size: 1.1rem;
+    color: #333333;
+    margin: 0;
+    line-height: 1.4;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Заглушка (удалишь, когда вставишь картинки) */
+.placeholder {
+    display: flex;
+    flex-direction: column;
+    font-family: "SF Pro", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-style: italic;
+}
+
+/* --- АДАПТИВ --- */
+
+/* Планшет: 2 колонки */
+@media (max-width: 1024px) {
+
+    .cardWrap:nth-child(1),
+    .cardWrap:nth-child(2) {
+        width: 50%;
+    }
+}
+
+/* Мобильный: 1 колонка */
+@media (max-width: 768px) {
+    .title {
+        font-size: 3.2rem;
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    .cardText {
+        font-size: 2rem;
+    }
+
+    .card {
+        padding: 1rem;
+        padding-bottom: 0;
+    }
+
+    .cardTitle {
+        font-size: 2.5rem;
+    }
+
+    .subtitle {
+        font-size: 2rem;
+    }
+
+    .imageContainerRow {
+        padding: 0;
+    }
+
+    .imageContainerRow {
+        column-gap: 5rem;
+    }
+
+    .derevo {
+        height: 60%;
+    }
+
+    .cardWrap3 {
+        min-height: 40rem;
+    }
+
+    .cardWrap:nth-child(1) {
+        padding-right: 0;
+    }
+
+   /* .cardWrap:nth-child(2) {
+        padding-left: 0;
+    }*/
+}
+
+@media (max-width: 415px) {
+
+    .title {
+        font-size: 3.2rem;
+    }
+
+    .placeholder p {
+        font-size: 1.4rem;
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    .cardText {
+        font-size: 1.5rem;
+    }
+
+    .card {
+        padding: 1rem;
+        padding-bottom: 0;
+    }
+
+    .cardTitle {
+        font-size: 2rem;
+    }
+
+    .subtitle {
+        font-size: 1.5rem;
+    }
+
+    .imageContainerRow {
+        padding: 0;
+    }
+
+    .imageContainerRow {
+        column-gap: 5rem;
+    }
+
+    .derevo {
+        height: 60%;
+    }
+
+    .cardWrap3 {
+        min-height: 30rem;
+    }
+
+    .cardWrap2 {
+        min-height: 45rem;
+    }
+
+    .cardWrap:nth-child(1) {
+        padding-right: 0;
+    }
+
+   /* .cardWrap:nth-child(2) {
+        padding-left: 0;
+    }*/
+}

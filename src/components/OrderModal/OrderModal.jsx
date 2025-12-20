@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useOrderStore } from "../../store/orderStore";
-import { useBoxStore } from "../../store/boxStore";
+import { useBoxStore, BOXES_DATA } from "../../store/boxStore";
 import DeliveryMapPage from "../DeliveryMapPage/DeliveryMapPage";
 import ContactForm from "./components/ContactForm";
 import RecipientForm from "./components/RecipientForm";
@@ -130,6 +130,8 @@ export default function OrderModal({
     try {
       const promoDiscount = promoApplied ? 500 : 0;
       const totalPrice = boxPrice + deliveryPrice - promoDiscount;
+      const themeId = personalizationData?.theme || selectedTheme;
+      const box = BOXES_DATA.find(b => b.id === themeId) || { id: "unknown", title: "Бокс" };
 
       const fullPersonalData = {
         theme: personalizationData?.theme || selectedTheme,
@@ -271,11 +273,38 @@ export default function OrderModal({
       const data = await response.json();
 
       if (response.ok && data.confirmationUrl) {
-        const hasQuizAnswers = fullPersonalData.quizAnswers && Object.keys(fullPersonalData.quizAnswers).length > 0;
+        if (window.dataLayer && data.crmId) {
+          window.dataLayer.push({
+            ecommerce: {
+              currencyCode: "RUB",
+              purchase: {
+                actionField: {
+                  id: data.crmId, // ID заказа из CRM
+                  revenue: totalPrice, // Полная сумма чека
+                  coupon: formData.promoCode || "",
+                },
+                products: [
+                  {
+                    id: box.id,
+                    name: box.title,
+                    price: boxPrice,
+                    brand: "WOWBOX",
+                    category: "Подарочные боксы",
+                    quantity: 1,
+                    coupon: formData.promoCode || "",
+                  },
+                ],
+              },
+            },
+          });
+        }
+        const hasQuizAnswers =
+          fullPersonalData.quizAnswers &&
+          Object.keys(fullPersonalData.quizAnswers).length > 0;
         if (hasQuizAnswers) {
-            reachGoal('buy_quiz_goal');
+          reachGoal("buy_quiz_goal");
         } else {
-            reachGoal('buy_quick_goal');
+          reachGoal("buy_quick_goal");
         }
         // Успех
         window.location.href = data.confirmationUrl;
