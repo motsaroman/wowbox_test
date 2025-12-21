@@ -7,7 +7,7 @@ import RecipientForm from "./components/RecipientForm";
 import DeliverySection from "./components/DeliverySection";
 import PaymentSection from "./components/PaymentSection";
 import OrderSummary from "./components/OrderSummary";
-import DeliveryModal from "../DeliveryModal/DeliveryModal";
+//import DeliveryModal from "../DeliveryModal/DeliveryModal";
 
 import editIcon from "../../assets/icons/edit.svg";
 import texno1 from "../../assets/images/texno1.webp";
@@ -93,17 +93,17 @@ export default function OrderModal({
   const [isMapOpen, setIsMapOpen] = useState(false);
 
   // Состояние видимости модального окна
-  const [isDeliveryWarningOpen, setIsDeliveryWarningOpen] = useState(false);
+  // const [isDeliveryWarningOpen, setIsDeliveryWarningOpen] = useState(false);
 
   // ИСПОЛЬЗУЕМ REF для мгновенного хранения статуса согласия
   // Это предотвратит повторное открытие даже при быстрых кликах
-  const hasAcceptedRef = useRef(false);
+  // const hasAcceptedRef = useRef(false);
 
   useEffect(() => {
     if (isOrderModalOpen) {
       resetForm();
       // Сбрасываем реф при открытии нового заказа
-      hasAcceptedRef.current = false;
+      // hasAcceptedRef.current = false;
       document.body.style.overflow = "hidden";
       reachGoal("checkout_opened");
     } else {
@@ -131,7 +131,10 @@ export default function OrderModal({
       const promoDiscount = promoApplied ? 500 : 0;
       const totalPrice = boxPrice + deliveryPrice - promoDiscount;
       const themeId = personalizationData?.theme || selectedTheme;
-      const box = BOXES_DATA.find(b => b.id === themeId) || { id: "unknown", title: "Бокс" };
+      const box = BOXES_DATA.find((b) => b.id === themeId) || {
+        id: "unknown",
+        title: "Бокс",
+      };
 
       const fullPersonalData = {
         theme: personalizationData?.theme || selectedTheme,
@@ -327,9 +330,8 @@ export default function OrderModal({
   // --- ОБРАБОТЧИК САБМИТА ФОРМЫ (КНОПКА ОПЛАТИТЬ) ---
   const handleFormSubmit = (e) => {
     // Если событие есть, предотвращаем перезагрузку
-    if (e) e.preventDefault();
+    if (e) e.preventDefault(); // Блокируем, если уже идет процесс
 
-    // Блокируем, если уже идет процесс
     if (isProcessing) return;
 
     if (!validateForm()) {
@@ -337,12 +339,8 @@ export default function OrderModal({
       return;
     }
 
-    // Проверяем через REF - это значение всегда актуально
-    if (hasAcceptedRef.current) {
-      processOrderPayment();
-    } else {
-      setIsDeliveryWarningOpen(true);
-    }
+    // Убрали проверку hasAcceptedRef и сразу вызываем оплату
+    processOrderPayment();
   };
 
   // --- ОБРАБОТЧИК КНОПКИ "ПОЛУЧИТЬ ПРЕЗЕНТ И ОПЛАТИТЬ" ---
@@ -445,7 +443,7 @@ export default function OrderModal({
     return details;
   };
 
-  if (!isOrderModalOpen) return null;
+  //if (!isOrderModalOpen) return null;
 
   return (
     <div className={styles.pageContainer}>
@@ -534,11 +532,11 @@ export default function OrderModal({
         />
       )}
 
-      <DeliveryModal
+      {/*<DeliveryModal
         isOpen={isDeliveryWarningOpen}
         onClose={() => setIsDeliveryWarningOpen(false)}
         onAccept={handleDeliveryAccept}
-      />
+      />*/}
     </div>
   );
 }
