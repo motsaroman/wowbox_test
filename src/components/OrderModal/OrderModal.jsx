@@ -443,7 +443,7 @@ export default function OrderModal({
     return details;
   };
 
-  //if (!isOrderModalOpen) return null;
+  if (!isOrderModalOpen) return null;
 
   return (
     <div className={styles.pageContainer}>
