@@ -1058,7 +1058,7 @@ h3 {
 
 .tab {
   border: none;
-  background: transparent;
+  background: transparent !important;
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -1091,7 +1091,7 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: transparent !important;
   border: none;
   cursor: pointer;
   padding: 8px;
@@ -1232,7 +1232,7 @@ h3 {
 .confirmBtn {
   width: 100%;
   padding: 14px;
-  background: #000;
+  background: #FF1E6E;
   color: white;
   border: none;
   border-radius: 14px;

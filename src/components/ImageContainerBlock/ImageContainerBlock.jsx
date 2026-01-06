@@ -15,27 +15,27 @@ export default function ImageContainerBlock() {
     <section className={`${styles.section} ${appStyles.howToWorksWowBox}`}>
       <div className={styles.container}>
         <h2 className={styles.title}>
-          Как мы находим идеальный
-          <br /> подарок за 30 секунд
+          КАК РАБОТАЕТ ПЕРСОНАЛИЗИРОВАННЫЙ
+          <br /> ПОДБОР ПОДАРКОВ WOWbox
         </h2>
         <div className={styles.cardsRow}>
           <div className={styles.cardWrap}>
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>01</h3>
               <p className={styles.cardText}>
-                Укажите бюджет и номер получателя
+                Укажите бюджет и оставьте контакты
               </p>
               <div className={styles.imageContainer}>
-                <img src={sending} alt="Описание 1" className={styles.image} />
+                <img src={answer}  alt="Описание 1" className={styles.image} />
               </div>
             </div>
           </div>
           <div className={styles.cardWrap}>
             <div className={styles.card}>
               <h3 className={styles.cardTitle}>02</h3>
-              <p className={styles.cardText}>Ответьте на 4 вопроса</p>
+              <p className={styles.cardText}>Пройдите квиз из 4-х вопросов за 30 секунд</p>
               <div className={styles.imageContainer}>
-                <img src={answer} alt="Описание 1" className={styles.image} />
+                <img src={sending} alt="Описание 1" className={styles.image} />
               </div>
             </div>
           </div>

@@ -30,6 +30,7 @@ import QualitySection from "./components/QualitySection/QualitySection.jsx";
 import DeliverySection from "./components/DeliverySection/DeliverySection.jsx";
 import HowItWorksSection from "./components/HowItWorksSection/HowItWorksSection.jsx";
 import PartnerSwiper from "./components/PartnersSwiper/PartnersSwiper.jsx";
+import CookieConsent from "./components/CookieConsent/CookieConsent.jsx";
 
 const YM_ID = 105562569;
 
@@ -196,6 +197,7 @@ export default function App() {
   }, [currentQuestionIndex, selectedPrice]);
 
   return (
+    <>
     <Routes>
       <Route
         path="/privacy"
@@ -469,9 +471,9 @@ export default function App() {
                         onClick={() => toggleFaq(index)}
                       >
                         <h3>{faq.question}</h3>
-                        <button className={styles.faqToggle}>
+                        <div className={styles.faqToggle}>
                           {openFaqIndex === index ? "×" : "+"}
-                        </button>
+                        </div>
                       </div>
                       {openFaqIndex === index && faq.answer && (
                         <div className={styles.faqItemContent}>
@@ -498,7 +500,7 @@ export default function App() {
                     className={styles.readyForSurpriseButton}
                     onClick={scrollToWowbox}
                   >
-                    Собрать подарок
+                    Собрать персонализированный подарок бесплатно
                   </button>
                 </div>
               </div>
@@ -571,5 +573,7 @@ export default function App() {
         }
       />
     </Routes>
+    <CookieConsent />
+</>
   );
 }

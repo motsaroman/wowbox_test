@@ -260,7 +260,8 @@ header {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2.7rem 0 0 0;
+  /*padding: 2.7rem 0 0 0;*/
+  padding: 0;
 }
 
 .heroTitle {
@@ -270,6 +271,7 @@ header {
   justify-content: center;
   gap: 0.4rem;
   margin-bottom: 2.4rem;
+  visibility: hidden;
 }
 
 .heroTitle h1 {
@@ -298,6 +300,7 @@ header {
   display: flex;
   align-items: center;
   gap: 1.6rem;
+  visibility: hidden;
 }
 
 .discountOverTime {
@@ -1119,7 +1122,8 @@ main {
   font-family: "SF Pro";
   font-weight: 700;
   font-size: 1.6rem;
-  color: rgba(51, 51, 51, 1);
+  /*color: rgba(51, 51, 51, 1);*/
+  color: #fff;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -1990,6 +1994,7 @@ main {
   justify-content: center;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  font-weight: 600;
 }
 
 .faqItemOpen .faqToggle {
@@ -2027,10 +2032,12 @@ main {
   text-align: center;
 }
 
-.textContainer ul {
+.textContainer ol {
   padding-left: 20px;
 }
-
+.textContainer ol li:not(:last-child) {
+  margin-bottom: 8px;
+}
 .heroSelectButtonWrapper {
   display: flex;
   gap: 10px;

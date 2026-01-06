@@ -29,7 +29,7 @@
   right: 6rem;
   width: 3.2rem;
   height: 3.2rem;
-  background: none;
+  background: none !important;
   border: none;
   font-size: 2.4rem;
   color: rgba(51, 51, 51, 0.5);
@@ -495,7 +495,7 @@
   right: 0;
   width: 3.2rem;
   height: 3.2rem;
-  background: white;
+  background: white !important;
   border: 0.1rem solid rgba(51, 51, 51, 0.1);
   border-radius: 0.8rem;
   cursor: pointer;
@@ -598,7 +598,7 @@
 .promoButton {
   width: 4.8rem;
   height: auto;
-  background: rgba(248, 248, 248, 1);
+  background: rgba(248, 248, 248, 1) !important;
   border: 0.1rem solid rgba(51, 51, 51, 0.1);
   border-radius: 0.8rem;
   cursor: pointer;
@@ -772,7 +772,7 @@
 .submitButton {
   width: 100%;
   padding: 2rem;
-  background: rgba(29, 29, 29, 1);
+  background: #FF1E6E;
   border: none;
   border-radius: 2.4rem;
   font-family: "SF Pro";

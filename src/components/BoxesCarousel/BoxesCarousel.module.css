@@ -58,7 +58,7 @@
 
 .boxesCarouselNavigation button {
   border: none;
-  background: none;
+  background: none !important;
   cursor: pointer;
 }
 

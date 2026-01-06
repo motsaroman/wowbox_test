@@ -59,7 +59,7 @@
   position: absolute;
   top: 1.5rem;
   right: 1rem;
-  background: none;
+  background: none !important;
   border: none;
   cursor: pointer;
   z-index: 10;

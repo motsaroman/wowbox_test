@@ -100,3 +100,10 @@ html {
     font-size: calc(100vw / (375 / 10));
   }
 }
+
+button {
+  background: #FF1E6E !important;
+}
+.ymaps3x0--button {
+  background: #fff !important;
+}

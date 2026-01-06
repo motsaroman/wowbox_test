@@ -205,14 +205,14 @@ export default function Header() {
               <div
                 className={`${styles.heroBonusItem} ${styles.heroBonusItem}`}
               >
-                <p>НЕ ТРАТЬТЕ ВРЕМЯ НА ПОИСКИ</p>
+                <p>БЕСПЛАТНАЯ ПЕРСОНАЛИЗАЦИЯ ПОДАРКОВ</p>
               </div>
             </div>
             <img src={heroBonusSticker1} alt="sticker" loading="lazy" />
           </div>
           <div className={styles.heroBonusWrapper}>
             <div className={`${styles.heroBonusItem} ${styles.heroBonusItem2}`}>
-              <p>от 3000 руб</p>
+              <p>ПОДАРКИ ОТ 3000₽</p>
             </div>
           </div>
           <div className={styles.heroBonusWrapper}>
@@ -234,10 +234,10 @@ export default function Header() {
 
         <div className={`${styles.heroSelectButtonWrapper}`}>
           <button className={`${styles.heroSelectButton} button-one-click`} onClick={scrollToWowbox}>
-            Купить подарок
+            Выбрать готовый подарок
           </button>
           <button className={`${styles.heroSelectButton} button-happy`} onClick={scrollToQuiz}>
-            Собрать подарок
+            Собрать персонализированный подарок бесплатно
           </button>
         </div>
       </div>

@@ -28,7 +28,7 @@
   position: absolute;
   top: 2rem;
   right: 2rem;
-  background: none;
+  background: none !important;
   border: none;
   cursor: pointer;
   padding: 8px;
