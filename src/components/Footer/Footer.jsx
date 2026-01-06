@@ -21,22 +21,29 @@ export default function Footer() {
       <div className={styles.footerItem}>
         <img src={footerLogo} alt="Footer Logo" loading="lazy" />
         <div className={styles.footerTopLinks}>
-           {[
-                { label: "Главная", ref: styles.hero },
-                { label: "Каталог", ref: styles.selectYourOwnWowbox },
-                { label: "Подобрать WOWBOX", ref: styles.weFoundYourSuperWowbox },
-                { label: "Как это работает", ref: styles.howToWorkWowBox },
-                { label: "Качество", ref: styles.quality },
-                { label: "Гарантии и доставка", ref: styles.delivery },
-                { label: "Вопросы и ответы", ref: styles.faq },
-             ].map((link, idx) => (
-                <span key={idx} style={{display: 'contents'}}>
-                    <a href="#" onClick={(e) => { e.preventDefault(); scrollToSection(link.ref); }}>
-                        {link.label}
-                    </a>
-                    {idx < 6 && <span></span>}
-                </span>
-             ))}
+          {[
+            { label: "Главная", ref: styles.hero },
+            { label: "Как это работает", ref: styles.howToWorksWowBox },
+            { label: "Гарантии и доставка", ref: styles.deliverys },
+            { label: "Каталог", ref: styles.selectYourOwnWowbox },
+            { label: "Партнеры", ref: styles.partners },
+            { label: "Подобрать WOWBOX", ref: styles.weFoundYourSuperWowbox },
+            { label: "Вопросы и ответы", ref: styles.faq },
+            //{ label: "Качество", ref: styles.qualitys },
+          ].map((link, idx) => (
+            <span key={idx} style={{ display: "contents" }}>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection(link.ref);
+                }}
+              >
+                {link.label}
+              </a>
+              {idx < 6 && <span></span>}
+            </span>
+          ))}
         </div>
       </div>
       <div className={styles.footerLine}></div>
@@ -49,7 +56,9 @@ export default function Footer() {
           </div>
           <div>
             {/*<a href="#"><img src={whatsup} alt="WhatsApp" loading="lazy" /></a>*/}
-            <a href="https://t.me/wowboxofficial"><img src={telegram} alt="Telegram" loading="lazy" /></a>
+            <a href="https://t.me/wowboxofficial">
+              <img src={telegram} alt="Telegram" loading="lazy" />
+            </a>
           </div>
         </div>
       </div>
@@ -65,12 +74,26 @@ export default function Footer() {
       </div>
       <div className={styles.footerLine}></div>
       <div className={`${styles.footerItem} ${styles.footerItem3}`}>
-        <p className={styles.footerItemContact}>® 2025 ВауБокс. Все права защищены.</p>
+        <p className={styles.footerItemContact}>
+          ® 2025 ВауБокс. Все права защищены.
+        </p>
         <div className={styles.footerItempoliticsLinks}>
-          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/privacy'); }}>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/privacy");
+            }}
+          >
             Политика конфиденциальности
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/public-offer'); }}>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/public-offer");
+            }}
+          >
             Публичная оферта
           </a>
         </div>

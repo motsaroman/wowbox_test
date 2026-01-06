@@ -1,47 +1,81 @@
-import styles from './PainAndSolution.module.css';
+import { useState, useEffect, useRef } from "react";
+import styles from "./PainAndSolution.module.css";
 
-import videoPoster from '../../assets/images/video-poster.jpg';
-import solutionMan from '../../assets/images/solution-man.png';
-import painVideo from '../../assets/videos/video.mp4';
+import videoPoster from "../../assets/images/video-poster.jpg";
+import solutionMan from "../../assets/images/solution-man.png";
+import painVideo from "../../assets/videos/video.mp4";
 
 export default function PainAndSolution() {
+  const [isFloating, setIsFloating] = useState(false);
+  const containerRef = useRef(null);
   const cloudsData = [
     {
       id: 1,
-      cloudClass: 'cloud1',
-      cloudTitle: 'Не знаю, что подарить',
-      descBlack: 'или спросить напрямую?',
+      cloudClass: "cloud1",
+      cloudTitle: "Не знаю, что подарить",
+      descBlack: "или спросить напрямую?",
       descRed: 'Ответят "да ничего не надо"',
     },
     {
       id: 2,
-      cloudClass: 'cloud2',
-      cloudTitle: 'Боюсь, что подарок не понравится',
-      descBlack: 'Или купить сертификат?',
-      descRed: 'Не воспользуются',
+      cloudClass: "cloud2",
+      cloudTitle: "Боюсь, что подарок не понравится",
+      descBlack: "Или купить сертификат?",
+      descRed: "Не воспользуются",
     },
     {
       id: 3,
-      cloudClass: 'cloud3',
-      cloudTitle: 'Не хватает времени на выбор',
-      descBlack: 'Или купить готовый набор?',
-      descRed: 'Половина товаров не подойдет',
+      cloudClass: "cloud3",
+      cloudTitle: "Не хватает времени на выбор",
+      descBlack: "Или купить готовый набор?",
+      descRed: "Половина товаров не подойдет",
     },
     {
       id: 4,
-      cloudClass: 'cloud4',
-      cloudTitle: 'Хочу удивить, но все банально',
-      descBlack: 'Или спросить совета у друзей?',
-      descRed: 'Они, как и ты, не знают',
+      cloudClass: "cloud4",
+      cloudTitle: "Хочу удивить, но все банально",
+      descBlack: "Или спросить совета у друзей?",
+      descRed: "Они, как и ты, не знают",
     },
   ];
+  useEffect(() => {
+    // Создаем наблюдателя
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+          setIsFloating(true);
+        }
 
+        if (entry.isIntersecting) {
+          setIsFloating(false);
+        }
+      },
+      {
+        threshold: 0,
+        rootMargin: "-100px 0px 0px 0px",
+      }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, []);
   return (
     <section className={styles.painAndSolution}>
       <div className={styles.topContainer}>
-        <div className={styles.videoOuter}>
+        <div className={styles.videoOuter} ref={containerRef}>
           <div className={styles.videoWrapper}>
-            <video className={styles.video} poster={videoPoster} controls>
+            <video
+              className={`${styles.video} ${isFloating ? styles.floating : ""}`}
+              poster={videoPoster}
+              controls
+            >
               <source
                 src={painVideo}
                 type="video/mp4"
@@ -66,7 +100,6 @@ export default function PainAndSolution() {
           </a>
         </div>
       </div>
-      *
       <div className={styles.bottomContainer}>
         <div className={styles.cloudsWrapper}>
           {cloudsData.map((cloud) => (

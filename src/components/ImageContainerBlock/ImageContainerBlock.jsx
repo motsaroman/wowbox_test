@@ -1,17 +1,18 @@
-import React from "react";
 import styles from "./ImageContainerBlock.module.css";
 import sending from "../../assets/images/sending.png";
 import answer from "../../assets/images/answer.png";
-import users from "../../assets/images/users.svg";
-import marketplace from "../../assets/images/marketplace.svg";
-import podarki from "../../assets/images/podarki.svg";
-import checklist from "../../assets/images/checklist.svg";
-import derevo from "../../assets/images/derevo.png";
+import users from "../../assets/images/users.png";
+import marketplace from "../../assets/images/marketplace.png";
+import podarki from "../../assets/images/podarki.png";
+import checklist from "../../assets/images/checklist.png";
+import derevo from "../../assets/images/derevo2.png";
 import deliveryBox from "../../assets/images/deliveryBox.png";
+
+import appStyles from "../../App.module.css";
 
 export default function ImageContainerBlock() {
   return (
-    <section className={styles.section}>
+    <section className={`${styles.section} ${appStyles.howToWorksWowBox}`}>
       <div className={styles.container}>
         <h2 className={styles.title}>
           Как мы находим идеальный

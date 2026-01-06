@@ -29,6 +29,7 @@ import styles from "./App.module.css";
 import QualitySection from "./components/QualitySection/QualitySection.jsx";
 import DeliverySection from "./components/DeliverySection/DeliverySection.jsx";
 import HowItWorksSection from "./components/HowItWorksSection/HowItWorksSection.jsx";
+import PartnerSwiper from "./components/PartnersSwiper/PartnersSwiper.jsx";
 
 const YM_ID = 105562569;
 
@@ -216,12 +217,13 @@ export default function App() {
               {/*Секция Боль и Решение*/}
               <PainAndSolution />
               <ImageContainerBlock />
+              <QualitySection />
               {/* Секция выбора бокса (Карусель) */}
               <div className={styles.selectYourOwnWowbox}>
                 <h1>Выберите свой WOWBOX</h1>
                 <BoxesCarousel />
               </div>
-
+              <PartnerSwiper />
               {/* Секция Квиза */}
               <div id="quiz" className={styles.weFoundYourSuperWowbox}>
                 <div className={styles.quizContainer}>
@@ -445,11 +447,11 @@ export default function App() {
                 </div>
               </div>
               {/* Секция "Как это работает" */}
-              <HowItWorksSection />
+              {/*<HowItWorksSection />*/}
               {/* Секция "Качество" */}
-              <QualitySection />
+
               {/* Секция "Гарантии и доставка" */}
-              <DeliverySection />
+              {/*<DeliverySection />*/}
               {/* Секция FAQ */}
               <div className={styles.faq}>
                 <h1 className={styles.faqTitle}>FAQ</h1>
@@ -496,7 +498,7 @@ export default function App() {
                     className={styles.readyForSurpriseButton}
                     onClick={scrollToWowbox}
                   >
-                    Собрать подарок от 3000₽
+                    Собрать подарок
                   </button>
                 </div>
               </div>

@@ -77,13 +77,13 @@
 }
 
 .imageContainerRow img {
-    max-width: 8rem;
+    max-width: 16rem;
     position: relative;
-    top: 1.8rem;
+    top: 3rem;
 }
 
 .imageContainerRow .placeholder:nth-child(2) img {
-    max-width: 9rem;
+    max-width: 10rem;
 }
 
 .imageContainerRow .placeholder {
@@ -92,7 +92,7 @@
 
 .placeholder p {
     text-align: center;
-    background: linear-gradient(to right, #E8F2FF, #EEE9FF);
+        background: linear-gradient(to right, rgba(232, 242, 255, 1), rgba(246, 255, 242, 1), rgba(249, 241, 255, 1), rgba(237, 243, 255, 1), rgba(254, 254, 255, 1), rgba(236, 252, 255, 1), rgba(238, 233, 255, 1));
     padding: 0.5rem;
     border-radius: 12px;
     max-width: 25rem;
@@ -101,11 +101,13 @@
 }
 
 .derevo {
-    height: 70%;
+    height: 74%;
     position: absolute;
     bottom: 0;
 }
-
+.howToWorksWowBox {
+    display: block;
+}
 .cardWrap:nth-child(1),
 .cardWrap:nth-child(2) {
     width: 50%;
@@ -116,6 +118,7 @@
     min-height: 52rem;
     margin-top: 1.5rem;
     width: 100%;
+
 }
 
 .cardWrap2 .card,
@@ -126,7 +129,7 @@
 
 .cardWrap3 {
     padding: 0 1rem;
-    min-height: 38rem;
+    min-height: 41rem;
     margin-top: 1.5rem;
     width: 100%;
 }
@@ -163,7 +166,7 @@
 
 /* Текст внутри карточки */
 .cardTitle {
-    font-family: "SF Pro", sans-serif;
+    font-family: "Andy", sans-serif;
     font-weight: 600;
     font-size: 3rem;
     color: #A8CE45;
@@ -298,7 +301,7 @@
     }
 
     .cardWrap3 {
-        min-height: 30rem;
+        min-height: 24rem;
     }
 
     .cardWrap2 {

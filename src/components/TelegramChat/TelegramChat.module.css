@@ -1,4 +1,5 @@
 .telegramChat {
+  display: none !important;
   position: fixed;
   right: 40px;
   bottom: 20px;
